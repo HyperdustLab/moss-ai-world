@@ -51,7 +51,7 @@ describe("MOSSAI_Island", () => {
 
 
 
-            const MOSSAI_20 = await ethers.deployContract("MOSSAI_20");
+            const MOSSAI_20 = await ethers.deployContract("MOSSAI_20", ["MOSSAI_20", "MOSSAI_20"]);
             await MOSSAI_20.waitForDeployment()
 
 
@@ -92,6 +92,20 @@ describe("MOSSAI_Island", () => {
 
 
             await (await MOSSAI_NFG.batchAddNFG([1], ['test'])).wait()
+
+
+
+            await (await MOSSAI_Roles_Cfg.addAdmin(MOSSAI_Free_Island_Mint.target)).wait()
+            await (await MOSSAI_Roles_Cfg.addAdmin(MOSSAI_Island.target)).wait()
+
+
+            await (await MOSSAI_Free_Island_Mint.mintIsland(1)).wait()
+
+
+
+
+
+
 
 
         });

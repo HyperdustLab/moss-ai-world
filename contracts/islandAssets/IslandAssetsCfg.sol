@@ -30,6 +30,8 @@ contract IslandAssetsCfg is Ownable {
 
     address public _MOSSAIRolesCfgAddress;
 
+    address public _HYDTPriceAddress;
+
     function setMOSSAIRolesCfgAddress(
         address rolesCfgAddress
     ) public onlyOwner {
@@ -59,6 +61,7 @@ contract IslandAssetsCfg is Ownable {
         _HYDTTokenAddress = contractaddressArray[1];
         _walletAccountAddres = contractaddressArray[2];
         _MOSSAIRolesCfgAddress = contractaddressArray[3];
+        _HYDTPriceAddress = contractaddressArray[4];
     }
 
     function getAddressConfList()
@@ -68,14 +71,16 @@ contract IslandAssetsCfg is Ownable {
             address transactionCfgAddress,
             address erc20Address,
             address walletAccountAddres,
-            address rolesCfgAddress
+            address rolesCfgAddress,
+            address HYDTPriceAddress
         )
     {
         return (
             _transactionCfgAddress,
             _HYDTTokenAddress,
             _walletAccountAddres,
-            _MOSSAIRolesCfgAddress
+            _MOSSAIRolesCfgAddress,
+            _HYDTPriceAddress
         );
     }
 }

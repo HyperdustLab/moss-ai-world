@@ -66,7 +66,6 @@ contract MOSSAI_Island_Template is Ownable {
         string memory name,
         string memory coverImage,
         string memory file,
-        uint256 spaceTypeId,
         string memory fileHash
     ) public {
         require(
@@ -88,7 +87,7 @@ contract MOSSAI_Island_Template is Ownable {
         revert("not found");
     }
 
-    function deleteSpaceTemplate(uint256 id) public {
+    function deleteIslandTemplate(uint256 id) public {
         require(
             MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
             "not admin role"
@@ -103,13 +102,14 @@ contract MOSSAI_Island_Template is Ownable {
                 ];
                 _islandTemplates.pop();
                 emit eveDeleteIslandTemplate(id);
+                return;
             }
         }
 
         revert("not found");
     }
 
-    function getSpaceTemplate(
+    function getIslandTemplate(
         uint256 id
     )
         public

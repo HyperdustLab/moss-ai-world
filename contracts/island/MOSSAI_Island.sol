@@ -142,7 +142,7 @@ contract MOSSAI_Island is Ownable {
         _index.increment();
 
         Island memory island = Island({
-            id: _id.current(),
+            id: _index.current(),
             name: owner.toHexString(),
             coverImage: defCoverImage,
             file: defFile,
@@ -155,6 +155,8 @@ contract MOSSAI_Island is Ownable {
         });
 
         _islands.push(island);
+
+        emit eveSaveIsland(_index.current());
     }
 
     function update(
@@ -189,5 +191,42 @@ contract MOSSAI_Island is Ownable {
         require(!hashExists[hash], "Hash already exists");
         hashExists[hash] = true;
         return hash;
+    }
+
+    function getIsland(
+        uint256 islandId
+    )
+        public
+        view
+        returns (
+            uint256,
+            string memory,
+            string memory,
+            string memory,
+            string memory,
+            address,
+            address,
+            uint256,
+            uint32,
+            bytes32
+        )
+    {
+        for (uint i = 0; i < _islands.length; i++) {
+            if (_islands[i].id == islandId) {
+                return (
+                    _islands[i].id,
+                    _islands[i].name,
+                    _islands[i].coverImage,
+                    _islands[i].file,
+                    _islands[i].fileHash,
+                    _islands[i].erc721Address,
+                    _islands[i].erc1155Address,
+                    _islands[i].coordinate,
+                    _islands[i].seed,
+                    _islands[i].sid
+                );
+            }
+        }
+        revert("not found");
     }
 }
