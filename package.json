@@ -12,6 +12,7 @@
     "axios": "^1.5.1",
     "dayjs": "^1.11.10",
     "dotenv": "^16.3.1",
-    "fs": "0.0.1-security"
+    "fs": "0.0.1-security",
+    "mysql2": "^3.6.2"
   }
 }
