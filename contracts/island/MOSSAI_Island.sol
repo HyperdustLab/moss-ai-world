@@ -31,6 +31,7 @@ contract MOSSAI_Island is Ownable {
     address public _island721FactoryAddress;
     address public _island1155FactoryAddress;
     address public _islandAssetsCfgAddress;
+    address public _HyperdustRolesCfgAddress;
 
     using Counters for Counters.Counter;
     Counters.Counter private _id;
@@ -105,6 +106,12 @@ contract MOSSAI_Island is Ownable {
         _islandAssetsCfgAddress = islandAssetsCfgAddress;
     }
 
+    function setHyperdustRolesCfgAddress(
+        address HyperdustRolesCfgAddress
+    ) public onlyOwner {
+        _HyperdustRolesCfgAddress = HyperdustRolesCfgAddress;
+    }
+
     function setContractAddress(
         address[] memory contractaddressArray
     ) public onlyOwner {
@@ -114,6 +121,7 @@ contract MOSSAI_Island is Ownable {
         _island721FactoryAddress = contractaddressArray[3];
         _island1155FactoryAddress = contractaddressArray[4];
         _islandAssetsCfgAddress = contractaddressArray[5];
+        _HyperdustRolesCfgAddress = contractaddressArray[6];
     }
 
     function mint(uint32 coordinate, address owner) public {
@@ -134,6 +142,11 @@ contract MOSSAI_Island is Ownable {
 
         address island1155Address = IIslandFactory(_island1155FactoryAddress)
             .deploy(owner, _islandAssetsCfgAddress);
+
+        MOSSAI_Roles_Cfg(_HyperdustRolesCfgAddress).addAdmin2(island721Address);
+        MOSSAI_Roles_Cfg(_HyperdustRolesCfgAddress).addAdmin2(
+            island1155Address
+        );
 
         bytes32 sid = generateHash(
             (block.timestamp + _index.current()).toString()

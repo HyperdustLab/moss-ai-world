@@ -26,14 +26,13 @@ abstract contract IIslandAssetsCfg {
             address _transactionCfgAddress,
             address _erc20Address,
             address _walletAccountAddres,
-            address _rolesCfgAddress,
-            address _HYDTPriceAddress
+            address _rolesCfgAddress
         )
     {}
 }
 
-abstract contract IHyperdustHYDTPrice {
-    function getHYDTPrice() public view returns (uint256) {}
+abstract contract IHyperdustTransactionCfg {
+    function getGasFee(string memory func) public view returns (uint256) {}
 }
 
 contract Island_1155 is
@@ -137,8 +136,7 @@ contract Island_1155 is
             address _transactionCfgAddress,
             address _erc20Address,
             address _walletAccountAddres,
-            address _rolesCfgAddress,
-            address _HYDTPriceAddress
+            address _rolesCfgAddress
         ) = IIslandAssetsCfg(_islandAssetsCfgAddress).getAddressConfList();
 
         ITransactionCfg transactionCfg = ITransactionCfg(
@@ -147,12 +145,10 @@ contract Island_1155 is
 
         IERC20 erc20 = IERC20(_erc20Address);
 
+        uint256 mintNFTAmount = IHyperdustTransactionCfg(_transactionCfgAddress)
+            .getGasFee("mintNFT");
+
         uint256 amount = erc20.allowance(msg.sender, address(this));
-
-        uint256 HYDTPrice = IHyperdustHYDTPrice(_HYDTPriceAddress)
-            .getHYDTPrice();
-
-        uint256 mintNFTAmount = transactionCfg.get("mintNFT") + HYDTPrice;
 
         require(amount >= mintNFTAmount, "Insufficient authorized amount");
 

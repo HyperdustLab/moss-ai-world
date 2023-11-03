@@ -24,13 +24,11 @@ contract IslandAssetsCfg is Ownable {
     using StrUtil for *;
     address public _transactionCfgAddress;
 
-    address public _HYDTTokenAddress;
+    address public _HYPTTokenAddress;
 
     address public _walletAccountAddres;
 
     address public _MOSSAIRolesCfgAddress;
-
-    address public _HYDTPriceAddress;
 
     function setMOSSAIRolesCfgAddress(
         address rolesCfgAddress
@@ -38,8 +36,8 @@ contract IslandAssetsCfg is Ownable {
         _MOSSAIRolesCfgAddress = rolesCfgAddress;
     }
 
-    function setHYDTTokenAddress(address HYDTTokenAddress) public onlyOwner {
-        _HYDTTokenAddress = HYDTTokenAddress;
+    function setHYPTTokenAddress(address HYPTTokenAddress) public onlyOwner {
+        _HYPTTokenAddress = HYPTTokenAddress;
     }
 
     function setWalletAccountAddres(
@@ -58,10 +56,9 @@ contract IslandAssetsCfg is Ownable {
         address[] memory contractaddressArray
     ) public onlyOwner {
         _transactionCfgAddress = contractaddressArray[0];
-        _HYDTTokenAddress = contractaddressArray[1];
+        _HYPTTokenAddress = contractaddressArray[1];
         _walletAccountAddres = contractaddressArray[2];
         _MOSSAIRolesCfgAddress = contractaddressArray[3];
-        _HYDTPriceAddress = contractaddressArray[4];
     }
 
     function getAddressConfList()
@@ -71,16 +68,14 @@ contract IslandAssetsCfg is Ownable {
             address transactionCfgAddress,
             address erc20Address,
             address walletAccountAddres,
-            address rolesCfgAddress,
-            address HYDTPriceAddress
+            address rolesCfgAddress
         )
     {
         return (
             _transactionCfgAddress,
-            _HYDTTokenAddress,
+            _HYPTTokenAddress,
             _walletAccountAddres,
-            _MOSSAIRolesCfgAddress,
-            _HYDTPriceAddress
+            _MOSSAIRolesCfgAddress
         );
     }
 }

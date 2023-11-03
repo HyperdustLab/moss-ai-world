@@ -18,7 +18,7 @@ async function main() {
 
     const tokenURIS = []
 
-    for (let i = 1; i < 5; i++) {
+    for (let i = 10; i < 100; i++) {
 
         seeds.push(i);
 
@@ -35,7 +35,7 @@ async function main() {
         const { data } = await axios.post('http://127.0.0.1:9999/sys/common/upload', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
-                'X-Access-Token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2OTgxNjc5NjksInVzZXJuYW1lIjoicm9vdCJ9.Bmr61rFae7Z608ChFc2EE7CjgZBzWvyRwX2k48K61zA'
+                'X-Access-Token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2OTg4MDUzNDEsInVzZXJuYW1lIjoicm9vdCJ9.ajYm6jzSTWOnio5cDzVbtwfYHYsrDTcN1rgbzT-gK80'
             }
         })
 

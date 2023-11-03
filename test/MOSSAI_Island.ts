@@ -60,6 +60,9 @@ describe("MOSSAI_Island", () => {
             await MOSSAI_NFG.waitForDeployment()
 
 
+            const Hyperdust_Node_Mgr = await ethers.deployContract("Hyperdust_Node_Mgr");
+            await Hyperdust_Node_Mgr.waitForDeployment()
+
 
 
 
@@ -72,7 +75,7 @@ describe("MOSSAI_Island", () => {
 
             await (await MOSSAI_Free_Island_Mint.setMOSSAIIslandAddres(MOSSAI_Island.target)).wait()
 
-            await (await MOSSAI_Island.setContractAddress([MOSSAI_Roles_Cfg.target, MOSSAI_NFG.target, MOSSAI_Island_Map.target, Island721Factory.target, Island1155Factory.target, IslandAssetsCfg.target])).wait()
+            await (await MOSSAI_Island.setContractAddress([MOSSAI_Roles_Cfg.target, MOSSAI_NFG.target, MOSSAI_Island_Map.target, Island721Factory.target, Island1155Factory.target, IslandAssetsCfg.target, MOSSAI_Roles_Cfg.target])).wait()
 
 
 
@@ -80,9 +83,12 @@ describe("MOSSAI_Island", () => {
 
 
 
-            await (await Hyperdust_Transaction_Cfg.setRolesCfgAddress(MOSSAI_Roles_Cfg.target)).wait()
+            await (await Hyperdust_Transaction_Cfg.setContractAddress([MOSSAI_Roles_Cfg.target, Hyperdust_Node_Mgr.target])).wait()
 
-            await (await Hyperdust_Transaction_Cfg.add('mintNFT', ethers.parseEther('1'))).wait()
+
+
+
+            await (await Hyperdust_Transaction_Cfg.add('mintNFT', 30000)).wait()
 
             await (await Hyperdust_Wallet_Account.setContractAddress([MOSSAI_Roles_Cfg.target, MOSSAI_20.target])).wait()
 
@@ -97,13 +103,27 @@ describe("MOSSAI_Island", () => {
 
             await (await MOSSAI_Roles_Cfg.addAdmin(MOSSAI_Free_Island_Mint.target)).wait()
             await (await MOSSAI_Roles_Cfg.addAdmin(MOSSAI_Island.target)).wait()
+            await (await MOSSAI_Roles_Cfg.addSuperAdmin(MOSSAI_Island.target)).wait()
+
 
 
             await (await MOSSAI_Free_Island_Mint.mintIsland(1)).wait()
 
 
 
+            const tx = await MOSSAI_Island.getIsland(1)
 
+            const contract721 = tx[5];
+
+            const Island721 = await ethers.getContractAt("Island_721", contract721)
+
+
+            await (await MOSSAI_20.approve(Island721.target, ethers.parseEther('111'))).wait()
+
+            await (await MOSSAI_20.mint(accounts[0].address, ethers.parseEther('111'))).wait()
+
+
+            await (await Island721.safeMint(accounts[0].address, '111')).wait()
 
 
 

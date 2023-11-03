@@ -6,11 +6,20 @@ async function main() {
     const contract = await ethers.deployContract("MOSSAI_Island");
     await contract.waitForDeployment()
 
-    await (await contract.setContractAddress(["0x6C34AbF4632BC38e90f5016d784D3ED320Cfad14", "0x33Ad4C2d6E60A7075A60E74754c8Cf62671c6625", "0x9bDaf3912e7b4794fE8aF2E748C35898265D5615", "0x01367733700aaC824A469d6e38eb1a7b613D08ba", "0x3fcb4Ba18D0d28A48863DeC1e06339549b387F16", "0x510bd88002C3546c544405A4771c24416fcEC97B"])).wait();
+    await (await contract.setContractAddress(
+        ["0x6C34AbF4632BC38e90f5016d784D3ED320Cfad14",
+            "0x66a0dcFF2803124F506d4a8F6D5Fa813629B8Bfa",
+            "0x9bDaf3912e7b4794fE8aF2E748C35898265D5615",
+            "0xAA928F4DE19cDd08E6971e721E69A720684e3ac7",
+            "0x5d64e70A0e8719b7FAbD456e9B9deAD42Fb73Da4",
+            "0x2FE14B0A0e0F7AA307Fd0a7999336c7A78D86bec",
+            "0x6C34AbF4632BC38e90f5016d784D3ED320Cfad14"])).wait();
 
     const MOSSAI_Roles_Cfg = await ethers.getContractAt("MOSSAI_Roles_Cfg", "0x6C34AbF4632BC38e90f5016d784D3ED320Cfad14")
 
     await (await MOSSAI_Roles_Cfg.addAdmin(contract.target)).wait()
+
+
 
     await (
         await contract.setDefParameter(
@@ -24,6 +33,8 @@ async function main() {
     const MOSSAI_Free_Island_Mint = await ethers.getContractAt("MOSSAI_Free_Island_Mint", "0x05eFb34F7F6E2c122ca6Da77257120FB6C9181D6")
 
     await (await MOSSAI_Free_Island_Mint.setMOSSAIIslandAddres(contract.target)).wait()
+
+    await (await MOSSAI_Roles_Cfg.addSuperAdmin(contract.target)).wait()
 
     console.info("contractFactory address:", contract.target);
 }
