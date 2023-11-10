@@ -10,6 +10,7 @@ describe("MOSSAI_mNFT_Mint", () => {
         it("MOSSAI_mNFT_Mint", async () => {
             const accounts = await ethers.getSigners();
 
+
             const MOSSAI_Roles_Cfg = await ethers.deployContract("MOSSAI_Roles_Cfg");
             await MOSSAI_Roles_Cfg.waitForDeployment()
 
