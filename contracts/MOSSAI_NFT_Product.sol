@@ -118,7 +118,11 @@ contract MOSSAI_NFT_Product is Ownable {
 
         bool allow;
 
-        if (contractType == 0x01) {} else {
+        if (contractType == 0x01) {
+            allow =
+                IERC721(contractAddress).getApproved(tokenId) ==
+                _MOSSAI_NFT_Market_Address;
+        } else {
             allow = IERC1155(contractAddress).isApprovedForAll(
                 msg.sender,
                 _MOSSAI_NFT_Market_Address

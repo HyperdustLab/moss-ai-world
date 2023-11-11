@@ -26,6 +26,11 @@ describe("MOSSAI_mNFT_Mint", () => {
             const Hyperdust_Wallet_Account = await ethers.deployContract("Hyperdust_Wallet_Account");
             await Hyperdust_Wallet_Account.waitForDeployment()
 
+            const Hyperdust_Wallet_Account = await ethers.deployContract("Hyperdust_Wallet_Account");
+            await Hyperdust_Wallet_Account.waitForDeployment()
+
+
+
             await (await Hyperdust_Wallet_Account.setContractAddress([MOSSAI_Roles_Cfg.target, MOSSAI_20.target])).wait()
 
 
