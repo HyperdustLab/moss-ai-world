@@ -31,6 +31,7 @@ const config: HardhatUserConfig = {
       url: process.env.SEPOLIA_RPC_URL,
       accounts: [process.env.PRIVATE_KEY],
       loggingEnabled: true,
+      timeout: 20000
     },
   },
   etherscan: {

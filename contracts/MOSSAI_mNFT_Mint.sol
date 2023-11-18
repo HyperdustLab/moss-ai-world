@@ -311,7 +311,7 @@ contract MOSSAI_mNFT_Mint is Ownable {
         );
 
         require(
-            mintInfo.allowNum >= mintInfo.mintNum + num + gasFee,
+            mintInfo.allowNum >= mintInfo.mintNum + num,
             "Insufficient inventory"
         );
 

@@ -49,7 +49,7 @@ describe("MOSSAI_mNFT_Mint", () => {
 
             await (await MOSSAI_mNFT_Mint.setContractAddress([MOSSAI_Roles_Cfg.target, MOSSAI_20.target, Hyperdust_Wallet_Account.target])).wait()
 
-            await (await MOSSAI_mNFT_Mint.addMintInfo("tokenURI", ethers.parseEther('100'), MOSSAI_1155.target, 1, 2, 1)).wait()
+            await (await MOSSAI_mNFT_Mint.addMintInfo("tokenURI", ethers.parseEther('100'), MOSSAI_1155.target, 1, '0x22', 1)).wait()
 
             await (await MOSSAI_Roles_Cfg.addAdmin(MOSSAI_mNFT_Mint.target)).wait()
 
