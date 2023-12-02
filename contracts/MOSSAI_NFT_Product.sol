@@ -211,7 +211,18 @@ contract MOSSAI_NFT_Product is Ownable {
             "not admin role"
         );
 
+        NFTProduct memory nftProduct = _NFTProducts[id - 1];
+
+        require(
+            nftProduct.sellNum + num <= nftProduct.putawayNum,
+            "Insufficient stock"
+        );
+
         _NFTProducts[id - 1].sellNum += num;
+
+        if (nftProduct.sellNum + num == nftProduct.putawayNum) {
+            _NFTProducts[id - 1].status = 0x00;
+        }
 
         emit eveSave(id);
     }

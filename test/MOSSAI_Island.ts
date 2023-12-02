@@ -56,8 +56,8 @@ describe("MOSSAI_Island", () => {
 
 
 
-            const MOSSAI_NFG = await ethers.deployContract("MOSSAI_NFG", ["MOSSAI_NFG", "MOSSAI_NFG"]);
-            await MOSSAI_NFG.waitForDeployment()
+            const MOSSAI_Island_NFG = await ethers.deployContract("MOSSAI_Island_NFG");
+            await MOSSAI_Island_NFG.waitForDeployment()
 
 
             const Hyperdust_Node_Mgr = await ethers.deployContract("Hyperdust_Node_Mgr");
@@ -69,13 +69,14 @@ describe("MOSSAI_Island", () => {
 
 
 
+
             await (await MOSSAI_Island_Map.setMOSSAIRolesCfgAddress(MOSSAI_Roles_Cfg.target)).wait()
             await (await MOSSAI_Island_Map.batchAdd([1])).wait()
 
 
-            await (await MOSSAI_Free_Island_Mint.setMOSSAIIslandAddres(MOSSAI_Island.target)).wait()
+            await (await MOSSAI_Free_Island_Mint.setContractAddress([MOSSAI_Island.target, Hyperdust_Wallet_Account.target, Hyperdust_Transaction_Cfg.target, MOSSAI_20.target])).wait()
 
-            await (await MOSSAI_Island.setContractAddress([MOSSAI_Roles_Cfg.target, MOSSAI_NFG.target, MOSSAI_Island_Map.target, Island721Factory.target, Island1155Factory.target, IslandAssetsCfg.target, MOSSAI_Roles_Cfg.target])).wait()
+            await (await MOSSAI_Island.setContractAddress([MOSSAI_Roles_Cfg.target, MOSSAI_Island_NFG.target, MOSSAI_Island_Map.target, Island721Factory.target, Island1155Factory.target, IslandAssetsCfg.target, MOSSAI_Roles_Cfg.target])).wait()
 
 
 
@@ -94,10 +95,10 @@ describe("MOSSAI_Island", () => {
 
 
 
-            await (await MOSSAI_NFG.setMOSSAIRolesCfgAddress(MOSSAI_Roles_Cfg.target)).wait()
+            await (await MOSSAI_Island_NFG.setMOSSAIRolesCfgAddress(MOSSAI_Roles_Cfg.target)).wait()
 
 
-            await (await MOSSAI_NFG.batchAddNFG([1], ['test'])).wait()
+            await (await MOSSAI_Island_NFG.batchAddNFG([1], ['test'], [1])).wait()
 
 
 
@@ -106,9 +107,12 @@ describe("MOSSAI_Island", () => {
             await (await MOSSAI_Roles_Cfg.addSuperAdmin(MOSSAI_Island.target)).wait()
 
 
+            await (await MOSSAI_20.mint(accounts[0].address, ethers.parseEther('111'))).wait()
+
+            await (await MOSSAI_20.approve(MOSSAI_Free_Island_Mint.target, ethers.parseEther('111'))).wait()
+
 
             await (await MOSSAI_Free_Island_Mint.mintIsland(1)).wait()
-
 
 
             const tx = await MOSSAI_Island.getIsland(1)
@@ -120,7 +124,7 @@ describe("MOSSAI_Island", () => {
 
             await (await MOSSAI_20.approve(Island721.target, ethers.parseEther('111'))).wait()
 
-            await (await MOSSAI_20.mint(accounts[0].address, ethers.parseEther('111'))).wait()
+
 
 
             await (await Island721.safeMint(accounts[0].address, '111')).wait()
