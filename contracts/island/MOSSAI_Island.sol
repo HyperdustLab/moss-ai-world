@@ -11,7 +11,7 @@ import "./MOSSAI_Island_Map.sol";
 import "../MOSSAI_Roles_Cfg.sol";
 
 abstract contract INFG {
-    function mint(address to) public returns (uint32) {}
+    function mint(address to, uint32 location) public returns (uint32) {}
 
     function getSeedOwer(uint32 seed) public view returns (address) {}
 }
@@ -40,6 +40,8 @@ contract MOSSAI_Island is Ownable {
     using StrUtil for *;
 
     Island[] public _islands;
+
+    mapping(uint32 => bool) public _coordinateExists;
 
     mapping(bytes32 => bool) public hashExists;
 
@@ -130,18 +132,22 @@ contract MOSSAI_Island is Ownable {
             "not admin role"
         );
 
+        require(!_coordinateExists[coordinate], "Location has been cast");
+
+        _coordinateExists[coordinate] = true;
+
         MOSSAI_Island_Map(_MOSSAIIslandMapAddress).updateMintStatus(
             coordinate,
             true
         );
 
-        uint32 seed = INFG(_islandNFGAddress).mint(owner);
+        uint32 seed = INFG(_islandNFGAddress).mint(owner, coordinate);
 
         address island721Address = IIslandFactory(_island721FactoryAddress)
             .deploy(owner, _islandAssetsCfgAddress);
 
         address island1155Address = IIslandFactory(_island1155FactoryAddress)
-            .deploy(owner, _islandAssetsCfgAddress);
+            .deploy(owner, _islandAssetsCfgAddress);    
 
         MOSSAI_Roles_Cfg(_HyperdustRolesCfgAddress).addAdmin2(island721Address);
         MOSSAI_Roles_Cfg(_HyperdustRolesCfgAddress).addAdmin2(

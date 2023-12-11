@@ -8,7 +8,7 @@ async function main() {
 
     await (await contract.setContractAddress(
         ["0x6C34AbF4632BC38e90f5016d784D3ED320Cfad14",
-            "0x66a0dcFF2803124F506d4a8F6D5Fa813629B8Bfa",
+            "0x24788117ce2E2BBfAfC27c6433FBB5144A8D15A2",
             "0x9bDaf3912e7b4794fE8aF2E748C35898265D5615",
             "0xAA928F4DE19cDd08E6971e721E69A720684e3ac7",
             "0x5d64e70A0e8719b7FAbD456e9B9deAD42Fb73Da4",
@@ -30,9 +30,9 @@ async function main() {
     ).wait();
 
 
-    const MOSSAI_Free_Island_Mint = await ethers.getContractAt("MOSSAI_Free_Island_Mint", "0x05eFb34F7F6E2c122ca6Da77257120FB6C9181D6")
+    // const MOSSAI_Free_Island_Mint = await ethers.getContractAt("MOSSAI_Free_Island_Mint", "0x05eFb34F7F6E2c122ca6Da77257120FB6C9181D6")
 
-    await (await MOSSAI_Free_Island_Mint.setMOSSAIIslandAddres(contract.target)).wait()
+    // await (await MOSSAI_Free_Island_Mint.setMOSSAIIslandAddres(contract.target)).wait()
 
     await (await MOSSAI_Roles_Cfg.addSuperAdmin(contract.target)).wait()
 
