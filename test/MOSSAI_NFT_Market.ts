@@ -22,6 +22,9 @@ describe("MOSSAI_NFT_Market", () => {
 
 
 
+
+
+
             const Hyperdust_Wallet_Account = await ethers.deployContract("Hyperdust_Wallet_Account");
             await Hyperdust_Wallet_Account.waitForDeployment()
 
@@ -30,7 +33,9 @@ describe("MOSSAI_NFT_Market", () => {
 
             await (await MOSSAI_20.mint(accounts[0].address, ethers.parseEther('100'))).wait()
 
-            await (await MOSSAI_20.mint(accounts[1].address, ethers.parseEther('100'))).wait()
+            await (await MOSSAI_20.mint(accounts[1].address, ethers.parseEther('101'))).wait()
+
+
 
 
 
@@ -52,11 +57,23 @@ describe("MOSSAI_NFT_Market", () => {
             await (await Hyperdust_Transaction_Cfg.setContractAddress([MOSSAI_Roles_Cfg.target, Hyperdust_Node_Mgr.target])).wait()
 
 
+            const MOSSAI_NFG = await ethers.deployContract("MOSSAI_NFG", ["test", "test"]);
+            await MOSSAI_NFG.waitForDeployment()
+
+
             await (await MOSSAI_NFT_Market.setContractAddress([MOSSAI_NFT_Product.target, Hyperdust_Wallet_Account.target, Hyperdust_Transaction_Cfg.target, MOSSAI_20.target])).wait()
-            await (await MOSSAI_NFT_Product.setContractAddress([MOSSAI_NFT_Market.target, MOSSAI_Roles_Cfg.target])).wait()
+            await (await MOSSAI_NFT_Product.setContractAddress([MOSSAI_NFT_Market.target, MOSSAI_Roles_Cfg.target, MOSSAI_NFG.target])).wait()
 
             await (await MOSSAI_Roles_Cfg.addAdmin(MOSSAI_NFT_Market.target)).wait()
 
+
+
+
+            await (await MOSSAI_NFG.setMOSSAIRolesCfgAddress(MOSSAI_Roles_Cfg.target)).wait()
+
+            await (await MOSSAI_NFG.batchAddNFG([1], ['1'])).wait()
+
+            await (await MOSSAI_NFG.mint(accounts[0].address)).wait()
 
             const MOSSAI_1155 = await ethers.deployContract("MOSSAI_1155", ["test", "test"]);
             await MOSSAI_1155.waitForDeployment()
@@ -65,11 +82,11 @@ describe("MOSSAI_NFT_Market", () => {
 
             await (await MOSSAI_1155.setApprovalForAll(MOSSAI_NFT_Market.target, true)).wait()
 
-            await (await MOSSAI_NFT_Product.saveNFTProduct(MOSSAI_1155.target, 1, "0x01", 1, ethers.parseEther('0.1'), "0x02")).wait();
+            await (await MOSSAI_NFT_Product.saveNFTProduct(MOSSAI_1155.target, 1, "0x01", 1, ethers.parseEther('100'), "0x02")).wait();
 
-            await (await MOSSAI_20.approve(MOSSAI_NFT_Market.target, ethers.parseEther('100'))).wait()
+            await (await MOSSAI_20.connect(accounts[1]).approve(MOSSAI_NFT_Market.target, ethers.parseEther('101'))).wait()
 
-            const tx = await (await MOSSAI_NFT_Market.buyNFTProduct(1, 1, { signer: accounts[1] })).wait()
+            const tx = await (await MOSSAI_NFT_Market.connect(accounts[1]).buyNFTProduct(1, 1)).wait()
 
             for (const log of tx.logs) {
 

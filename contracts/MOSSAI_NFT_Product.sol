@@ -157,9 +157,12 @@ contract MOSSAI_NFT_Product is Ownable {
 
             _nftProductMap[key] = id;
         } else {
+            nftProduct = _NFTProducts[id - 1];
+
             _NFTProducts[id - 1].status = status;
             _NFTProducts[id - 1].putawayNum = putawayNum;
             _NFTProducts[id - 1].price = price;
+            _NFTProducts[id - 1].sellNum = 0;
 
             require(_NFTProducts[id - 1].owner == msg.sender, "not owner");
         }

@@ -140,12 +140,6 @@ contract MOSSAI_NFT_Market is Ownable {
 
         IWalletAccount(_walletAccountAddress).addAmount(commission);
 
-        IERC20(_HYDTTokenAddress).transferFrom(
-            msg.sender,
-            nftProduct.owner,
-            amount
-        );
-
         if (nftProduct.contractType == 0x01) {
             IERC721(nftProduct.contractAddress).safeTransferFrom(
                 nftProduct.owner,
