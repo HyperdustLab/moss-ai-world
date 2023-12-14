@@ -90,7 +90,18 @@ describe("MOSSAI_NFT_Market", () => {
 
             for (const log of tx.logs) {
 
-                console.info(log)
+                if (log.address === MOSSAI_NFT_Product.target) {
+                    const a = MOSSAI_NFT_Product.interface.decodeEventLog("eveSave", log.data, log.topics)
+
+                    const b = await MOSSAI_NFT_Product.getNFTProduct(a[0])
+
+                    console.info(b)
+
+
+
+
+
+                }
 
 
             }

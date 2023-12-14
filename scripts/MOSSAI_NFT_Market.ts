@@ -6,15 +6,15 @@ async function main() {
     const contract = await ethers.deployContract("MOSSAI_NFT_Market");
     await contract.waitForDeployment()
 
-    await (await contract.setContractAddress(["0x8DDBFD88ca0E588EA4a3B37D055d3F1717B54D48", "0x41B72CB16A2e89DddA403519A42aa0C386c1A4e7", "0xeb43b97d1AE99F28c07d0EA79C467E3ECF2a6A77", "0xeb43b97d1AE99F28c07d0EA79C467E3ECF2a6A77"])).wait()
+    await (await contract.setContractAddress(["0xc524FffffFA78620Af367bAd67AD887eA6da5246", "0x2EBDe3e744d0a870a17A2d51fd9079f14BF2137B", "0xAb0a5962659e59325ea6A3b0246444FC5e6024e0", "0x1a41f86248E33e5327B26092b898bDfe04C6d8b4"])).wait()
 
 
-    const MOSSAI_Roles_Cfg = await ethers.getContractAt("MOSSAI_Roles_Cfg", "0x6C34AbF4632BC38e90f5016d784D3ED320Cfad14")
+    const MOSSAI_Roles_Cfg = await ethers.getContractAt("MOSSAI_Roles_Cfg", "0x3cc42e32ea76016CED99b98DEc0FD8D541Dc3B76")
 
     await (await MOSSAI_Roles_Cfg.addAdmin(contract.target)).wait()
 
 
-    const MOSSAI_NFT_Product = await ethers.getContractAt("MOSSAI_NFT_Product", "0x8DDBFD88ca0E588EA4a3B37D055d3F1717B54D48");
+    const MOSSAI_NFT_Product = await ethers.getContractAt("MOSSAI_NFT_Product", "0xc524FffffFA78620Af367bAd67AD887eA6da5246");
 
     await (await MOSSAI_NFT_Product.setMOSSAINFTMarketAddress(contract.target)).wait();
 

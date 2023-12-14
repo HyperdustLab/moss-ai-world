@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../utils/StrUtil.sol";
 import "../MOSSAI_Roles_Cfg.sol";
 
-abstract contract MOSSAI_Island {
+abstract contract IMOSSAIIsland {
     function getIsland(
         uint256 islandId
     )
@@ -32,7 +32,7 @@ abstract contract MOSSAI_Island {
     {}
 }
 
-abstract contract MOSSAI_Island_NFG {
+abstract contract IMOSSAIIslandNFG {
     function getSeedOwer(uint32 seed) public view returns (address) {}
 }
 
@@ -65,9 +65,9 @@ contract Hyperdust_Island_Airdrop is Ownable {
     }
 
     function setMOSSAIIslandNFGAddress(
-        address _MOSSAIIslandNFGAddress
+        address MOSSAIIslandNFGAddress
     ) public onlyOwner {
-        _MOSSAIIslandNFGAddress = _MOSSAIIslandNFGAddress;
+        _MOSSAIIslandNFGAddress = MOSSAIIslandNFGAddress;
     }
 
     function setContractAddress(
@@ -83,7 +83,8 @@ contract Hyperdust_Island_Airdrop is Ownable {
         uint256 id;
         uint256 totalAmount;
         uint256 releaseAmount;
-        uint256 randomAmount;
+        uint256 minRandomAmount;
+        uint256 maxRandomAmount;
         uint32 startTime;
         uint32 endTime;
         uint256 islandId;
@@ -105,11 +106,9 @@ contract Hyperdust_Island_Airdrop is Ownable {
     event eveReceiveAirdrop(uint256 id, address to, uint256 amount);
 
     function addIslandAirdrop(
-        uint256 totalAmount,
-        uint256 randomAmount,
+        uint256[] memory uint256Array,
         uint32 startTime,
         uint32 endTime,
-        uint256 islandId,
         string memory airdropConfig,
         bytes1 status,
         address fromAddress,
@@ -120,19 +119,23 @@ contract Hyperdust_Island_Airdrop is Ownable {
             "not admin role"
         );
 
-        require(!_islandAirdropExists[islandId], "island airdrop is exists");
+        require(
+            !_islandAirdropExists[uint256Array[3]],
+            "island airdrop is exists"
+        );
 
         _id.increment();
 
         _islandAirdrops.push(
             IslandAirdrop({
                 id: _id.current(),
-                totalAmount: totalAmount,
+                totalAmount: uint256Array[0],
                 releaseAmount: 0,
-                randomAmount: randomAmount,
+                minRandomAmount: uint256Array[1],
+                maxRandomAmount: uint256Array[2],
                 startTime: startTime,
                 endTime: endTime,
-                islandId: islandId,
+                islandId: uint256Array[3],
                 airdropConfig: airdropConfig,
                 status: status,
                 fromAddress: fromAddress,
@@ -140,13 +143,14 @@ contract Hyperdust_Island_Airdrop is Ownable {
             })
         );
 
-        _islandAirdropExists[islandId] = true;
+        _islandAirdropExists[uint256Array[3]] = true;
         emit eveSave(_id.current());
     }
 
     function updateIslandAirdrop(
         uint256 id,
-        uint256 randomAmount,
+        uint256 minRandomAmount,
+        uint256 maxRandomAmount,
         uint32 startTime,
         uint32 endTime,
         string memory airdropConfig,
@@ -160,11 +164,13 @@ contract Hyperdust_Island_Airdrop is Ownable {
 
         for (uint i = 0; i < _islandAirdrops.length; i++) {
             if (_islandAirdrops[i].id == id) {
-                _islandAirdrops[i].randomAmount = randomAmount;
+                _islandAirdrops[i].minRandomAmount = minRandomAmount;
+                _islandAirdrops[i].maxRandomAmount = maxRandomAmount;
                 _islandAirdrops[i].startTime = startTime;
                 _islandAirdrops[i].endTime = endTime;
                 _islandAirdrops[i].airdropConfig = airdropConfig;
                 _islandAirdrops[i].status = status;
+                _islandAirdrops[i].intervalTime = intervalTime;
                 emit eveSave(id);
                 return;
             }
@@ -184,6 +190,8 @@ contract Hyperdust_Island_Airdrop is Ownable {
                 ];
                 _islandAirdrops.pop();
                 emit eveDelete(id);
+
+                delete _islandAirdropExists[_islandAirdrops[i].islandId];
                 return;
             }
         }
@@ -196,13 +204,9 @@ contract Hyperdust_Island_Airdrop is Ownable {
         public
         view
         returns (
-            uint256,
-            uint256,
-            uint256,
-            uint256,
+            uint256[] memory,
             uint32,
             uint32,
-            uint256,
             string memory,
             bytes1,
             address,
@@ -211,14 +215,18 @@ contract Hyperdust_Island_Airdrop is Ownable {
     {
         for (uint i = 0; i < _islandAirdrops.length; i++) {
             if (_islandAirdrops[i].id == id) {
+                uint256[] memory uint256Array = new uint256[](6);
+                uint256Array[0] = _islandAirdrops[i].id;
+                uint256Array[1] = _islandAirdrops[i].totalAmount;
+                uint256Array[2] = _islandAirdrops[i].releaseAmount;
+                uint256Array[3] = _islandAirdrops[i].minRandomAmount;
+                uint256Array[4] = _islandAirdrops[i].maxRandomAmount;
+                uint256Array[5] = _islandAirdrops[i].islandId;
+
                 return (
-                    _islandAirdrops[i].id,
-                    _islandAirdrops[i].totalAmount,
-                    _islandAirdrops[i].releaseAmount,
-                    _islandAirdrops[i].randomAmount,
+                    uint256Array,
                     _islandAirdrops[i].startTime,
                     _islandAirdrops[i].endTime,
-                    _islandAirdrops[i].islandId,
                     _islandAirdrops[i].airdropConfig,
                     _islandAirdrops[i].status,
                     _islandAirdrops[i].fromAddress,
@@ -265,7 +273,10 @@ contract Hyperdust_Island_Airdrop is Ownable {
             "The airdrop collection time has not arrived"
         );
 
-        uint256 randomAmount = _getRandom(0, islandAirdrop.randomAmount);
+        uint256 randomAmount = _getRandom(
+            islandAirdrop.minRandomAmount,
+            islandAirdrop.maxRandomAmount
+        );
 
         uint256 releaseAmount = islandAirdrop.releaseAmount + randomAmount;
 
@@ -293,7 +304,48 @@ contract Hyperdust_Island_Airdrop is Ownable {
 
         emit eveReceiveAirdrop(id, msg.sender, randomAmount);
 
-        emit eveDelete(id);
+        emit eveSave(id);
+    }
+
+    function withdraw(uint256 id, uint256 amount) public {
+        (
+            IslandAirdrop memory islandAirdrop,
+            uint256 index
+        ) = getIslandAirdropObj(id);
+
+        (, , , , , , , , uint32 seed, ) = IMOSSAIIsland(_MOSSAIIslandAddress)
+            .getIsland(islandAirdrop.islandId);
+
+        address seedOwer = IMOSSAIIslandNFG(_MOSSAIIslandNFGAddress)
+            .getSeedOwer(seed);
+
+        require(msg.sender == seedOwer, "not island ower");
+
+        uint256 releaseAmount = islandAirdrop.releaseAmount + amount;
+
+        require(
+            releaseAmount <= islandAirdrop.totalAmount,
+            "release amount is not enough"
+        );
+
+        uint256 allowance = IERC20(_erc20Address).allowance(
+            islandAirdrop.fromAddress,
+            address(this)
+        );
+
+        require(allowance >= amount, "Insufficient authorized amount");
+
+        IERC20(_erc20Address).transferFrom(
+            islandAirdrop.fromAddress,
+            msg.sender,
+            amount
+        );
+
+        _islandAirdrops[index].releaseAmount = releaseAmount;
+
+        emit eveReceiveAirdrop(id, msg.sender, amount);
+
+        emit eveSave(id);
     }
 
     /**

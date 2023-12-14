@@ -2,53 +2,46 @@
 
 import { ethers, run } from "hardhat";
 
-import axios from 'axios'
-
-
-
-
 
 async function main() {
 
 
-    const MOSSAI_NFG = await ethers.getContractAt("MOSSAI_NFG", "0x66a0dcFF2803124F506d4a8F6D5Fa813629B8Bfa")
+    const MOSSAI_Island_NFG = await ethers.getContractAt("MOSSAI_Island_NFG", "0xDa3e9fD7d9b447fbaf1383E61458B1FA55Bff94F");
 
 
-    const seeds = []
+    let seeds = []
 
-    const tokenURIS = []
+    let tokenURIS = []
 
-    for (let i = 10; i < 100; i++) {
+    let locations = []
 
-        seeds.push(i);
+    let seed = 5000;
 
-
-        const tokenURIJSON = { "image": "https://vniverse.s3.ap-east-1.amazonaws.com/upload/2023/7/25/13a8e1d9-87bf-45ae-ae00-bc04f088e41a.jpeg", coverImage: "https://vniverse.s3.ap-east-1.amazonaws.com/upload/2023/7/25/13a8e1d9-87bf-45ae-ae00-bc04f088e41a.jpeg", "name": "Island", "description": "Island", "type": "006001", "seed": i }
-
-
-        const file = new Blob([JSON.stringify(tokenURIJSON)], { type: 'application/json' });
-
-        let formData = new FormData()
-        formData.append("file", file, "data.json")
+    for (let i = 1; i <= 1000; i++) {
 
 
-        const { data } = await axios.post('http://127.0.0.1:9999/sys/common/upload', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                'X-Access-Token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2OTg4MDUzNDEsInVzZXJuYW1lIjoicm9vdCJ9.ajYm6jzSTWOnio5cDzVbtwfYHYsrDTcN1rgbzT-gK80'
-            }
-        })
+        tokenURIS.push(`https://s3.hyperdust.io/island/${i}.json`);
 
-        if (!data.success) {
-            throw data;
+        locations.push(i);
+        seeds.push(seed);
+
+        seed++;
+
+        if (i % 100 === 0) {
+
+            await (await MOSSAI_Island_NFG.batchAddNFG(seeds, tokenURIS, locations)).wait()
+
+            console.info(seeds, tokenURIS, locations)
+            seeds = []
+            tokenURIS = []
+            locations = []
         }
-
-        tokenURIS.push(data.result)
 
 
     }
 
-    await (await MOSSAI_NFG.batchAddNFG(seeds, tokenURIS)).wait()
+
+
 }
 
 // We recommend this pattern to be able to use async/await everywhere q

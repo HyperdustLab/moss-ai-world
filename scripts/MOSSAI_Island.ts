@@ -7,15 +7,15 @@ async function main() {
     await contract.waitForDeployment()
 
     await (await contract.setContractAddress(
-        ["0x6C34AbF4632BC38e90f5016d784D3ED320Cfad14",
-            "0x24788117ce2E2BBfAfC27c6433FBB5144A8D15A2",
-            "0x9bDaf3912e7b4794fE8aF2E748C35898265D5615",
-            "0xAA928F4DE19cDd08E6971e721E69A720684e3ac7",
-            "0x5d64e70A0e8719b7FAbD456e9B9deAD42Fb73Da4",
-            "0x2FE14B0A0e0F7AA307Fd0a7999336c7A78D86bec",
-            "0x6C34AbF4632BC38e90f5016d784D3ED320Cfad14"])).wait();
+        ["0x3cc42e32ea76016CED99b98DEc0FD8D541Dc3B76",
+            "0xDa3e9fD7d9b447fbaf1383E61458B1FA55Bff94F",
+            "0x61A205bc2c94aDd1565cD29803EF53D9a20F10dA",
+            "0xad20ce3a9dce85708074BD7a0E6F4b355151e040",
+            "0x920fC5dBBd6740fb996825Eb6729493e97697CA3",
+            "0xb16B5c14425853cd36E6671D7240B290D3c1B039",
+            "0x3cc42e32ea76016CED99b98DEc0FD8D541Dc3B76"])).wait();
 
-    const MOSSAI_Roles_Cfg = await ethers.getContractAt("MOSSAI_Roles_Cfg", "0x6C34AbF4632BC38e90f5016d784D3ED320Cfad14")
+    const MOSSAI_Roles_Cfg = await ethers.getContractAt("MOSSAI_Roles_Cfg", "0x3cc42e32ea76016CED99b98DEc0FD8D541Dc3B76")
 
     await (await MOSSAI_Roles_Cfg.addAdmin(contract.target)).wait()
 
@@ -24,8 +24,8 @@ async function main() {
     await (
         await contract.setDefParameter(
             "https://vniverse.s3.ap-east-1.amazonaws.com/upload/2023/8/10/13e02181-24b5-4e41-8481-4d7bb4886619.jpg",
-            "https://vniverse.s3.ap-east-1.amazonaws.com/upload/2023/8/11/d073bdc7-8440-4479-9d84-8b357a0fe7cf.7z",
-            "875c03eba7bd71e564ed657e9f6ed97132c230a1e5073422bb410624d0ac1766"
+            "https://s3.mossai.com/upload/2023/10/27/05289452-914d-444f-a4d4-c272367ea649.7z",
+            "90a5e1652e499b05e9b9e9f149322220e7110d73900b312cbce45072cef2c35b"
         )
     ).wait();
 

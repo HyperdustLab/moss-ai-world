@@ -9,10 +9,10 @@ async function main() {
 
 
     await (await contract.setContractAddress([
-        "0xF0C9b366C06cd940E995493149a4e045724273f6",
-        "0x41B72CB16A2e89DddA403519A42aa0C386c1A4e7",
-        "0xeb43b97d1AE99F28c07d0EA79C467E3ECF2a6A77",
-        "0x1CF7f55C216b28BC14Bf663d49D95d5F68446bed"
+        "0xCe25B74F7C6C26c3A02B61e2eca6f9EBC10CcC17",
+        "0x2EBDe3e744d0a870a17A2d51fd9079f14BF2137B",
+        "0xAb0a5962659e59325ea6A3b0246444FC5e6024e0",
+        "0x1a41f86248E33e5327B26092b898bDfe04C6d8b4"
     ])).wait()
 
 }
