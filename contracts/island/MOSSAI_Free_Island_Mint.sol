@@ -8,6 +8,8 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+
 abstract contract IWalletAccount {
     function addAmount(uint256 amount) public {}
 }
@@ -21,6 +23,7 @@ contract MOSSAI_Free_Island_Mint is Ownable {
     address public _WalletAccountAddress;
     address public _HyperdustTransactionCfgAddress;
     address public _erc20Address;
+    address public _MOSSAIIslandNFGAddress;
 
     function setMOSSAIIslandAddres(
         address MOSSAIIslandAddres
@@ -44,6 +47,12 @@ contract MOSSAI_Free_Island_Mint is Ownable {
         _erc20Address = erc20Address;
     }
 
+    function setMOSSAIIslandNFGAddress(
+        address _MOSSAIIslandNFGAddress
+    ) public onlyOwner {
+        _MOSSAIIslandNFGAddress = _MOSSAIIslandNFGAddress;
+    }
+
     function setContractAddress(
         address[] memory contractaddressArray
     ) public onlyOwner {
@@ -51,9 +60,19 @@ contract MOSSAI_Free_Island_Mint is Ownable {
         _WalletAccountAddress = contractaddressArray[1];
         _HyperdustTransactionCfgAddress = contractaddressArray[2];
         _erc20Address = contractaddressArray[3];
+        _MOSSAIIslandNFGAddress = contractaddressArray[4];
     }
 
     function mintIsland(uint32 coordinate) public {
+        uint256 balance = IERC721(_MOSSAIIslandNFGAddress).balanceOf(
+            msg.sender
+        );
+
+        require(
+            balance == 0,
+            "You have held the island and are not allowed to cast it again"
+        );
+
         IERC20 erc20 = IERC20(_erc20Address);
 
         uint256 mintIslandAmount = IHyperdustTransactionCfg(

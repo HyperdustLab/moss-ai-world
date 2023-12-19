@@ -81,6 +81,7 @@ contract Hyperdust_Island_Airdrop is Ownable {
 
     struct IslandAirdrop {
         uint256 id;
+        string name;
         uint256 totalAmount;
         uint256 releaseAmount;
         uint256 minRandomAmount;
@@ -95,7 +96,6 @@ contract Hyperdust_Island_Airdrop is Ownable {
     }
 
     IslandAirdrop[] public _islandAirdrops;
-    mapping(uint256 => bool) public _islandAirdropExists;
     mapping(address => uint256) _lastReleaseTimeMap;
     uint256 private _rand = 1;
 
@@ -106,6 +106,7 @@ contract Hyperdust_Island_Airdrop is Ownable {
     event eveReceiveAirdrop(uint256 id, address to, uint256 amount);
 
     function addIslandAirdrop(
+        string memory name,
         uint256[] memory uint256Array,
         uint32 startTime,
         uint32 endTime,
@@ -119,16 +120,19 @@ contract Hyperdust_Island_Airdrop is Ownable {
             "not admin role"
         );
 
-        require(
-            !_islandAirdropExists[uint256Array[3]],
-            "island airdrop is exists"
-        );
-
         _id.increment();
+
+        if (uint256Array[3] != 0) {
+            (uint256 id, , , , , , , , , ) = IMOSSAIIsland(_MOSSAIIslandAddress)
+                .getIsland(uint256Array[3]);
+
+            require(id > 0, "island not found");
+        }
 
         _islandAirdrops.push(
             IslandAirdrop({
                 id: _id.current(),
+                name: name,
                 totalAmount: uint256Array[0],
                 releaseAmount: 0,
                 minRandomAmount: uint256Array[1],
@@ -143,34 +147,49 @@ contract Hyperdust_Island_Airdrop is Ownable {
             })
         );
 
-        _islandAirdropExists[uint256Array[3]] = true;
         emit eveSave(_id.current());
     }
 
     function updateIslandAirdrop(
         uint256 id,
+        string memory name,
         uint256 minRandomAmount,
         uint256 maxRandomAmount,
         uint32 startTime,
         uint32 endTime,
         string memory airdropConfig,
-        bytes1 status,
-        uint32 intervalTime
+        uint32 intervalTime,
+        uint256 totalAmount,
+        uint256 islandId
     ) public {
         require(
             MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
             "not admin role"
         );
 
+        if (islandId != 0) {
+            (uint256 id, , , , , , , , , ) = IMOSSAIIsland(_MOSSAIIslandAddress)
+                .getIsland(islandId);
+
+            require(id > 0, "island not found");
+        }
+
         for (uint i = 0; i < _islandAirdrops.length; i++) {
             if (_islandAirdrops[i].id == id) {
+                require(
+                    _islandAirdrops[i].releaseAmount == 0,
+                    "airdrop has release amount,Update is not allowed"
+                );
+
                 _islandAirdrops[i].minRandomAmount = minRandomAmount;
                 _islandAirdrops[i].maxRandomAmount = maxRandomAmount;
                 _islandAirdrops[i].startTime = startTime;
                 _islandAirdrops[i].endTime = endTime;
                 _islandAirdrops[i].airdropConfig = airdropConfig;
-                _islandAirdrops[i].status = status;
                 _islandAirdrops[i].intervalTime = intervalTime;
+                _islandAirdrops[i].name = name;
+                _islandAirdrops[i].islandId = islandId;
+                _islandAirdrops[i].totalAmount = totalAmount;
                 emit eveSave(id);
                 return;
             }
@@ -185,13 +204,32 @@ contract Hyperdust_Island_Airdrop is Ownable {
         );
         for (uint i = 0; i < _islandAirdrops.length; i++) {
             if (_islandAirdrops[i].id == id) {
+                require(
+                    _islandAirdrops[i].releaseAmount == 0,
+                    "airdrop has release amount,Deletion is not allowed"
+                );
+
                 _islandAirdrops[i] = _islandAirdrops[
                     _islandAirdrops.length - 1
                 ];
                 _islandAirdrops.pop();
                 emit eveDelete(id);
 
-                delete _islandAirdropExists[_islandAirdrops[i].islandId];
+                return;
+            }
+        }
+        revert("not found");
+    }
+
+    function updateStatus(uint256 id, bytes1 status) public {
+        require(
+            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            "not admin role"
+        );
+        for (uint i = 0; i < _islandAirdrops.length; i++) {
+            if (_islandAirdrops[i].id == id) {
+                _islandAirdrops[i].status = status;
+                emit eveSave(id);
                 return;
             }
         }
@@ -210,7 +248,8 @@ contract Hyperdust_Island_Airdrop is Ownable {
             string memory,
             bytes1,
             address,
-            uint32
+            uint32,
+            string memory name
         )
     {
         for (uint i = 0; i < _islandAirdrops.length; i++) {
@@ -230,7 +269,8 @@ contract Hyperdust_Island_Airdrop is Ownable {
                     _islandAirdrops[i].airdropConfig,
                     _islandAirdrops[i].status,
                     _islandAirdrops[i].fromAddress,
-                    _islandAirdrops[i].intervalTime
+                    _islandAirdrops[i].intervalTime,
+                    _islandAirdrops[i].name
                 );
             }
         }
@@ -265,12 +305,12 @@ contract Hyperdust_Island_Airdrop is Ownable {
         require(
             timestamp >= islandAirdrop.startTime &&
                 timestamp < islandAirdrop.endTime,
-            "not in time"
+            "Temporary Closed"
         );
 
         require(
             timestamp - lastTime >= islandAirdrop.intervalTime,
-            "The airdrop collection time has not arrived"
+            "Waiting for the next round drop."
         );
 
         uint256 randomAmount = _getRandom(
@@ -282,7 +322,7 @@ contract Hyperdust_Island_Airdrop is Ownable {
 
         require(
             releaseAmount <= islandAirdrop.totalAmount,
-            "release amount is not enough"
+            "This airdrop zone reached its limit."
         );
 
         uint256 allowance = IERC20(_erc20Address).allowance(
