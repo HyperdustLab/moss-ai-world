@@ -37,14 +37,14 @@ contract MOSSAI_Island_NFG is
 
         require(_seedToken[seed] == 0, "seed already exists");
 
-        uint256 tokenId = _nextTokenId++;
-        _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);
+        _nextTokenId++;
+        _safeMint(to, _nextTokenId);
+        _setTokenURI(_nextTokenId, uri);
 
-        _tokenSeed[tokenId] = seed;
-        _seedToken[seed] = tokenId;
+        _tokenSeed[_nextTokenId] = seed;
+        _seedToken[seed] = _nextTokenId;
 
-        _mintTokens[seed].push(tokenId);
+        _mintTokens[seed].push(_nextTokenId);
 
         return seed;
     }
@@ -62,16 +62,16 @@ contract MOSSAI_Island_NFG is
 
         require(_seedToken[seed] > 0, "seed not exists");
 
-        uint256 tokenId = _nextTokenId++;
-        _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);
+        _nextTokenId++;
+        _safeMint(to, _nextTokenId);
+        _setTokenURI(_nextTokenId, uri);
 
-        _tokenSeed[tokenId] = seed;
-        _seedToken[seed] = tokenId;
+        _tokenSeed[_nextTokenId] = seed;
+        _seedToken[seed] = _nextTokenId;
 
-        _mintTokens[seed].push(tokenId);
+        _mintTokens[seed].push(_nextTokenId);
 
-        return tokenId;
+        return _nextTokenId;
     }
 
     function getSeedOwer(uint32 seed) public view returns (address) {

@@ -7,13 +7,13 @@ async function main() {
     await contract.waitForDeployment()
 
     await (await contract.setContractAddress(
-        ["0x3cc42e32ea76016CED99b98DEc0FD8D541Dc3B76",
-            "0xDa3e9fD7d9b447fbaf1383E61458B1FA55Bff94F",
-            "0x61A205bc2c94aDd1565cD29803EF53D9a20F10dA",
-            "0xad20ce3a9dce85708074BD7a0E6F4b355151e040",
+        ["0xd5A7E4eFb8Ae98aadE6d0078B3FeCf06c44c55Ae",
+            "0xba09e4f4A54f3dB674C7B1fa729F4986F59FAFB8",
+            "0xD7efD20E42155295Da5268FC465697354d91fce0",
+            "0x8E2219508F5F6160Ba7cc663262c51E97294A061",
             "0x920fC5dBBd6740fb996825Eb6729493e97697CA3",
-            "0xb16B5c14425853cd36E6671D7240B290D3c1B039",
-            "0x3cc42e32ea76016CED99b98DEc0FD8D541Dc3B76"])).wait();
+            "0xcd17a8A93391F90dCc8ba3C2001840723ae5B8C6",
+            "0xd5A7E4eFb8Ae98aadE6d0078B3FeCf06c44c55Ae"])).wait();
 
     const MOSSAI_Roles_Cfg = await ethers.getContractAt("MOSSAI_Roles_Cfg", "0x3cc42e32ea76016CED99b98DEc0FD8D541Dc3B76")
 
