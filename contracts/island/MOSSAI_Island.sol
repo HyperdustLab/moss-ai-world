@@ -23,6 +23,27 @@ abstract contract IIslandFactory {
     ) public returns (address) {}
 }
 
+abstract contract OldMOSSAIIsland {
+    function getIsland(
+        uint256 islandId
+    )
+        public
+        view
+        returns (
+            uint256,
+            string memory,
+            string memory,
+            string memory,
+            string memory,
+            address,
+            address,
+            uint256,
+            uint32,
+            bytes32
+        )
+    {}
+}
+
 contract MOSSAI_Island is Ownable {
     Counters.Counter private _index;
     address public _MOSSAIRolesCfgAddress;
@@ -32,6 +53,7 @@ contract MOSSAI_Island is Ownable {
     address public _island1155FactoryAddress;
     address public _islandAssetsCfgAddress;
     address public _HyperdustRolesCfgAddress;
+    address public _OldMOSSAIIslandAddress;
 
     using Counters for Counters.Counter;
     Counters.Counter private _id;
@@ -57,9 +79,10 @@ contract MOSSAI_Island is Ownable {
         string fileHash;
         address erc721Address;
         address erc1155Address;
-        uint256 coordinate;
+        uint32 coordinate;
         uint32 seed;
         bytes32 sid;
+        string scenesData;
     }
 
     event eveSaveIsland(uint256 id);
@@ -114,6 +137,12 @@ contract MOSSAI_Island is Ownable {
         _HyperdustRolesCfgAddress = HyperdustRolesCfgAddress;
     }
 
+    function setOldMOSSAIIslandAddress(
+        address OldMOSSAIIslandAddress
+    ) public onlyOwner {
+        _OldMOSSAIIslandAddress = OldMOSSAIIslandAddress;
+    }
+
     function setContractAddress(
         address[] memory contractaddressArray
     ) public onlyOwner {
@@ -124,6 +153,7 @@ contract MOSSAI_Island is Ownable {
         _island1155FactoryAddress = contractaddressArray[4];
         _islandAssetsCfgAddress = contractaddressArray[5];
         _HyperdustRolesCfgAddress = contractaddressArray[6];
+        _OldMOSSAIIslandAddress = contractaddressArray[7];
     }
 
     function mint(uint32 coordinate, address owner) public {
@@ -147,7 +177,7 @@ contract MOSSAI_Island is Ownable {
             .deploy(owner, _islandAssetsCfgAddress);
 
         address island1155Address = IIslandFactory(_island1155FactoryAddress)
-            .deploy(owner, _islandAssetsCfgAddress);    
+            .deploy(owner, _islandAssetsCfgAddress);
 
         MOSSAI_Roles_Cfg(_HyperdustRolesCfgAddress).addAdmin2(island721Address);
         MOSSAI_Roles_Cfg(_HyperdustRolesCfgAddress).addAdmin2(
@@ -170,7 +200,8 @@ contract MOSSAI_Island is Ownable {
             erc1155Address: island1155Address,
             coordinate: coordinate,
             seed: seed,
-            sid: sid
+            sid: sid,
+            scenesData: ""
         });
 
         _islands.push(island);
@@ -183,7 +214,8 @@ contract MOSSAI_Island is Ownable {
         string memory name,
         string memory coverImage,
         string memory file,
-        string memory fileHash
+        string memory fileHash,
+        string memory scenesData
     ) public {
         for (uint256 i = 0; i < _islands.length; i++) {
             if (_islands[i].id == id) {
@@ -197,6 +229,7 @@ contract MOSSAI_Island is Ownable {
                 _islands[i].coverImage = coverImage;
                 _islands[i].file = file;
                 _islands[i].fileHash = fileHash;
+                _islands[i].scenesData = scenesData;
 
                 emit eveSaveIsland(id);
                 return;
@@ -227,7 +260,8 @@ contract MOSSAI_Island is Ownable {
             address,
             uint256,
             uint32,
-            bytes32
+            bytes32,
+            string memory scenesData
         )
     {
         for (uint i = 0; i < _islands.length; i++) {
@@ -242,10 +276,53 @@ contract MOSSAI_Island is Ownable {
                     _islands[i].erc1155Address,
                     _islands[i].coordinate,
                     _islands[i].seed,
-                    _islands[i].sid
+                    _islands[i].sid,
+                    _islands[i].scenesData
                 );
             }
         }
         revert("not found");
+    }
+
+    function migration(uint256 start, uint256 end) public onlyOwner {
+        OldMOSSAIIsland oldMOSSAIIsland = OldMOSSAIIsland(
+            _OldMOSSAIIslandAddress
+        );
+
+        for (uint256 i = start; i <= end; i++) {
+            (
+                uint256 id,
+                string memory name,
+                string memory coverImage,
+                string memory file,
+                string memory fileHash,
+                address erc721Address,
+                address erc1155Address,
+                uint256 coordinate,
+                uint32 seed,
+                bytes32 sid
+            ) = oldMOSSAIIsland.getIsland(i);
+
+            _islands.push(
+                Island({
+                    id: id,
+                    name: name,
+                    coverImage: coverImage,
+                    file: file,
+                    fileHash: fileHash,
+                    erc721Address: erc721Address,
+                    erc1155Address: erc1155Address,
+                    coordinate: uint32(coordinate),
+                    seed: seed,
+                    sid: sid,
+                    scenesData: ""
+                })
+            );
+
+            _index.increment();
+
+            _coordinateExists[uint32(coordinate)] = true;
+            hashExists[sid] = true;
+        }
     }
 }

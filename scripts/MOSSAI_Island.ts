@@ -13,12 +13,16 @@ async function main() {
             "0x8E2219508F5F6160Ba7cc663262c51E97294A061",
             "0x920fC5dBBd6740fb996825Eb6729493e97697CA3",
             "0xcd17a8A93391F90dCc8ba3C2001840723ae5B8C6",
-            "0xd5A7E4eFb8Ae98aadE6d0078B3FeCf06c44c55Ae"])).wait();
+            "0xd5A7E4eFb8Ae98aadE6d0078B3FeCf06c44c55Ae",
+            "0x5d0aD674F5f6682fd6f23D581aE90e9968436392"
 
-    const MOSSAI_Roles_Cfg = await ethers.getContractAt("MOSSAI_Roles_Cfg", "0x3cc42e32ea76016CED99b98DEc0FD8D541Dc3B76")
+        ])).wait();
+
+    const MOSSAI_Roles_Cfg = await ethers.getContractAt("MOSSAI_Roles_Cfg", "0xd5A7E4eFb8Ae98aadE6d0078B3FeCf06c44c55Ae")
 
     await (await MOSSAI_Roles_Cfg.addAdmin(contract.target)).wait()
 
+    await (await MOSSAI_Roles_Cfg.addSuperAdmin(contract.target)).wait()
 
 
     await (
@@ -35,6 +39,19 @@ async function main() {
     // await (await MOSSAI_Free_Island_Mint.setMOSSAIIslandAddres(contract.target)).wait()
 
     await (await MOSSAI_Roles_Cfg.addSuperAdmin(contract.target)).wait()
+
+
+
+    const batchSize = 50;
+    const total = 4;
+
+    for (let i = 1; i <= total; i += batchSize) {
+        const end = Math.min(i + batchSize - 1, total);
+        await (await contract.migration(i, end)).wait();
+    }
+
+
+
 
     console.info("contractFactory address:", contract.target);
 }
