@@ -5,12 +5,16 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "./utils/StrUtil.sol";
 import "./MOSSAI_Roles_Cfg.sol";
+import "./MOSSAI_Storage.sol";
 
 abstract contract IWalletAccount {
     function addAmount(uint256 amount) public {}
@@ -34,10 +38,7 @@ abstract contract IERC1155 {
     ) public virtual {}
 }
 
-contract MOSSAI_mNFT_Mint is Ownable {
-    using Counters for Counters.Counter;
-    Counters.Counter private _id;
-
+contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
     using Strings for *;
     using StrUtil for *;
 
@@ -45,28 +46,7 @@ contract MOSSAI_mNFT_Mint is Ownable {
     address public _HYDTTokenAddress;
     address public _walletAccountAddres;
     address public _HyperdustTransactionCfgAddress;
-
-    /**
-     * @dev Struct containing information about a mint request.
-     * @param id The ID of the mint request.
-     * @param tokenURI The URI of the token being minted.
-     * @param price The price of the mint request.
-     * @param contractAddress The address of the contract being used for minting.
-     * @param tokenId The ID of the token being minted.
-     * @param contractType The type of contract being used for minting.
-     * @param mintNum The number of tokens being minted.
-     * @param allowNum The number of tokens allowed to be minted.
-     */
-    struct MintInfo {
-        uint256 id;
-        string tokenURI;
-        uint256 price;
-        address contractAddress;
-        uint256 tokenId;
-        bytes1 contractType;
-        uint256 mintNum;
-        uint256 allowNum;
-    }
+    address public _MOSSAIStorageAddress;
 
     event eveSave(uint256 id);
 
@@ -81,7 +61,9 @@ contract MOSSAI_mNFT_Mint is Ownable {
 
     event eveDelete(uint256 id);
 
-    MintInfo[] public _mintInfos;
+    function initialize() public initializer {
+        __Ownable_init(msg.sender);
+    }
 
     function setMOSSAIRolesCfgAddress(
         address MOSSAIRolesCfgAddress
@@ -105,6 +87,12 @@ contract MOSSAI_mNFT_Mint is Ownable {
         _HyperdustTransactionCfgAddress = HyperdustTransactionCfgAddress;
     }
 
+    function setMOSSAIStorageAddress(
+        address MOSSAIStorageAddress
+    ) public onlyOwner {
+        _MOSSAIStorageAddress = MOSSAIStorageAddress;
+    }
+
     /**
      * @dev Sets the contract addresses for the MOSSAI mNFT minting contract.
      * @param contractaddressArray An array of contract addresses to be set.
@@ -122,6 +110,7 @@ contract MOSSAI_mNFT_Mint is Ownable {
         _HYDTTokenAddress = contractaddressArray[1];
         _walletAccountAddres = contractaddressArray[2];
         _HyperdustTransactionCfgAddress = contractaddressArray[3];
+        _MOSSAIStorageAddress = contractaddressArray[4];
     }
 
     /**
@@ -145,20 +134,25 @@ contract MOSSAI_mNFT_Mint is Ownable {
             MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
             "not admin role"
         );
-        _id.increment();
-        uint256 id = _id.current();
-        _mintInfos.push(
-            MintInfo(
-                id,
-                tokenURI,
-                price,
-                contractAddress,
-                tokenId,
-                contractType,
-                0,
-                allowNum
-            )
+
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+
+        uint256 id = mossaiStorage.getNextId();
+
+        mossaiStorage.setString(mossaiStorage.genKey("tokenURI", id), tokenURI);
+        mossaiStorage.setUint(mossaiStorage.genKey("price", id), price);
+        mossaiStorage.setAddress(
+            mossaiStorage.genKey("contractAddress", id),
+            contractAddress
         );
+
+        mossaiStorage.setUint(mossaiStorage.genKey("tokenId", id), tokenId);
+        mossaiStorage.setBytes1(
+            mossaiStorage.genKey("contractType", id),
+            contractType
+        );
+
+        mossaiStorage.setUint(mossaiStorage.genKey("allowNum", id), allowNum);
 
         emit eveSave(id);
     }
@@ -189,22 +183,31 @@ contract MOSSAI_mNFT_Mint is Ownable {
             MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
             "not admin role"
         );
-        for (uint256 i = 0; i < _mintInfos.length; i++) {
-            if (_mintInfos[i].id == id) {
-                _mintInfos[i].tokenURI = tokenURI;
-                _mintInfos[i].price = price;
-                _mintInfos[i].contractAddress = contractAddress;
-                _mintInfos[i].tokenId = tokenId;
-                _mintInfos[i].contractType = contractType;
-                _mintInfos[i].allowNum = allowNum;
 
-                emit eveSave(id);
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
-                return;
-            }
-        }
+        string memory _tokenURI = mossaiStorage.getString(
+            mossaiStorage.genKey("tokenURI", id)
+        );
 
-        revert("NFT does not exist");
+        require(bytes(_tokenURI).length > 0, "not found");
+
+        mossaiStorage.setString(mossaiStorage.genKey("tokenURI", id), tokenURI);
+        mossaiStorage.setUint(mossaiStorage.genKey("price", id), price);
+        mossaiStorage.setAddress(
+            mossaiStorage.genKey("contractAddress", id),
+            contractAddress
+        );
+
+        mossaiStorage.setUint(mossaiStorage.genKey("tokenId", id), tokenId);
+        mossaiStorage.setBytes1(
+            mossaiStorage.genKey("contractType", id),
+            contractType
+        );
+
+        mossaiStorage.setUint(mossaiStorage.genKey("allowNum", id), allowNum);
+
+        emit eveSave(id);
     }
 
     /**
@@ -229,21 +232,26 @@ contract MOSSAI_mNFT_Mint is Ownable {
             uint256
         )
     {
-        for (uint256 i = 0; i < _mintInfos.length; i++) {
-            if (_mintInfos[i].id == id) {
-                return (
-                    _mintInfos[i].id,
-                    _mintInfos[i].tokenURI,
-                    _mintInfos[i].price,
-                    _mintInfos[i].contractAddress,
-                    _mintInfos[i].tokenId,
-                    _mintInfos[i].contractType,
-                    _mintInfos[i].mintNum,
-                    _mintInfos[i].allowNum
-                );
-            }
-        }
-        revert("NFT does not exist");
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+
+        string memory _tokenURI = mossaiStorage.getString(
+            mossaiStorage.genKey("tokenURI", id)
+        );
+
+        require(bytes(_tokenURI).length > 0, "not found");
+
+        return (
+            id,
+            mossaiStorage.getString(mossaiStorage.genKey("tokenURI", id)),
+            mossaiStorage.getUint(mossaiStorage.genKey("price", id)),
+            mossaiStorage.getAddress(
+                mossaiStorage.genKey("contractAddress", id)
+            ),
+            mossaiStorage.getUint(mossaiStorage.genKey("tokenId", id)),
+            mossaiStorage.getBytes1(mossaiStorage.genKey("contractType", id)),
+            mossaiStorage.getUint(mossaiStorage.genKey("mintNum", id)),
+            mossaiStorage.getUint(mossaiStorage.genKey("allowNum", id))
+        );
     }
 
     /**
@@ -258,16 +266,16 @@ contract MOSSAI_mNFT_Mint is Ownable {
             MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
             "not admin role"
         );
-        for (uint256 i = 0; i < _mintInfos.length; i++) {
-            if (_mintInfos[i].id == id) {
-                _mintInfos[i] = _mintInfos[_mintInfos.length - 1];
-                _mintInfos.pop();
-                emit eveDelete(id);
-                return;
-            }
-        }
 
-        revert("NFT does not exist");
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+
+        string memory _tokenURI = mossaiStorage.getString(
+            mossaiStorage.genKey("tokenURI", id)
+        );
+
+        require(bytes(_tokenURI).length > 0, "not found");
+
+        mossaiStorage.setString(mossaiStorage.genKey("tokenURI", id), "");
     }
 
     /**
@@ -288,69 +296,86 @@ contract MOSSAI_mNFT_Mint is Ownable {
             _walletAccountAddres
         );
 
-        MintInfo memory mintInfo;
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
-        for (uint256 i = 0; i < _mintInfos.length; i++) {
-            if (_mintInfos[i].id == id) {
-                mintInfo = _mintInfos[i];
-                break;
-            }
-        }
+        string memory _tokenURI = mossaiStorage.getString(
+            mossaiStorage.genKey("tokenURI", id)
+        );
 
-        require(mintInfo.id > 0, "NFT does not exist");
+        require(bytes(_tokenURI).length > 0, "not found");
 
         uint256 amount = erc20.allowance(msg.sender, address(this));
+
+        uint256 price = mossaiStorage.getUint(
+            mossaiStorage.genKey("price", id)
+        );
 
         uint256 gasFee = IHyperdustTransactionCfg(
             _HyperdustTransactionCfgAddress
         ).getGasFee("mint_mNFT");
 
         require(
-            amount >= mintInfo.price * num + gasFee,
+            amount >= price * num + gasFee,
             "Insufficient authorized amount"
         );
 
-        require(
-            mintInfo.allowNum >= mintInfo.mintNum + num,
-            "Insufficient inventory"
+        uint256 allowNum = mossaiStorage.getUint(
+            mossaiStorage.genKey("allowNum", id)
         );
+
+        uint256 mintNum = mossaiStorage.getUint(
+            mossaiStorage.genKey("mintNum", id)
+        );
+
+        require(allowNum >= mintNum + num, "Insufficient inventory");
 
         erc20.transferFrom(
             msg.sender,
             _walletAccountAddres,
-            mintInfo.price * num + gasFee
+            price * num + gasFee
         );
 
-        walletAccountAddress.addAmount(mintInfo.price * num + gasFee);
+        walletAccountAddress.addAmount(price * num + gasFee);
 
-        if (mintInfo.contractType == 0x11) {
+        bytes1 contractType = mossaiStorage.getBytes1(
+            mossaiStorage.genKey("contractType", id)
+        );
+
+        address contractAddress = mossaiStorage.getAddress(
+            mossaiStorage.genKey("contractAddress", id)
+        );
+
+        uint256 tokenId = mossaiStorage.getUint(
+            mossaiStorage.genKey("tokenId", id)
+        );
+
+        string memory tokenURI = mossaiStorage.getString(
+            mossaiStorage.genKey("tokenURI", id)
+        );
+
+        if (contractType == 0x11) {
             for (uint i = 0; i < num; i++) {
-                IERC721(mintInfo.contractAddress).safeMint(
-                    msg.sender,
-                    mintInfo.tokenURI
-                );
+                IERC721(contractAddress).safeMint(msg.sender, tokenURI);
             }
-        } else if (mintInfo.contractType == 0x22) {
-            IERC1155(mintInfo.contractAddress).mint(
+        } else if (contractType == 0x22) {
+            IERC1155(contractAddress).mint(
                 msg.sender,
-                mintInfo.tokenId,
+                tokenId,
                 num,
-                mintInfo.tokenURI,
+                tokenURI,
                 ""
             );
         } else {
             revert("invalid contract type");
         }
 
-        for (uint256 i = 0; i < _mintInfos.length; i++) {
-            if (_mintInfos[i].id == id) {
-                _mintInfos[i].mintNum += num;
-                break;
-            }
-        }
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("mintNum", id),
+            mintNum + num
+        );
 
         emit eveSave(id);
 
-        emit eveMint(id, msg.sender, num, mintInfo.price, amount, gasFee);
+        emit eveMint(id, msg.sender, num, price, amount, gasFee);
     }
 }

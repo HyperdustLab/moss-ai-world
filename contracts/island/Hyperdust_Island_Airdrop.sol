@@ -2,14 +2,15 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-
-import "@openzeppelin/contracts/utils/Counters.sol";
-
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "../utils/StrUtil.sol";
 import "../MOSSAI_Roles_Cfg.sol";
+import "../MOSSAI_Storage.sol";
 
 abstract contract IMOSSAIIsland {
     function getIsland(
@@ -36,17 +37,22 @@ abstract contract IMOSSAIIslandNFG {
     function getSeedOwer(uint32 seed) public view returns (address) {}
 }
 
-contract Hyperdust_Island_Airdrop is Ownable {
+contract Hyperdust_Island_Airdrop is OwnableUpgradeable {
     using Strings for *;
     using StrUtil for *;
+
+    uint256 private _rand;
 
     address public _MOSSAIRolesCfgAddress;
     address public _erc20Address;
     address public _MOSSAIIslandAddress;
     address public _MOSSAIIslandNFGAddress;
+    address public _MOSSAIStorageAddress;
 
-    using Counters for Counters.Counter;
-    Counters.Counter private _id;
+    function initialize() public initializer {
+        _rand = 1;
+        __Ownable_init(msg.sender);
+    }
 
     function setMOSSAIRolesCfgAddress(
         address MOSSAIRolesCfgAddress
@@ -70,6 +76,12 @@ contract Hyperdust_Island_Airdrop is Ownable {
         _MOSSAIIslandNFGAddress = MOSSAIIslandNFGAddress;
     }
 
+    function setMOSSAIStorageAddress(
+        address MOSSAIStorageAddress
+    ) public onlyOwner {
+        _MOSSAIStorageAddress = MOSSAIStorageAddress;
+    }
+
     function setContractAddress(
         address[] memory contractaddressArray
     ) public onlyOwner {
@@ -77,27 +89,8 @@ contract Hyperdust_Island_Airdrop is Ownable {
         _erc20Address = contractaddressArray[1];
         _MOSSAIIslandAddress = contractaddressArray[2];
         _MOSSAIIslandNFGAddress = contractaddressArray[3];
+        _MOSSAIStorageAddress = contractaddressArray[4];
     }
-
-    struct IslandAirdrop {
-        uint256 id;
-        string name;
-        uint256 totalAmount;
-        uint256 releaseAmount;
-        uint256 minRandomAmount;
-        uint256 maxRandomAmount;
-        uint32 startTime;
-        uint32 endTime;
-        uint256 islandId;
-        string airdropConfig;
-        bytes1 status;
-        address fromAddress;
-        uint32 intervalTime;
-    }
-
-    IslandAirdrop[] public _islandAirdrops;
-    mapping(address => uint256) _lastReleaseTimeMap;
-    uint256 private _rand = 1;
 
     event eveSave(uint256 id);
 
@@ -108,19 +101,17 @@ contract Hyperdust_Island_Airdrop is Ownable {
     function addIslandAirdrop(
         string memory name,
         uint256[] memory uint256Array,
-        uint32 startTime,
-        uint32 endTime,
+        uint256 startTime,
+        uint256 endTime,
         string memory airdropConfig,
         bytes1 status,
         address fromAddress,
-        uint32 intervalTime
+        uint256 intervalTime
     ) public {
         require(
             MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
             "not admin role"
         );
-
-        _id.increment();
 
         if (uint256Array[3] != 0) {
             (uint256 id, , , , , , , , , ) = IMOSSAIIsland(_MOSSAIIslandAddress)
@@ -129,25 +120,50 @@ contract Hyperdust_Island_Airdrop is Ownable {
             require(id > 0, "island not found");
         }
 
-        _islandAirdrops.push(
-            IslandAirdrop({
-                id: _id.current(),
-                name: name,
-                totalAmount: uint256Array[0],
-                releaseAmount: 0,
-                minRandomAmount: uint256Array[1],
-                maxRandomAmount: uint256Array[2],
-                startTime: startTime,
-                endTime: endTime,
-                islandId: uint256Array[3],
-                airdropConfig: airdropConfig,
-                status: status,
-                fromAddress: fromAddress,
-                intervalTime: intervalTime
-            })
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+
+        uint256 id = mossaiStorage.getNextId();
+
+        mossaiStorage.setString(mossaiStorage.genKey("name", id), name);
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("totalAmount", id),
+            uint256Array[0]
+        );
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("minRandomAmount", id),
+            uint256Array[1]
         );
 
-        emit eveSave(_id.current());
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("maxRandomAmount", id),
+            uint256Array[2]
+        );
+
+        mossaiStorage.setUint(mossaiStorage.genKey("startTime", id), startTime);
+        mossaiStorage.setUint(mossaiStorage.genKey("endTime", id), endTime);
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("islandId", id),
+            uint256Array[3]
+        );
+
+        mossaiStorage.setString(
+            mossaiStorage.genKey("airdropConfig", id),
+            airdropConfig
+        );
+
+        mossaiStorage.setBytes1(mossaiStorage.genKey("status", id), status);
+
+        mossaiStorage.setAddress(
+            mossaiStorage.genKey("fromAddress", id),
+            fromAddress
+        );
+
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("intervalTime", id),
+            intervalTime
+        );
+
+        emit eveSave(id);
     }
 
     function updateIslandAirdrop(
@@ -155,10 +171,10 @@ contract Hyperdust_Island_Airdrop is Ownable {
         string memory name,
         uint256 minRandomAmount,
         uint256 maxRandomAmount,
-        uint32 startTime,
-        uint32 endTime,
+        uint256 startTime,
+        uint256 endTime,
         string memory airdropConfig,
-        uint32 intervalTime,
+        uint256 intervalTime,
         uint256 totalAmount,
         uint256 islandId
     ) public {
@@ -167,6 +183,8 @@ contract Hyperdust_Island_Airdrop is Ownable {
             "not admin role"
         );
 
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+
         if (islandId != 0) {
             (uint256 id, , , , , , , , , ) = IMOSSAIIsland(_MOSSAIIslandAddress)
                 .getIsland(islandId);
@@ -174,27 +192,51 @@ contract Hyperdust_Island_Airdrop is Ownable {
             require(id > 0, "island not found");
         }
 
-        for (uint i = 0; i < _islandAirdrops.length; i++) {
-            if (_islandAirdrops[i].id == id) {
-                require(
-                    _islandAirdrops[i].releaseAmount == 0,
-                    "airdrop has release amount,Update is not allowed"
-                );
+        string memory _name = mossaiStorage.getString(
+            mossaiStorage.genKey("name", id)
+        );
 
-                _islandAirdrops[i].minRandomAmount = minRandomAmount;
-                _islandAirdrops[i].maxRandomAmount = maxRandomAmount;
-                _islandAirdrops[i].startTime = startTime;
-                _islandAirdrops[i].endTime = endTime;
-                _islandAirdrops[i].airdropConfig = airdropConfig;
-                _islandAirdrops[i].intervalTime = intervalTime;
-                _islandAirdrops[i].name = name;
-                _islandAirdrops[i].islandId = islandId;
-                _islandAirdrops[i].totalAmount = totalAmount;
-                emit eveSave(id);
-                return;
-            }
-        }
-        revert("not found");
+        require(bytes(_name).length > 0, "not found");
+
+        uint256 releaseAmount = mossaiStorage.getUint(
+            mossaiStorage.genKey("releaseAmount", id)
+        );
+
+        require(
+            releaseAmount == 0,
+            "airdrop has release amount,Update is not allowed"
+        );
+
+        mossaiStorage.setString(mossaiStorage.genKey("name", id), name);
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("totalAmount", id),
+            totalAmount
+        );
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("minRandomAmount", id),
+            minRandomAmount
+        );
+
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("maxRandomAmount", id),
+            maxRandomAmount
+        );
+
+        mossaiStorage.setUint(mossaiStorage.genKey("startTime", id), startTime);
+        mossaiStorage.setUint(mossaiStorage.genKey("endTime", id), endTime);
+        mossaiStorage.setUint(mossaiStorage.genKey("islandId", id), islandId);
+
+        mossaiStorage.setString(
+            mossaiStorage.genKey("airdropConfig", id),
+            airdropConfig
+        );
+
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("intervalTime", id),
+            intervalTime
+        );
+
+        emit eveSave(id);
     }
 
     function deleteIslandAirdrop(uint256 id) public {
@@ -202,23 +244,27 @@ contract Hyperdust_Island_Airdrop is Ownable {
             MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
             "not admin role"
         );
-        for (uint i = 0; i < _islandAirdrops.length; i++) {
-            if (_islandAirdrops[i].id == id) {
-                require(
-                    _islandAirdrops[i].releaseAmount == 0,
-                    "airdrop has release amount,Deletion is not allowed"
-                );
 
-                _islandAirdrops[i] = _islandAirdrops[
-                    _islandAirdrops.length - 1
-                ];
-                _islandAirdrops.pop();
-                emit eveDelete(id);
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
-                return;
-            }
-        }
-        revert("not found");
+        string memory _name = mossaiStorage.getString(
+            mossaiStorage.genKey("name", id)
+        );
+
+        require(bytes(_name).length > 0, "not found");
+
+        uint256 releaseAmount = mossaiStorage.getUint(
+            mossaiStorage.genKey("releaseAmount", id)
+        );
+
+        require(
+            releaseAmount == 0,
+            "airdrop has release amount,Update is not allowed"
+        );
+
+        mossaiStorage.setString(mossaiStorage.genKey("name", id), "");
+
+        emit eveDelete(id);
     }
 
     function updateStatus(uint256 id, bytes1 status) public {
@@ -226,14 +272,18 @@ contract Hyperdust_Island_Airdrop is Ownable {
             MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
             "not admin role"
         );
-        for (uint i = 0; i < _islandAirdrops.length; i++) {
-            if (_islandAirdrops[i].id == id) {
-                _islandAirdrops[i].status = status;
-                emit eveSave(id);
-                return;
-            }
-        }
-        revert("not found");
+
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+
+        string memory _name = mossaiStorage.getString(
+            mossaiStorage.genKey("name", id)
+        );
+
+        require(bytes(_name).length > 0, "not found");
+
+        mossaiStorage.setBytes1(mossaiStorage.genKey("status", id), status);
+
+        emit eveSave(id);
     }
 
     function getIslandAirdrop(
@@ -243,104 +293,155 @@ contract Hyperdust_Island_Airdrop is Ownable {
         view
         returns (
             uint256[] memory,
-            uint32,
-            uint32,
             string memory,
             bytes1,
             address,
-            uint32,
-            string memory name
+            string memory
         )
     {
-        for (uint i = 0; i < _islandAirdrops.length; i++) {
-            if (_islandAirdrops[i].id == id) {
-                uint256[] memory uint256Array = new uint256[](6);
-                uint256Array[0] = _islandAirdrops[i].id;
-                uint256Array[1] = _islandAirdrops[i].totalAmount;
-                uint256Array[2] = _islandAirdrops[i].releaseAmount;
-                uint256Array[3] = _islandAirdrops[i].minRandomAmount;
-                uint256Array[4] = _islandAirdrops[i].maxRandomAmount;
-                uint256Array[5] = _islandAirdrops[i].islandId;
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
-                return (
-                    uint256Array,
-                    _islandAirdrops[i].startTime,
-                    _islandAirdrops[i].endTime,
-                    _islandAirdrops[i].airdropConfig,
-                    _islandAirdrops[i].status,
-                    _islandAirdrops[i].fromAddress,
-                    _islandAirdrops[i].intervalTime,
-                    _islandAirdrops[i].name
-                );
-            }
-        }
-        revert("not found");
-    }
+        string memory _name = mossaiStorage.getString(
+            mossaiStorage.genKey("name", id)
+        );
 
-    function getIslandAirdropObj(
-        uint256 id
-    ) public view returns (IslandAirdrop memory, uint256 index) {
-        for (uint i = 0; i < _islandAirdrops.length; i++) {
-            if (_islandAirdrops[i].id == id) {
-                return (_islandAirdrops[i], i);
-            }
-        }
-        revert("not found");
+        require(bytes(_name).length > 0, "not found");
+
+        uint256[] memory uint256Array = new uint256[](9);
+        uint256Array[0] = id;
+        uint256Array[1] = mossaiStorage.getUint(
+            mossaiStorage.genKey("totalAmount", id)
+        );
+        uint256Array[2] = mossaiStorage.getUint(
+            mossaiStorage.genKey("releaseAmount", id)
+        );
+
+        uint256Array[3] = mossaiStorage.getUint(
+            mossaiStorage.genKey("minRandomAmount", id)
+        );
+
+        uint256Array[4] = mossaiStorage.getUint(
+            mossaiStorage.genKey("maxRandomAmount", id)
+        );
+
+        uint256Array[5] = mossaiStorage.getUint(
+            mossaiStorage.genKey("islandId", id)
+        );
+
+        uint256Array[6] = mossaiStorage.getUint(
+            mossaiStorage.genKey("startTime", id)
+        );
+
+        uint256Array[7] = mossaiStorage.getUint(
+            mossaiStorage.genKey("endTime", id)
+        );
+
+        uint256Array[8] = mossaiStorage.getUint(
+            mossaiStorage.genKey("intervalTime", id)
+        );
+
+        return (
+            uint256Array,
+            mossaiStorage.getString(mossaiStorage.genKey("airdropConfig", id)),
+            mossaiStorage.getBytes1(mossaiStorage.genKey("status", id)),
+            mossaiStorage.getAddress(mossaiStorage.genKey("fromAddress", id)),
+            _name
+        );
     }
 
     function receiveAirdrop(uint256 id) public {
-        uint256 lastTime = _lastReleaseTimeMap[msg.sender];
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
-        (
-            IslandAirdrop memory islandAirdrop,
-            uint256 index
-        ) = getIslandAirdropObj(id);
-
-        require(
-            islandAirdrop.status == 0x01,
-            "island airdrop status is not open"
+        string memory _name = mossaiStorage.getString(
+            mossaiStorage.genKey("name", id)
         );
 
+        require(bytes(_name).length > 0, "not found");
+
+        string memory lastReleaseTimeKey = string(
+            abi.encodePacked("lastReleaseTime_", msg.sender.toHexString())
+        );
+
+        uint256 lastTime = mossaiStorage.getUint(lastReleaseTimeKey);
+
+        bytes1 status = mossaiStorage.getBytes1(
+            mossaiStorage.genKey("status", id)
+        );
+
+        require(status == 0x01, "island airdrop status is not open");
+
         uint256 timestamp = block.timestamp;
+
+        uint256 startTime = mossaiStorage.getUint(
+            mossaiStorage.genKey("startTime", id)
+        );
+
+        uint256 endTime = mossaiStorage.getUint(
+            mossaiStorage.genKey("endTime", id)
+        );
+
         require(
-            timestamp >= islandAirdrop.startTime &&
-                timestamp < islandAirdrop.endTime,
+            timestamp >= startTime && timestamp < endTime,
             "Temporary Closed"
         );
 
+        uint256 intervalTime = mossaiStorage.getUint(
+            mossaiStorage.genKey("intervalTime", id)
+        );
+
         require(
-            timestamp - lastTime >= islandAirdrop.intervalTime,
+            timestamp - lastTime >= intervalTime,
             "Waiting for the next round drop."
         );
 
-        uint256 randomAmount = _getRandom(
-            islandAirdrop.minRandomAmount,
-            islandAirdrop.maxRandomAmount
+        uint256 minRandomAmount = mossaiStorage.getUint(
+            mossaiStorage.genKey("minRandomAmount", id)
         );
 
-        uint256 releaseAmount = islandAirdrop.releaseAmount + randomAmount;
+        uint256 maxRandomAmount = mossaiStorage.getUint(
+            mossaiStorage.genKey("maxRandomAmount", id)
+        );
+
+        uint256 releaseAmount = mossaiStorage.getUint(
+            mossaiStorage.genKey("releaseAmount", id)
+        );
+
+        uint256 totalAmount = mossaiStorage.getUint(
+            mossaiStorage.genKey("totalAmount", id)
+        );
+
+        uint256 randomAmount = _getRandom(minRandomAmount, maxRandomAmount);
+
+        releaseAmount = releaseAmount + randomAmount;
 
         require(
-            releaseAmount <= islandAirdrop.totalAmount,
+            releaseAmount <= totalAmount,
             "This airdrop zone reached its limit."
         );
 
+        address fromAddress = mossaiStorage.getAddress(
+            mossaiStorage.genKey("fromAddress", id)
+        );
+
         uint256 allowance = IERC20(_erc20Address).allowance(
-            islandAirdrop.fromAddress,
+            fromAddress,
             address(this)
         );
 
         require(allowance >= randomAmount, "Insufficient authorized amount");
 
         IERC20(_erc20Address).transferFrom(
-            islandAirdrop.fromAddress,
+            fromAddress,
             msg.sender,
             randomAmount
         );
 
-        _islandAirdrops[index].releaseAmount = releaseAmount;
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("releaseAmount", id),
+            releaseAmount
+        );
 
-        _lastReleaseTimeMap[msg.sender] = timestamp;
+        mossaiStorage.setUint(lastReleaseTimeKey, timestamp);
 
         emit eveReceiveAirdrop(id, msg.sender, randomAmount);
 
@@ -348,40 +449,54 @@ contract Hyperdust_Island_Airdrop is Ownable {
     }
 
     function withdraw(uint256 id, uint256 amount) public {
-        (
-            IslandAirdrop memory islandAirdrop,
-            uint256 index
-        ) = getIslandAirdropObj(id);
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+        string memory _name = mossaiStorage.getString(
+            mossaiStorage.genKey("name", id)
+        );
+
+        require(bytes(_name).length > 0, "not found");
+
+        uint256 islandId = mossaiStorage.getUint(
+            mossaiStorage.genKey("islandId", id)
+        );
 
         (, , , , , , , , uint32 seed, ) = IMOSSAIIsland(_MOSSAIIslandAddress)
-            .getIsland(islandAirdrop.islandId);
+            .getIsland(islandId);
 
         address seedOwer = IMOSSAIIslandNFG(_MOSSAIIslandNFGAddress)
             .getSeedOwer(seed);
 
         require(msg.sender == seedOwer, "not island ower");
 
-        uint256 releaseAmount = islandAirdrop.releaseAmount + amount;
+        uint256 releaseAmount = mossaiStorage.getUint(
+            mossaiStorage.genKey("releaseAmount", id)
+        );
 
-        require(
-            releaseAmount <= islandAirdrop.totalAmount,
-            "release amount is not enough"
+        uint256 totalAmount = mossaiStorage.getUint(
+            mossaiStorage.genKey("totalAmount", id)
+        );
+
+        releaseAmount = releaseAmount + amount;
+
+        require(releaseAmount <= totalAmount, "release amount is not enough");
+
+        address fromAddress = mossaiStorage.getAddress(
+            mossaiStorage.genKey("fromAddress", id)
         );
 
         uint256 allowance = IERC20(_erc20Address).allowance(
-            islandAirdrop.fromAddress,
+            fromAddress,
             address(this)
         );
 
         require(allowance >= amount, "Insufficient authorized amount");
 
-        IERC20(_erc20Address).transferFrom(
-            islandAirdrop.fromAddress,
-            msg.sender,
-            amount
-        );
+        IERC20(_erc20Address).transferFrom(fromAddress, msg.sender, amount);
 
-        _islandAirdrops[index].releaseAmount = releaseAmount;
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("releaseAmount", id),
+            releaseAmount
+        );
 
         emit eveReceiveAirdrop(id, msg.sender, amount);
 

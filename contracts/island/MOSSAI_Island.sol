@@ -2,26 +2,14 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "../utils/StrUtil.sol";
 import "./MOSSAI_Island_Map.sol";
 import "../MOSSAI_Roles_Cfg.sol";
-
-abstract contract INFG {
-    function mint(address to, uint32 location) public returns (uint32) {}
-
-    function getSeedOwer(uint32 seed) public view returns (address) {}
-}
-
-abstract contract IIslandFactory {
-    function deploy(
-        address account,
-        address islandAssetsCfgAddress
-    ) public returns (address) {}
-}
+import "../MOSSAI_Storage.sol";
 
 abstract contract OldMOSSAIIsland {
     function getIsland(
@@ -39,13 +27,26 @@ abstract contract OldMOSSAIIsland {
             address,
             uint256,
             uint32,
-            bytes32
+            bytes32,
+            string memory
         )
     {}
 }
 
-contract MOSSAI_Island is Ownable {
-    Counters.Counter private _index;
+abstract contract INFG {
+    function mint(address to, uint32 location) public returns (uint32) {}
+
+    function getSeedOwer(uint32 seed) public view returns (address) {}
+}
+
+abstract contract IIslandFactory {
+    function deploy(
+        address account,
+        address islandAssetsCfgAddress
+    ) public returns (address) {}
+}
+
+contract MOSSAI_Island is OwnableUpgradeable {
     address public _MOSSAIRolesCfgAddress;
     address public _islandNFGAddress;
     address public _MOSSAIIslandMapAddress;
@@ -54,38 +55,20 @@ contract MOSSAI_Island is Ownable {
     address public _islandAssetsCfgAddress;
     address public _HyperdustRolesCfgAddress;
     address public _OldMOSSAIIslandAddress;
-
-    using Counters for Counters.Counter;
-    Counters.Counter private _id;
+    address public _MOSSAIStorageAddress;
 
     using Strings for *;
     using StrUtil for *;
-
-    Island[] public _islands;
-
-    mapping(uint32 => bool) public _coordinateExists;
-
-    mapping(bytes32 => bool) public hashExists;
 
     string public defCoverImage;
     string public defFile;
     string public fileHash;
 
-    struct Island {
-        uint256 id;
-        string name;
-        string coverImage;
-        string file;
-        string fileHash;
-        address erc721Address;
-        address erc1155Address;
-        uint32 coordinate;
-        uint32 seed;
-        bytes32 sid;
-        string scenesData;
-    }
-
     event eveSaveIsland(uint256 id);
+
+    function initialize() public initializer {
+        __Ownable_init(msg.sender);
+    }
 
     function setDefParameter(
         string memory _defCoverImage,
@@ -143,6 +126,12 @@ contract MOSSAI_Island is Ownable {
         _OldMOSSAIIslandAddress = OldMOSSAIIslandAddress;
     }
 
+    function setMOSSAIStorageAddress(
+        address MOSSAIStorageAddress
+    ) public onlyOwner {
+        _MOSSAIStorageAddress = MOSSAIStorageAddress;
+    }
+
     function setContractAddress(
         address[] memory contractaddressArray
     ) public onlyOwner {
@@ -154,6 +143,7 @@ contract MOSSAI_Island is Ownable {
         _islandAssetsCfgAddress = contractaddressArray[5];
         _HyperdustRolesCfgAddress = contractaddressArray[6];
         _OldMOSSAIIslandAddress = contractaddressArray[7];
+        _MOSSAIStorageAddress = contractaddressArray[8];
     }
 
     function mint(uint32 coordinate, address owner) public {
@@ -162,9 +152,20 @@ contract MOSSAI_Island is Ownable {
             "not admin role"
         );
 
-        require(!_coordinateExists[coordinate], "Location has been cast");
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
-        _coordinateExists[coordinate] = true;
+        string memory key = string(
+            abi.encodePacked("coordinate_", coordinate.toString())
+        );
+
+        require(
+            !mossaiStorage.getBool(key),
+            coordinate.toString().toSlice().concat(
+                " coordinate already exists".toSlice()
+            )
+        );
+
+        mossaiStorage.setBool(key, true);
 
         MOSSAI_Island_Map(_MOSSAIIslandMapAddress).updateMintStatus(
             coordinate,
@@ -184,29 +185,42 @@ contract MOSSAI_Island is Ownable {
             island1155Address
         );
 
-        bytes32 sid = generateHash(
-            (block.timestamp + _index.current()).toString()
+        uint256 id = mossaiStorage.getNextId();
+
+        bytes32 sid = generateHash((block.timestamp + id).toString());
+
+        mossaiStorage.setString(
+            mossaiStorage.genKey("name", id),
+            owner.toHexString()
         );
 
-        _index.increment();
+        mossaiStorage.setString(
+            mossaiStorage.genKey("coverImage", id),
+            defCoverImage
+        );
 
-        Island memory island = Island({
-            id: _index.current(),
-            name: owner.toHexString(),
-            coverImage: defCoverImage,
-            file: defFile,
-            fileHash: fileHash,
-            erc721Address: island721Address,
-            erc1155Address: island1155Address,
-            coordinate: coordinate,
-            seed: seed,
-            sid: sid,
-            scenesData: ""
-        });
+        mossaiStorage.setString(mossaiStorage.genKey("file", id), defFile);
+        mossaiStorage.setString(mossaiStorage.genKey("fileHash", id), fileHash);
 
-        _islands.push(island);
+        mossaiStorage.setAddress(
+            mossaiStorage.genKey("erc721Address", id),
+            island721Address
+        );
 
-        emit eveSaveIsland(_index.current());
+        mossaiStorage.setAddress(
+            mossaiStorage.genKey("erc1155Address", id),
+            island1155Address
+        );
+
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("coordinate", id),
+            coordinate
+        );
+
+        mossaiStorage.setUint(mossaiStorage.genKey("seed", id), seed);
+        mossaiStorage.setBytes32(mossaiStorage.genKey("sid", id), sid);
+
+        emit eveSaveIsland(id);
     }
 
     function update(
@@ -217,32 +231,63 @@ contract MOSSAI_Island is Ownable {
         string memory fileHash,
         string memory scenesData
     ) public {
-        for (uint256 i = 0; i < _islands.length; i++) {
-            if (_islands[i].id == id) {
-                address owner = INFG(_islandNFGAddress).getSeedOwer(
-                    _islands[i].seed
-                );
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+        string memory _name = mossaiStorage.getString(
+            mossaiStorage.genKey("name", id)
+        );
 
-                require(owner == msg.sender, "not owner");
+        require(bytes(_name).length > 0, "not found");
 
-                _islands[i].name = name;
-                _islands[i].coverImage = coverImage;
-                _islands[i].file = file;
-                _islands[i].fileHash = fileHash;
-                _islands[i].scenesData = scenesData;
+        uint256 seed = mossaiStorage.getUint(mossaiStorage.genKey("seed", id));
 
-                emit eveSaveIsland(id);
-                return;
-            }
-        }
-        revert("island does not exist");
+        address owner = INFG(_islandNFGAddress).getSeedOwer(uint32(seed));
+
+        require(owner == msg.sender, "not owner");
+
+        mossaiStorage.setString(mossaiStorage.genKey("name", id), name);
+        mossaiStorage.setString(
+            mossaiStorage.genKey("coverImage", id),
+            coverImage
+        );
+
+        mossaiStorage.setString(mossaiStorage.genKey("file", id), file);
+        mossaiStorage.setString(mossaiStorage.genKey("fileHash", id), fileHash);
+        mossaiStorage.setString(
+            mossaiStorage.genKey("scenesData", id),
+            scenesData
+        );
+
+        emit eveSaveIsland(id);
     }
 
     function generateHash(string memory input) public returns (bytes32) {
         bytes32 hash = keccak256(abi.encodePacked(input));
-        require(!hashExists[hash], "Hash already exists");
-        hashExists[hash] = true;
+
+        string memory hashStr = bytes32ToString(hash);
+
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+
+        bool hashExists = mossaiStorage.getBool(hashStr);
+
+        require(!hashExists, "Hash already exists");
+
+        mossaiStorage.setBool(hashStr, true);
+
         return hash;
+    }
+
+    function bytes32ToString(
+        bytes32 _bytes32
+    ) public pure returns (string memory) {
+        uint8 i = 0;
+        while (i < 32 && _bytes32[i] != 0) {
+            i++;
+        }
+        bytes memory bytesArray = new bytes(i);
+        for (i = 0; i < 32 && _bytes32[i] != 0; i++) {
+            bytesArray[i] = _bytes32[i];
+        }
+        return string(bytesArray);
     }
 
     function getIsland(
@@ -259,35 +304,47 @@ contract MOSSAI_Island is Ownable {
             address,
             address,
             uint256,
-            uint32,
+            uint256,
             bytes32,
             string memory scenesData
         )
     {
-        for (uint i = 0; i < _islands.length; i++) {
-            if (_islands[i].id == islandId) {
-                return (
-                    _islands[i].id,
-                    _islands[i].name,
-                    _islands[i].coverImage,
-                    _islands[i].file,
-                    _islands[i].fileHash,
-                    _islands[i].erc721Address,
-                    _islands[i].erc1155Address,
-                    _islands[i].coordinate,
-                    _islands[i].seed,
-                    _islands[i].sid,
-                    _islands[i].scenesData
-                );
-            }
-        }
-        revert("not found");
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+        string memory _name = mossaiStorage.getString(
+            mossaiStorage.genKey("name", islandId)
+        );
+
+        require(bytes(_name).length > 0, "not found");
+
+        return (
+            islandId,
+            _name,
+            mossaiStorage.getString(
+                mossaiStorage.genKey("coverImage", islandId)
+            ),
+            mossaiStorage.getString(mossaiStorage.genKey("file", islandId)),
+            mossaiStorage.getString(mossaiStorage.genKey("fileHash", islandId)),
+            mossaiStorage.getAddress(
+                mossaiStorage.genKey("erc721Address", islandId)
+            ),
+            mossaiStorage.getAddress(
+                mossaiStorage.genKey("erc1155Address", islandId)
+            ),
+            mossaiStorage.getUint(mossaiStorage.genKey("coordinate", islandId)),
+            mossaiStorage.getUint(mossaiStorage.genKey("seed", islandId)),
+            mossaiStorage.getBytes32(mossaiStorage.genKey("sid", islandId)),
+            mossaiStorage.getString(
+                mossaiStorage.genKey("scenesData", islandId)
+            )
+        );
     }
 
     function migration(uint256 start, uint256 end) public onlyOwner {
         OldMOSSAIIsland oldMOSSAIIsland = OldMOSSAIIsland(
             _OldMOSSAIIslandAddress
         );
+
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
         for (uint256 i = start; i <= end; i++) {
             (
@@ -300,29 +357,69 @@ contract MOSSAI_Island is Ownable {
                 address erc1155Address,
                 uint256 coordinate,
                 uint32 seed,
-                bytes32 sid
+                bytes32 sid,
+                string memory scenesData
             ) = oldMOSSAIIsland.getIsland(i);
 
-            _islands.push(
-                Island({
-                    id: id,
-                    name: name,
-                    coverImage: coverImage,
-                    file: file,
-                    fileHash: fileHash,
-                    erc721Address: erc721Address,
-                    erc1155Address: erc1155Address,
-                    coordinate: uint32(coordinate),
-                    seed: seed,
-                    sid: sid,
-                    scenesData: ""
-                })
+            string memory key = string(
+                abi.encodePacked("coordinate_", coordinate.toString())
             );
 
-            _index.increment();
+            require(
+                !mossaiStorage.getBool(key),
+                coordinate.toString().toSlice().concat(
+                    " coordinate already exists".toSlice()
+                )
+            );
 
-            _coordinateExists[uint32(coordinate)] = true;
-            hashExists[sid] = true;
+            mossaiStorage.setBool(key, true);
+
+            string memory hashStr = bytes32ToString(sid);
+
+            mossaiStorage.setBool(hashStr, true);
+
+            MOSSAI_Island_Map(_MOSSAIIslandMapAddress).updateMintStatus(
+                uint32(coordinate),
+                true
+            );
+
+            mossaiStorage.getNextId();
+
+            mossaiStorage.setString(mossaiStorage.genKey("name", id), name);
+
+            mossaiStorage.setString(
+                mossaiStorage.genKey("coverImage", id),
+                defCoverImage
+            );
+
+            mossaiStorage.setString(mossaiStorage.genKey("file", id), defFile);
+            mossaiStorage.setString(
+                mossaiStorage.genKey("fileHash", id),
+                fileHash
+            );
+
+            mossaiStorage.setAddress(
+                mossaiStorage.genKey("erc721Address", id),
+                erc721Address
+            );
+
+            mossaiStorage.setAddress(
+                mossaiStorage.genKey("erc1155Address", id),
+                erc1155Address
+            );
+
+            mossaiStorage.setUint(
+                mossaiStorage.genKey("coordinate", id),
+                coordinate
+            );
+
+            mossaiStorage.setUint(mossaiStorage.genKey("seed", id), seed);
+            mossaiStorage.setBytes32(mossaiStorage.genKey("sid", id), sid);
+
+            mossaiStorage.setString(
+                mossaiStorage.genKey("scenesData", id),
+                scenesData
+            );
         }
     }
 }

@@ -2,13 +2,13 @@ pragma solidity ^0.8.0;
 import "./MOSSAI_Island.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-
-import "@openzeppelin/contracts/utils/Counters.sol";
-
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 abstract contract IWalletAccount {
     function addAmount(uint256 amount) public {}
@@ -18,12 +18,16 @@ abstract contract IHyperdustTransactionCfg {
     function getGasFee(string memory func) public view returns (uint256) {}
 }
 
-contract MOSSAI_Free_Island_Mint is Ownable {
+contract MOSSAI_Free_Island_Mint is OwnableUpgradeable {
     address public _MOSSAIIslandAddres;
     address public _WalletAccountAddress;
     address public _HyperdustTransactionCfgAddress;
     address public _erc20Address;
     address public _MOSSAIIslandNFGAddress;
+
+    function initialize() public initializer {
+        __Ownable_init(msg.sender);
+    }
 
     function setMOSSAIIslandAddres(
         address MOSSAIIslandAddres

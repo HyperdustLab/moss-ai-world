@@ -1,20 +1,39 @@
 /** @format */
 
-import { ethers, run } from "hardhat";
+import { ethers, run, upgrades } from "hardhat";
 
 async function main() {
-    const contract = await ethers.deployContract("Hyperdust_Island_Airdrop");
-    await contract.waitForDeployment()
-    console.info("contractFactory address:", contract.target);
 
 
-    await (await contract.setContractAddress([
-        "0xd5A7E4eFb8Ae98aadE6d0078B3FeCf06c44c55Ae",
+
+
+    const MOSSAI_Storage = await ethers.deployContract("MOSSAI_Storage");
+    await MOSSAI_Storage.waitForDeployment()
+
+
+
+    const contract = await ethers.getContractFactory("Hyperdust_Island_Airdrop");
+    const instance = await upgrades.deployProxy(contract);
+    await instance.waitForDeployment();
+
+    console.info("Hyperdust_Storage:", MOSSAI_Storage.target)
+
+
+    await (await MOSSAI_Storage.setServiceAddress(instance.target)).wait()
+
+
+
+
+    await (await instance.setContractAddress([
+        "0x9bDaf3912e7b4794fE8aF2E748C35898265D5615",
         "0x1a41f86248E33e5327B26092b898bDfe04C6d8b4",
-        "0x5d0aD674F5f6682fd6f23D581aE90e9968436392",
-        "0xba09e4f4A54f3dB674C7B1fa729F4986F59FAFB8"
+        "0x3Bf13fA640240D50298D21240c8B48eF01418384",
+        "0xba09e4f4A54f3dB674C7B1fa729F4986F59FAFB8",
+        MOSSAI_Storage.target
     ])).wait()
 
+
+    console.info("contractFactory address:", instance.target);
 
 
 
