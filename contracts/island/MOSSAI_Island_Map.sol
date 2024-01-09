@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "../utils/StrUtil.sol";
-import "../MOSSAI_Roles_Cfg.sol";
+import "../Hyperdust_Roles_Cfg.sol";
 import "../MOSSAI_Storage.sol";
 
 contract MOSSAI_Island_Map is OwnableUpgradeable {
@@ -57,7 +57,9 @@ contract MOSSAI_Island_Map is OwnableUpgradeable {
 
     function batchAdd(uint256[] memory coordinates) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 
@@ -82,7 +84,9 @@ contract MOSSAI_Island_Map is OwnableUpgradeable {
 
     function batchDel(uint256[] memory coordinates) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 
@@ -94,7 +98,9 @@ contract MOSSAI_Island_Map is OwnableUpgradeable {
 
     function updateMintStatus(uint32 coordinate, bool isMint) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 

@@ -13,7 +13,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "./utils/StrUtil.sol";
-import "./MOSSAI_Roles_Cfg.sol";
+import "./Hyperdust_Roles_Cfg.sol";
 import "./MOSSAI_Storage.sol";
 
 abstract contract IWalletAccount {
@@ -131,7 +131,9 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
         uint256 allowNum
     ) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 
@@ -180,7 +182,9 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
         uint256 allowNum
     ) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 
@@ -263,7 +267,9 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
      */
     function deleteMintInfo(uint256 id) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 

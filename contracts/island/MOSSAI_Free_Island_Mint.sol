@@ -1,14 +1,19 @@
 pragma solidity ^0.8.0;
-import "./MOSSAI_Island.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
+import "@openzeppelin/contracts/utils/Strings.sol";
+
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
+import "./MOSSAI_Island.sol";
+
+import "../utils/StrUtil.sol";
 
 abstract contract IWalletAccount {
     function addAmount(uint256 amount) public {}
@@ -19,6 +24,9 @@ abstract contract IHyperdustTransactionCfg {
 }
 
 contract MOSSAI_Free_Island_Mint is OwnableUpgradeable {
+    using Strings for *;
+    using StrUtil for *;
+
     address public _MOSSAIIslandAddres;
     address public _WalletAccountAddress;
     address public _HyperdustTransactionCfgAddress;
@@ -52,9 +60,9 @@ contract MOSSAI_Free_Island_Mint is OwnableUpgradeable {
     }
 
     function setMOSSAIIslandNFGAddress(
-        address _MOSSAIIslandNFGAddress
+        address MOSSAIIslandNFGAddress
     ) public onlyOwner {
-        _MOSSAIIslandNFGAddress = _MOSSAIIslandNFGAddress;
+        _MOSSAIIslandNFGAddress = MOSSAIIslandNFGAddress;
     }
 
     function setContractAddress(
@@ -67,7 +75,11 @@ contract MOSSAI_Free_Island_Mint is OwnableUpgradeable {
         _MOSSAIIslandNFGAddress = contractaddressArray[4];
     }
 
-    function mintIsland(uint32 coordinate) public {
+    function mintIsland(
+        uint32 coordinate,
+        string[] memory names,
+        string[] memory symbols
+    ) public {
         uint256 balance = IERC721(_MOSSAIIslandNFGAddress).balanceOf(
             msg.sender
         );
@@ -95,6 +107,11 @@ contract MOSSAI_Free_Island_Mint is OwnableUpgradeable {
 
         walletAccountAddress.addAmount(mintIslandAmount);
 
-        MOSSAI_Island(_MOSSAIIslandAddres).mint(coordinate, msg.sender);
+        MOSSAI_Island(_MOSSAIIslandAddres).mint(
+            coordinate,
+            msg.sender,
+            names,
+            symbols
+        );
     }
 }

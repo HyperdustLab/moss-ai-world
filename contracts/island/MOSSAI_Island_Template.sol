@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "../utils/StrUtil.sol";
-import "../MOSSAI_Roles_Cfg.sol";
+import "../Hyperdust_Roles_Cfg.sol";
 import "../MOSSAI_Storage.sol";
 
 contract MOSSAI_Island_Template is OwnableUpgradeable {
@@ -45,7 +45,9 @@ contract MOSSAI_Island_Template is OwnableUpgradeable {
         string memory fileHash
     ) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 
@@ -73,7 +75,9 @@ contract MOSSAI_Island_Template is OwnableUpgradeable {
         string memory fileHash
     ) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 
@@ -99,7 +103,9 @@ contract MOSSAI_Island_Template is OwnableUpgradeable {
 
     function deleteIslandTemplate(uint256 id) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 

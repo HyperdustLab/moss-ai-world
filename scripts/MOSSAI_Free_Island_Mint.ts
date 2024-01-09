@@ -13,11 +13,11 @@ async function main() {
 
 
     await (await instance.setContractAddress([
-        "0x3Bf13fA640240D50298D21240c8B48eF01418384",
-        "0xcA19Ba81bdF2d9d1a4EBEba09598265195821982",
-        "0xfbdB6d8B4e47c0d546eE0f721BF2EBfE55136E53",
+        "0x5197De6b2353d4720e08992c938eeb44E4F83206",
+        "0x3812D0341D721F66698228B0b10De0396117499e",
+        "0x7C94D4145c2d2ad2712B496DF6C27EEA5E0252C2",
         "0x1a41f86248E33e5327B26092b898bDfe04C6d8b4",
-        "0xba09e4f4A54f3dB674C7B1fa729F4986F59FAFB8"
+        "0xD11F65E5A55Cd7CA459a659734951901c8E57D30"
     ])).wait()
 
     console.info("contractFactory address:", instance.target);

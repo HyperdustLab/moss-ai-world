@@ -1,11 +1,13 @@
 /** @format */
 
-import { ethers, run } from "hardhat";
+import { ethers, run, upgrades } from "hardhat";
 
 async function main() {
-    const contract = await ethers.deployContract("Island1155Factory");
-    await contract.waitForDeployment()
-    console.info("contractFactory address:", contract.target);
+
+    const contract = await ethers.getContractFactory("Island1155Factory");
+    const instance = await upgrades.deployProxy(contract);
+
+    console.info("contractFactory address:", instance.target);
 }
 
 // We recommend this pattern to be able to use async/await everywhere q

@@ -6,7 +6,7 @@ import { ethers, run } from "hardhat";
 async function main() {
 
 
-    const MOSSAI_Island_NFG = await ethers.getContractAt("MOSSAI_Island_NFG", "0xc31b08A89c94fa26f9C3eF1eDC65c84e6F5ce411");
+    const MOSSAI_Island_NFG = await ethers.getContractAt("MOSSAI_Island_NFG", "0xC31A364A09c85319cFAc88Bb3F8F0dB874acBeFA");
 
 
     let seeds = []

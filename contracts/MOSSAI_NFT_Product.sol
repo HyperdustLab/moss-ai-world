@@ -10,7 +10,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "./utils/StrUtil.sol";
-import "./MOSSAI_Roles_Cfg.sol";
+import "./Hyperdust_Roles_Cfg.sol";
 
 import "./MOSSAI_Storage.sol";
 
@@ -201,7 +201,9 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
 
     function addSellNum(uint256 id, uint256 num) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 

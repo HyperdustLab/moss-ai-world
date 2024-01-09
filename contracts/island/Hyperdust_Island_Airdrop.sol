@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "../utils/StrUtil.sol";
-import "../MOSSAI_Roles_Cfg.sol";
+import "../Hyperdust_Roles_Cfg.sol";
 import "../MOSSAI_Storage.sol";
 
 abstract contract IMOSSAIIsland {
@@ -109,7 +109,9 @@ contract Hyperdust_Island_Airdrop is OwnableUpgradeable {
         uint256 intervalTime
     ) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 
@@ -179,7 +181,9 @@ contract Hyperdust_Island_Airdrop is OwnableUpgradeable {
         uint256 islandId
     ) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 
@@ -241,7 +245,9 @@ contract Hyperdust_Island_Airdrop is OwnableUpgradeable {
 
     function deleteIslandAirdrop(uint256 id) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 
@@ -269,7 +275,9 @@ contract Hyperdust_Island_Airdrop is OwnableUpgradeable {
 
     function updateStatus(uint256 id, bytes1 status) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 

@@ -15,28 +15,25 @@ async function main() {
     const instance = await upgrades.deployProxy(contract);
     await instance.waitForDeployment();
 
-
     console.info("Hyperdust_Storage:", MOSSAI_Storage.target)
 
 
     await (await instance.setContractAddress(
-        ["0x9bDaf3912e7b4794fE8aF2E748C35898265D5615",
-            "0xba09e4f4A54f3dB674C7B1fa729F4986F59FAFB8",
-            "0x8F7CD8D1F35459163EEc80034F92958c021aa651",
-            "0x8E2219508F5F6160Ba7cc663262c51E97294A061",
-            "0x920fC5dBBd6740fb996825Eb6729493e97697CA3",
-            "0xcd17a8A93391F90dCc8ba3C2001840723ae5B8C6",
+        [
+            "0xC31A364A09c85319cFAc88Bb3F8F0dB874acBeFA",
+            "0xBb9fa5E512802Ae2AA92A235e5e7c091E366d2ec",
+            "0x92bf83aF19DE8bbBfC50dD96196668569D0C779a",
+            "0x81cD3746573C5b6121d19b285D32D7233aEcB11b",
             "0x9bDaf3912e7b4794fE8aF2E748C35898265D5615",
-            "0xC955884cbED1DCdf726Dd6CF22AE643273690F2d",
-            MOSSAI_Storage.target
-
+            "0xcd17a8A93391F90dCc8ba3C2001840723ae5B8C6",
+            MOSSAI_Storage.target,
+            "0xed8069499F24e24101b04cdf5A740e6BEED825B1",
         ])).wait();
 
-    const MOSSAI_Roles_Cfg = await ethers.getContractAt("MOSSAI_Roles_Cfg", "0x9bDaf3912e7b4794fE8aF2E748C35898265D5615")
+
+    const MOSSAI_Roles_Cfg = await ethers.getContractAt("Hyperdust_Roles_Cfg", "0x9bDaf3912e7b4794fE8aF2E748C35898265D5615")
 
     await (await MOSSAI_Roles_Cfg.addAdmin(instance.target)).wait()
-
-    await (await MOSSAI_Roles_Cfg.addSuperAdmin(instance.target)).wait()
 
     await (await MOSSAI_Storage.setServiceAddress(instance.target)).wait()
 
@@ -50,16 +47,17 @@ async function main() {
     ).wait();
 
 
-    // const MOSSAI_Free_Island_Mint = await ethers.getContractAt("MOSSAI_Free_Island_Mint", "0x05eFb34F7F6E2c122ca6Da77257120FB6C9181D6")
+    const Island_Mint = await ethers.getContractAt("Island_Mint", "0xed8069499F24e24101b04cdf5A740e6BEED825B1")
 
-    // await (await MOSSAI_Free_Island_Mint.setMOSSAIIslandAddres(contract.target)).wait()
+
+    await (await Island_Mint.setMOSSAIIslandAddres(instance.target)).wait()
 
     console.info("contractFactory address:", instance.target);
-
 
 }
 
 // We recommend this pattern to be able to use async/await everywhere q
+
 // and properly handle errors.
 main().catch((error) => {
     console.error(error);

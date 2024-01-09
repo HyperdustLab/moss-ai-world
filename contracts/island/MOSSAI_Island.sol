@@ -8,8 +8,12 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "../utils/StrUtil.sol";
 import "./MOSSAI_Island_Map.sol";
-import "../MOSSAI_Roles_Cfg.sol";
+import "../Hyperdust_Roles_Cfg.sol";
 import "../MOSSAI_Storage.sol";
+import "./MOSSAI_Island_NFG.sol";
+
+import "@openzeppelin/contracts/utils/Strings.sol";
+import "../utils/StrUtil.sol";
 
 abstract contract OldMOSSAIIsland {
     function getIsland(
@@ -33,32 +37,26 @@ abstract contract OldMOSSAIIsland {
     {}
 }
 
-abstract contract INFG {
-    function mint(address to, uint32 location) public returns (uint32) {}
-
-    function getSeedOwer(uint32 seed) public view returns (address) {}
-}
-
 abstract contract IIslandFactory {
     function deploy(
         address account,
-        address islandAssetsCfgAddress
+        string memory name,
+        string memory symbol
     ) public returns (address) {}
 }
 
 contract MOSSAI_Island is OwnableUpgradeable {
-    address public _MOSSAIRolesCfgAddress;
+    using Strings for *;
+    using StrUtil for *;
+
     address public _islandNFGAddress;
     address public _MOSSAIIslandMapAddress;
     address public _island721FactoryAddress;
     address public _island1155FactoryAddress;
-    address public _islandAssetsCfgAddress;
     address public _HyperdustRolesCfgAddress;
     address public _OldMOSSAIIslandAddress;
     address public _MOSSAIStorageAddress;
-
-    using Strings for *;
-    using StrUtil for *;
+    address public _IslandMintAddress;
 
     string public defCoverImage;
     string public defFile;
@@ -78,12 +76,6 @@ contract MOSSAI_Island is OwnableUpgradeable {
         defCoverImage = _defCoverImage;
         defFile = _defFile;
         fileHash = _fileHash;
-    }
-
-    function setMOSSAIRolesCfgAddress(
-        address MOSSAIRolesCfgAddress
-    ) public onlyOwner {
-        _MOSSAIRolesCfgAddress = MOSSAIRolesCfgAddress;
     }
 
     function setIslandNFGAddress(address islandNFGAddress) public onlyOwner {
@@ -108,12 +100,6 @@ contract MOSSAI_Island is OwnableUpgradeable {
         _island1155FactoryAddress = island1155FactoryAddress;
     }
 
-    function setIslandAssetsCfgAddress(
-        address islandAssetsCfgAddress
-    ) public onlyOwner {
-        _islandAssetsCfgAddress = islandAssetsCfgAddress;
-    }
-
     function setHyperdustRolesCfgAddress(
         address HyperdustRolesCfgAddress
     ) public onlyOwner {
@@ -132,23 +118,33 @@ contract MOSSAI_Island is OwnableUpgradeable {
         _MOSSAIStorageAddress = MOSSAIStorageAddress;
     }
 
+    function setIslandMintAddress(address IslandMintAddress) public onlyOwner {
+        _IslandMintAddress = IslandMintAddress;
+    }
+
     function setContractAddress(
         address[] memory contractaddressArray
     ) public onlyOwner {
-        _MOSSAIRolesCfgAddress = contractaddressArray[0];
-        _islandNFGAddress = contractaddressArray[1];
-        _MOSSAIIslandMapAddress = contractaddressArray[2];
-        _island721FactoryAddress = contractaddressArray[3];
-        _island1155FactoryAddress = contractaddressArray[4];
-        _islandAssetsCfgAddress = contractaddressArray[5];
-        _HyperdustRolesCfgAddress = contractaddressArray[6];
-        _OldMOSSAIIslandAddress = contractaddressArray[7];
-        _MOSSAIStorageAddress = contractaddressArray[8];
+        _islandNFGAddress = contractaddressArray[0];
+        _MOSSAIIslandMapAddress = contractaddressArray[1];
+        _island721FactoryAddress = contractaddressArray[2];
+        _island1155FactoryAddress = contractaddressArray[3];
+        _HyperdustRolesCfgAddress = contractaddressArray[4];
+        _OldMOSSAIIslandAddress = contractaddressArray[5];
+        _MOSSAIStorageAddress = contractaddressArray[6];
+        _IslandMintAddress = contractaddressArray[7];
     }
 
-    function mint(uint32 coordinate, address owner) public {
+    function mint(
+        uint32 coordinate,
+        address owner,
+        string[] memory names,
+        string[] memory symbols
+    ) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_HyperdustRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 
@@ -172,18 +168,16 @@ contract MOSSAI_Island is OwnableUpgradeable {
             true
         );
 
-        uint32 seed = INFG(_islandNFGAddress).mint(owner, coordinate);
+        uint256 seed = MOSSAI_Island_NFG(_islandNFGAddress).mint(
+            owner,
+            coordinate
+        );
 
         address island721Address = IIslandFactory(_island721FactoryAddress)
-            .deploy(owner, _islandAssetsCfgAddress);
+            .deploy(_IslandMintAddress, names[0], symbols[0]);
 
         address island1155Address = IIslandFactory(_island1155FactoryAddress)
-            .deploy(owner, _islandAssetsCfgAddress);
-
-        MOSSAI_Roles_Cfg(_HyperdustRolesCfgAddress).addAdmin2(island721Address);
-        MOSSAI_Roles_Cfg(_HyperdustRolesCfgAddress).addAdmin2(
-            island1155Address
-        );
+            .deploy(_IslandMintAddress, names[1], symbols[1]);
 
         uint256 id = mossaiStorage.getNextId();
 
@@ -240,7 +234,9 @@ contract MOSSAI_Island is OwnableUpgradeable {
 
         uint256 seed = mossaiStorage.getUint(mossaiStorage.genKey("seed", id));
 
-        address owner = INFG(_islandNFGAddress).getSeedOwer(uint32(seed));
+        address owner = MOSSAI_Island_NFG(_islandNFGAddress).getSeedOwer(
+            uint32(seed)
+        );
 
         require(owner == msg.sender, "not owner");
 
@@ -306,7 +302,7 @@ contract MOSSAI_Island is OwnableUpgradeable {
             uint256,
             uint256,
             bytes32,
-            string memory scenesData
+            string memory
         )
     {
         MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
@@ -421,5 +417,70 @@ contract MOSSAI_Island is OwnableUpgradeable {
                 scenesData
             );
         }
+    }
+
+    function updateErc721Address(
+        uint256 islandId,
+        string memory name,
+        string memory symbol
+    ) public {
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+        string memory _name = mossaiStorage.getString(
+            mossaiStorage.genKey("name", islandId)
+        );
+        require(bytes(_name).length > 0, "not found");
+
+        uint256 seed = mossaiStorage.getUint(
+            mossaiStorage.genKey("seed", islandId)
+        );
+
+        address owner = MOSSAI_Island_NFG(_islandNFGAddress).getSeedOwer(
+            uint32(seed)
+        );
+
+        require(owner == msg.sender, "not owner");
+
+        address erc721Address = IIslandFactory(_island721FactoryAddress).deploy(
+            _IslandMintAddress,
+            name,
+            symbol
+        );
+
+        mossaiStorage.setAddress(
+            mossaiStorage.genKey("erc721Address", islandId),
+            erc721Address
+        );
+        emit eveSaveIsland(islandId);
+    }
+
+    function updateErc1155Address(
+        uint256 islandId,
+        string memory name,
+        string memory symbol
+    ) public {
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+        string memory _name = mossaiStorage.getString(
+            mossaiStorage.genKey("name", islandId)
+        );
+        require(bytes(_name).length > 0, "not found");
+
+        uint256 seed = mossaiStorage.getUint(
+            mossaiStorage.genKey("seed", islandId)
+        );
+
+        address owner = MOSSAI_Island_NFG(_islandNFGAddress).getSeedOwer(
+            uint32(seed)
+        );
+
+        require(owner == msg.sender, "not owner");
+
+        address erc1155Address = IIslandFactory(_island1155FactoryAddress)
+            .deploy(_IslandMintAddress, name, symbol);
+
+        mossaiStorage.setAddress(
+            mossaiStorage.genKey("erc1155Address", islandId),
+            erc1155Address
+        );
+        emit eveSaveIsland(islandId);
     }
 }

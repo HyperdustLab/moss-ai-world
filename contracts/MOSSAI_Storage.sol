@@ -2,16 +2,15 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-import "@openzeppelin/contracts/utils/Counters.sol";
-
 import "./utils/StrUtil.sol";
 
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract MOSSAI_Storage is Ownable {
+    constructor() Ownable(msg.sender) {}
+
     using Strings for *;
     using StrUtil for *;
-    using Counters for Counters.Counter;
 
     mapping(string => uint256) public uintStorage;
     mapping(string => address) public addressStorage;
@@ -28,7 +27,7 @@ contract MOSSAI_Storage is Ownable {
     mapping(string => bytes[]) public bytesArrayStorage;
     mapping(string => bool[]) public boolArrayStorage;
 
-    Counters.Counter public _id;
+    uint256 public _id;
 
     address public _serviceAddress;
 
@@ -83,8 +82,8 @@ contract MOSSAI_Storage is Ownable {
 
     function getNextId() public returns (uint256) {
         require(msg.sender == _serviceAddress, "only service can set");
-        _id.increment();
-        return _id.current();
+        _id++;
+        return _id;
     }
 
     function setUintArray(
