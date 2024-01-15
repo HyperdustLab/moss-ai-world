@@ -20,6 +20,8 @@ import "./MOSSAI_Storage.sol";
 
 abstract contract IWalletAccount {
     function addAmount(uint256 amount) public {}
+
+    function _GasFeeCollectionWallet() public view returns (address) {}
 }
 
 abstract contract IHyperdustTransactionCfg {
@@ -111,6 +113,18 @@ contract MOSSAI_NFT_Market is OwnableUpgradeable {
      * @param num The number of NFT products to buy.
      */
     function buyNFTProduct(uint256 NFTProductId, uint256 num) public {
+        IWalletAccount walletAccountAddress = IWalletAccount(
+            _walletAccountAddress
+        );
+
+        address _GasFeeCollectionWallet = walletAccountAddress
+            ._GasFeeCollectionWallet();
+
+        require(
+            _GasFeeCollectionWallet != address(0),
+            "not set GasFeeCollectionWallet"
+        );
+
         require(num > 0, "num error");
         require(NFTProductId > 0, "NFTProductId error");
 
@@ -151,9 +165,12 @@ contract MOSSAI_NFT_Market is OwnableUpgradeable {
         require(erc20.balanceOf(msg.sender) >= payAmount, "balance error");
 
         erc20.transferFrom(msg.sender, owner, amount);
-        erc20.transferFrom(msg.sender, _walletAccountAddress, commission);
 
-        IWalletAccount(_walletAccountAddress).addAmount(commission);
+        if (commission > 0) {
+            erc20.transferFrom(msg.sender, _GasFeeCollectionWallet, commission);
+
+            IWalletAccount(_walletAccountAddress).addAmount(commission);
+        }
 
         if (contractType == 0x01) {
             IERC721(contractAddress).safeTransferFrom(

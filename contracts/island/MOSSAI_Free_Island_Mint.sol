@@ -17,6 +17,8 @@ import "../utils/StrUtil.sol";
 
 abstract contract IWalletAccount {
     function addAmount(uint256 amount) public {}
+
+    function _GasFeeCollectionWallet() public view returns (address) {}
 }
 
 abstract contract IHyperdustTransactionCfg {
@@ -80,6 +82,17 @@ contract MOSSAI_Free_Island_Mint is OwnableUpgradeable {
         string[] memory names,
         string[] memory symbols
     ) public {
+        IWalletAccount walletAccountAddress = IWalletAccount(
+            _WalletAccountAddress
+        );
+
+        address _GasFeeCollectionWallet = walletAccountAddress
+            ._GasFeeCollectionWallet();
+        require(
+            _GasFeeCollectionWallet != address(0),
+            "not set GasFeeCollectionWallet"
+        );
+
         uint256 balance = IERC721(_MOSSAIIslandNFGAddress).balanceOf(
             msg.sender
         );
@@ -99,13 +112,15 @@ contract MOSSAI_Free_Island_Mint is OwnableUpgradeable {
 
         require(amount >= mintIslandAmount, "Insufficient authorized amount");
 
-        erc20.transferFrom(msg.sender, _WalletAccountAddress, mintIslandAmount);
+        if (mintIslandAmount > 0) {
+            erc20.transferFrom(
+                msg.sender,
+                _WalletAccountAddress,
+                mintIslandAmount
+            );
 
-        IWalletAccount walletAccountAddress = IWalletAccount(
-            _WalletAccountAddress
-        );
-
-        walletAccountAddress.addAmount(mintIslandAmount);
+            walletAccountAddress.addAmount(mintIslandAmount);
+        }
 
         MOSSAI_Island(_MOSSAIIslandAddres).mint(
             coordinate,

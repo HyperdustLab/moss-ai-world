@@ -18,6 +18,8 @@ import "./MOSSAI_Storage.sol";
 
 abstract contract IWalletAccount {
     function addAmount(uint256 amount) public {}
+
+    function _GasFeeCollectionWallet() public view returns (address) {}
 }
 
 abstract contract IERC721 {
@@ -302,6 +304,14 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
             _walletAccountAddres
         );
 
+        address _GasFeeCollectionWallet = walletAccountAddress
+            ._GasFeeCollectionWallet();
+
+        require(
+            _GasFeeCollectionWallet != address(0),
+            "not set GasFeeCollectionWallet"
+        );
+
         MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
         string memory _tokenURI = mossaiStorage.getString(
@@ -320,10 +330,9 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
             _HyperdustTransactionCfgAddress
         ).getGasFee("mint_mNFT");
 
-        require(
-            amount >= price * num + gasFee,
-            "Insufficient authorized amount"
-        );
+        uint256 payAmount = price * num + gasFee;
+
+        require(amount >= payAmount, "Insufficient authorized amount");
 
         uint256 allowNum = mossaiStorage.getUint(
             mossaiStorage.genKey("allowNum", id)
@@ -335,13 +344,11 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
 
         require(allowNum >= mintNum + num, "Insufficient inventory");
 
-        erc20.transferFrom(
-            msg.sender,
-            _walletAccountAddres,
-            price * num + gasFee
-        );
+        
 
-        walletAccountAddress.addAmount(price * num + gasFee);
+        erc20.transferFrom(msg.sender, _GasFeeCollectionWallet, payAmount);
+
+        walletAccountAddress.addAmount(payAmount);
 
         bytes1 contractType = mossaiStorage.getBytes1(
             mossaiStorage.genKey("contractType", id)
