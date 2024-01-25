@@ -41,8 +41,8 @@ async function main() {
     await (
         await instance.setDefParameter(
             "https://vniverse.s3.ap-east-1.amazonaws.com/upload/2023/8/10/13e02181-24b5-4e41-8481-4d7bb4886619.jpg",
-            "https://s3.mossai.com/upload/2023/10/27/05289452-914d-444f-a4d4-c272367ea649.7z",
-            "90a5e1652e499b05e9b9e9f149322220e7110d73900b312cbce45072cef2c35b"
+            "https://s3.hyperdust.io/upload/2024/1/24/63241709-6683-404c-b35c-b5466a57dad3.7z",
+            "83e56d1e198ac71e493706073e2547b99f35baa53801d7127ebe2448e04ce5f0"
         )
     ).wait();
 
