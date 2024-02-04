@@ -58,10 +58,21 @@ contract Island_1155 is
     }
 
     function _setTokenURI(uint256 tokenId, string memory tokenURI) private {
-        string memory tokenURI = _tokenURIs[tokenId];
+        string memory _tokenURI = _tokenURIs[tokenId];
 
-        if (bytes(tokenURI).length == 0) {
+        if (bytes(_tokenURI).length == 0) {
             _tokenURIs[tokenId] = tokenURI;
         }
+    }
+
+    function uri(
+        uint256 tokenId
+    )
+        public
+        view
+        override(ERC1155, IERC1155MetadataURI)
+        returns (string memory)
+    {
+        return _tokenURIs[tokenId];
     }
 }

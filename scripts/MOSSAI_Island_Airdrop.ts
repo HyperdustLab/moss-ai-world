@@ -7,29 +7,29 @@ async function main() {
 
 
 
-    const MOSSAI_Storage = await ethers.deployContract("MOSSAI_Storage");
-    await MOSSAI_Storage.waitForDeployment()
+    // const MOSSAI_Storage = await ethers.deployContract("MOSSAI_Storage");
+    // await MOSSAI_Storage.waitForDeployment()
 
 
 
-    const contract = await ethers.getContractFactory("Hyperdust_Island_Airdrop");
+    const contract = await ethers.getContractFactory("MOSSAI_Island_Airdrop");
     const instance = await upgrades.deployProxy(contract);
     await instance.waitForDeployment();
 
-    console.info("Hyperdust_Storage:", MOSSAI_Storage.target)
+    // console.info("Hyperdust_Storage:", MOSSAI_Storage.target)
 
 
-    await (await MOSSAI_Storage.setServiceAddress(instance.target)).wait()
+    // await (await MOSSAI_Storage.setServiceAddress(instance.target)).wait()
 
 
 
 
     await (await instance.setContractAddress([
         "0x9bDaf3912e7b4794fE8aF2E748C35898265D5615",
-        "0x1a41f86248E33e5327B26092b898bDfe04C6d8b4",
+        "0x01778569225bA43FFDABF872607e1df2Bc83f102",
         "0x5197De6b2353d4720e08992c938eeb44E4F83206",
         "0xC31A364A09c85319cFAc88Bb3F8F0dB874acBeFA",
-        MOSSAI_Storage.target
+        "0x656A4a75aCFc6Ab339EF2b18322e9F2E2a0237C7"
     ])).wait()
 
 

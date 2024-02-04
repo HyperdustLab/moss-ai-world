@@ -37,7 +37,7 @@ abstract contract IMOSSAIIslandNFG {
     function getSeedOwer(uint32 seed) public view returns (address) {}
 }
 
-contract Hyperdust_Island_Airdrop is OwnableUpgradeable {
+contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
     using Strings for *;
     using StrUtil for *;
 
@@ -82,16 +82,6 @@ contract Hyperdust_Island_Airdrop is OwnableUpgradeable {
         _MOSSAIStorageAddress = MOSSAIStorageAddress;
     }
 
-    function setContractAddress(
-        address[] memory contractaddressArray
-    ) public onlyOwner {
-        _MOSSAIRolesCfgAddress = contractaddressArray[0];
-        _erc20Address = contractaddressArray[1];
-        _MOSSAIIslandAddress = contractaddressArray[2];
-        _MOSSAIIslandNFGAddress = contractaddressArray[3];
-        _MOSSAIStorageAddress = contractaddressArray[4];
-    }
-
     event eveSave(uint256 id);
 
     event eveDelete(uint256 id);
@@ -116,10 +106,11 @@ contract Hyperdust_Island_Airdrop is OwnableUpgradeable {
         );
 
         if (uint256Array[3] != 0) {
-            (uint256 id, , , , , , , , , ) = IMOSSAIIsland(_MOSSAIIslandAddress)
-                .getIsland(uint256Array[3]);
+            (uint256 _id, , , , , , , , , ) = IMOSSAIIsland(
+                _MOSSAIIslandAddress
+            ).getIsland(uint256Array[3]);
 
-            require(id > 0, "island not found");
+            require(_id > 0, "island not found");
         }
 
         MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
@@ -190,10 +181,11 @@ contract Hyperdust_Island_Airdrop is OwnableUpgradeable {
         MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
         if (islandId != 0) {
-            (uint256 id, , , , , , , , , ) = IMOSSAIIsland(_MOSSAIIslandAddress)
-                .getIsland(islandId);
+            (uint256 _id, , , , , , , , , ) = IMOSSAIIsland(
+                _MOSSAIIslandAddress
+            ).getIsland(islandId);
 
-            require(id > 0, "island not found");
+            require(_id > 0, "island not found");
         }
 
         string memory _name = mossaiStorage.getString(
@@ -533,5 +525,15 @@ contract Hyperdust_Island_Airdrop is OwnableUpgradeable {
         random = (random % _length) + _start;
         _rand++;
         return random;
+    }
+
+    function setContractAddress(
+        address[] memory contractaddressArray
+    ) public onlyOwner {
+        _MOSSAIRolesCfgAddress = contractaddressArray[0];
+        _erc20Address = contractaddressArray[1];
+        _MOSSAIIslandAddress = contractaddressArray[2];
+        _MOSSAIIslandNFGAddress = contractaddressArray[3];
+        _MOSSAIStorageAddress = contractaddressArray[4];
     }
 }
