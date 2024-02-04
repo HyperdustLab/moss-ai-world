@@ -37,7 +37,7 @@ abstract contract IMOSSAIIslandNFG {
     function getSeedOwer(uint32 seed) public view returns (address) {}
 }
 
-contract Hyperdust_Island_Airdrop is OwnableUpgradeable {
+contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
     using Strings for *;
     using StrUtil for *;
 
