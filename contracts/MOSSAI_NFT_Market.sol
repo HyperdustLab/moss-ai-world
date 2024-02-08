@@ -41,8 +41,8 @@ contract MOSSAI_NFT_Market is OwnableUpgradeable {
     address public _HYDTTokenAddress;
     address public _MOSSAIStorageAddress;
 
-    function initialize() public initializer {
-        __Ownable_init(msg.sender);
+    function initialize(address onlyOwner) public initializer {
+        __Ownable_init(onlyOwner);
     }
 
     function setMOSSAINFTProductAddress(

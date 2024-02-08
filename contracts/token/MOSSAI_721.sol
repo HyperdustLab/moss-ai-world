@@ -12,10 +12,11 @@ contract MOSSAI_721 is ERC721, ERC721URIStorage, ERC721Burnable, AccessControl {
 
     constructor(
         string memory name_,
-        string memory symbol_
+        string memory symbol_,
+        address onlyOwner
     ) ERC721(name_, symbol_) {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(MINTER_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, onlyOwner);
+        _grantRole(MINTER_ROLE, onlyOwner);
     }
 
     function safeMint(

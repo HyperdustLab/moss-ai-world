@@ -49,9 +49,9 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
     address public _MOSSAIIslandNFGAddress;
     address public _MOSSAIStorageAddress;
 
-    function initialize() public initializer {
+    function initialize(address onlyOwner) public initializer {
         _rand = 1;
-        __Ownable_init(msg.sender);
+        __Ownable_init(onlyOwner);
     }
 
     function setMOSSAIRolesCfgAddress(

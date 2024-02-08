@@ -63,8 +63,8 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
 
     event eveDelete(uint256 id);
 
-    function initialize() public initializer {
-        __Ownable_init(msg.sender);
+    function initialize(address onlyOwner) public initializer {
+        __Ownable_init(onlyOwner);
     }
 
     function setMOSSAIRolesCfgAddress(
@@ -343,8 +343,6 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
         );
 
         require(allowNum >= mintNum + num, "Insufficient inventory");
-
-        
 
         erc20.transferFrom(msg.sender, _GasFeeCollectionWallet, payAmount);
 

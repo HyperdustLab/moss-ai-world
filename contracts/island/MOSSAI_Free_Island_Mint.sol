@@ -35,8 +35,8 @@ contract MOSSAI_Free_Island_Mint is OwnableUpgradeable {
     address public _erc20Address;
     address public _MOSSAIIslandNFGAddress;
 
-    function initialize() public initializer {
-        __Ownable_init(msg.sender);
+    function initialize(address onlyOwner) public initializer {
+        __Ownable_init(onlyOwner);
     }
 
     function setMOSSAIIslandAddres(

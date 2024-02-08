@@ -7,7 +7,7 @@ import "./utils/StrUtil.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract MOSSAI_Storage is Ownable {
-    constructor() Ownable(msg.sender) {}
+    constructor(address onlyOwner) Ownable(onlyOwner) {}
 
     using Strings for *;
     using StrUtil for *;

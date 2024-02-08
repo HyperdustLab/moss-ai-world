@@ -29,8 +29,8 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
 
     event eveSave(uint256 id);
 
-    function initialize() public initializer {
-        __Ownable_init(msg.sender);
+    function initialize(address onlyOwner) public initializer {
+        __Ownable_init(onlyOwner);
     }
 
     function setMOSSAINFTMarketAddress(

@@ -13,8 +13,8 @@ contract MOSSAI_Island_NFG is OwnableUpgradeable {
     address public _MOSSAIStorageAddress;
     address public _IslandNFTAddress;
 
-    function initialize() public initializer {
-        __Ownable_init(msg.sender);
+    function initialize(address onlyOwner) public initializer {
+        __Ownable_init(onlyOwner);
     }
 
     function mint(address to, uint32 location) public returns (uint256) {

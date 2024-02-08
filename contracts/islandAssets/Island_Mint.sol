@@ -62,8 +62,8 @@ contract Island_Mint is OwnableUpgradeable {
     using Strings for *;
     using StrUtil for *;
 
-    function initialize() public initializer {
-        __Ownable_init(msg.sender);
+    function initialize(address onlyOwner) public initializer {
+        __Ownable_init(onlyOwner);
     }
 
     function setMOSSAIIslandAddres(

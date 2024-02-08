@@ -15,28 +15,6 @@ import "./MOSSAI_Island_NFG.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "../utils/StrUtil.sol";
 
-abstract contract OldMOSSAIIsland {
-    function getIsland(
-        uint256 islandId
-    )
-        public
-        view
-        returns (
-            uint256,
-            string memory,
-            string memory,
-            string memory,
-            string memory,
-            address,
-            address,
-            uint256,
-            uint32,
-            bytes32,
-            string memory
-        )
-    {}
-}
-
 abstract contract IIslandFactory {
     function deploy(
         address account,
@@ -54,7 +32,6 @@ contract MOSSAI_Island is OwnableUpgradeable {
     address public _island721FactoryAddress;
     address public _island1155FactoryAddress;
     address public _HyperdustRolesCfgAddress;
-    address public _OldMOSSAIIslandAddress;
     address public _MOSSAIStorageAddress;
     address public _IslandMintAddress;
 
@@ -64,8 +41,8 @@ contract MOSSAI_Island is OwnableUpgradeable {
 
     event eveSaveIsland(uint256 id);
 
-    function initialize() public initializer {
-        __Ownable_init(msg.sender);
+    function initialize(address onlyOwner) public initializer {
+        __Ownable_init(onlyOwner);
     }
 
     function setDefParameter(
@@ -106,12 +83,6 @@ contract MOSSAI_Island is OwnableUpgradeable {
         _HyperdustRolesCfgAddress = HyperdustRolesCfgAddress;
     }
 
-    function setOldMOSSAIIslandAddress(
-        address OldMOSSAIIslandAddress
-    ) public onlyOwner {
-        _OldMOSSAIIslandAddress = OldMOSSAIIslandAddress;
-    }
-
     function setMOSSAIStorageAddress(
         address MOSSAIStorageAddress
     ) public onlyOwner {
@@ -130,9 +101,8 @@ contract MOSSAI_Island is OwnableUpgradeable {
         _island721FactoryAddress = contractaddressArray[2];
         _island1155FactoryAddress = contractaddressArray[3];
         _HyperdustRolesCfgAddress = contractaddressArray[4];
-        _OldMOSSAIIslandAddress = contractaddressArray[5];
-        _MOSSAIStorageAddress = contractaddressArray[6];
-        _IslandMintAddress = contractaddressArray[7];
+        _MOSSAIStorageAddress = contractaddressArray[5];
+        _IslandMintAddress = contractaddressArray[6];
     }
 
     function mint(
@@ -333,90 +303,6 @@ contract MOSSAI_Island is OwnableUpgradeable {
                 mossaiStorage.genKey("scenesData", islandId)
             )
         );
-    }
-
-    function migration(uint256 start, uint256 end) public onlyOwner {
-        OldMOSSAIIsland oldMOSSAIIsland = OldMOSSAIIsland(
-            _OldMOSSAIIslandAddress
-        );
-
-        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
-
-        for (uint256 i = start; i <= end; i++) {
-            (
-                uint256 id,
-                string memory name,
-                string memory coverImage,
-                string memory file,
-                string memory fileHash,
-                address erc721Address,
-                address erc1155Address,
-                uint256 coordinate,
-                uint32 seed,
-                bytes32 sid,
-                string memory scenesData
-            ) = oldMOSSAIIsland.getIsland(i);
-
-            string memory key = string(
-                abi.encodePacked("coordinate_", coordinate.toString())
-            );
-
-            require(
-                !mossaiStorage.getBool(key),
-                coordinate.toString().toSlice().concat(
-                    " coordinate already exists".toSlice()
-                )
-            );
-
-            mossaiStorage.setBool(key, true);
-
-            string memory hashStr = bytes32ToString(sid);
-
-            mossaiStorage.setBool(hashStr, true);
-
-            MOSSAI_Island_Map(_MOSSAIIslandMapAddress).updateMintStatus(
-                uint32(coordinate),
-                true
-            );
-
-            mossaiStorage.getNextId();
-
-            mossaiStorage.setString(mossaiStorage.genKey("name", id), name);
-
-            mossaiStorage.setString(
-                mossaiStorage.genKey("coverImage", id),
-                defCoverImage
-            );
-
-            mossaiStorage.setString(mossaiStorage.genKey("file", id), defFile);
-            mossaiStorage.setString(
-                mossaiStorage.genKey("fileHash", id),
-                fileHash
-            );
-
-            mossaiStorage.setAddress(
-                mossaiStorage.genKey("erc721Address", id),
-                erc721Address
-            );
-
-            mossaiStorage.setAddress(
-                mossaiStorage.genKey("erc1155Address", id),
-                erc1155Address
-            );
-
-            mossaiStorage.setUint(
-                mossaiStorage.genKey("coordinate", id),
-                coordinate
-            );
-
-            mossaiStorage.setUint(mossaiStorage.genKey("seed", id), seed);
-            mossaiStorage.setBytes32(mossaiStorage.genKey("sid", id), sid);
-
-            mossaiStorage.setString(
-                mossaiStorage.genKey("scenesData", id),
-                scenesData
-            );
-        }
     }
 
     function updateErc721Address(
