@@ -2,39 +2,40 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "../utils/StrUtil.sol";
-import "../MOSSAI_Roles_Cfg.sol";
+import "../Hyperdust_Roles_Cfg.sol";
+import "../MOSSAI_Storage.sol";
 
-contract MOSSAI_Island_Template is Ownable {
+contract MOSSAI_Island_Template is OwnableUpgradeable {
     address public _MOSSAIRolesCfgAddress;
 
-    IslandTemplate[] public _islandTemplates;
+    address public _MOSSAIStorageAddress;
 
-    using Counters for Counters.Counter;
-    Counters.Counter private _id;
     using Strings for *;
     using StrUtil for *;
-
-    struct IslandTemplate {
-        uint256 id;
-        string name;
-        string coverImage;
-        string file;
-        string fileHash;
-    }
 
     event eveDeleteIslandTemplate(uint256 id);
 
     event eveSaveIslandTemplate(uint256 id);
 
+    function initialize() public initializer {
+        __Ownable_init(msg.sender);
+    }
+
     function setMOSSAIRolesCfgAddress(
         address MOSSAIRolesCfgAddress
     ) public onlyOwner {
         _MOSSAIRolesCfgAddress = MOSSAIRolesCfgAddress;
+    }
+
+    function setMOSSAIStorageAddress(
+        address MOSSAIStorageAddress
+    ) public onlyOwner {
+        _MOSSAIStorageAddress = MOSSAIStorageAddress;
     }
 
     function add(
@@ -44,20 +45,25 @@ contract MOSSAI_Island_Template is Ownable {
         string memory fileHash
     ) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
-        _id.increment();
-        uint256 id = _id.current();
-        _islandTemplates.push(
-            IslandTemplate({
-                id: id,
-                name: name,
-                coverImage: coverImage,
-                file: file,
-                fileHash: fileHash
-            })
+
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+
+        uint256 id = mossaiStorage.getNextId();
+
+        mossaiStorage.setString(mossaiStorage.genKey("name", id), name);
+        mossaiStorage.setString(
+            mossaiStorage.genKey("coverImage", id),
+            coverImage
         );
+
+        mossaiStorage.setString(mossaiStorage.genKey("file", id), file);
+        mossaiStorage.setString(mossaiStorage.genKey("fileHash", id), fileHash);
+
         emit eveSaveIslandTemplate(id);
     }
 
@@ -69,44 +75,51 @@ contract MOSSAI_Island_Template is Ownable {
         string memory fileHash
     ) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 
-        for (uint256 i = 0; i < _islandTemplates.length; i++) {
-            if (_islandTemplates[i].id == id) {
-                _islandTemplates[i].name = name;
-                _islandTemplates[i].coverImage = coverImage;
-                _islandTemplates[i].file = file;
-                _islandTemplates[i].fileHash = fileHash;
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
-                emit eveSaveIslandTemplate(id);
-                return;
-            }
-        }
-        revert("not found");
+        string memory _name = mossaiStorage.getString(
+            mossaiStorage.genKey("name", id)
+        );
+
+        require(bytes(_name).length > 0, "not found");
+
+        mossaiStorage.setString(mossaiStorage.genKey("name", id), name);
+        mossaiStorage.setString(
+            mossaiStorage.genKey("coverImage", id),
+            coverImage
+        );
+
+        mossaiStorage.setString(mossaiStorage.genKey("file", id), file);
+        mossaiStorage.setString(mossaiStorage.genKey("fileHash", id), fileHash);
+
+        emit eveSaveIslandTemplate(id);
     }
 
     function deleteIslandTemplate(uint256 id) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 
-        uint256 index = 0;
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
-        for (uint i = 0; i < _islandTemplates.length; i++) {
-            if (_islandTemplates[i].id == id) {
-                _islandTemplates[i] = _islandTemplates[
-                    _islandTemplates.length - 1
-                ];
-                _islandTemplates.pop();
-                emit eveDeleteIslandTemplate(id);
-                return;
-            }
-        }
+        string memory _name = mossaiStorage.getString(
+            mossaiStorage.genKey("name", id)
+        );
 
-        revert("not found");
+        require(bytes(_name).length > 0, "not found");
+
+        mossaiStorage.setString(mossaiStorage.genKey("name", id), "");
+
+        emit eveDeleteIslandTemplate(id);
     }
 
     function getIslandTemplate(
@@ -122,17 +135,17 @@ contract MOSSAI_Island_Template is Ownable {
             string memory
         )
     {
-        for (uint256 i = 0; i < _islandTemplates.length; i++) {
-            if (_islandTemplates[i].id == id) {
-                return (
-                    _islandTemplates[i].id,
-                    _islandTemplates[i].name,
-                    _islandTemplates[i].coverImage,
-                    _islandTemplates[i].file,
-                    _islandTemplates[i].fileHash
-                );
-            }
-        }
-        revert("not found");
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+
+        string memory _name = mossaiStorage.getString(
+            mossaiStorage.genKey("name", id)
+        );
+        return (
+            id,
+            _name,
+            mossaiStorage.getString(mossaiStorage.genKey("coverImage", id)),
+            mossaiStorage.getString(mossaiStorage.genKey("file", id)),
+            mossaiStorage.getString(mossaiStorage.genKey("fileHash", id))
+        );
     }
 }

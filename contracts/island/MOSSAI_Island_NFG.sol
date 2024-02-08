@@ -1,113 +1,112 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.1;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "../MOSSAI_Roles_Cfg.sol";
+import "../Hyperdust_Roles_Cfg.sol";
+import "../MOSSAI_Storage.sol";
+import "../token/MOSSAI_721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract MOSSAI_Island_NFG is
-    ERC721,
-    ERC721URIStorage,
-    ERC721Burnable,
-    Ownable
-{
-    uint256 private _nextTokenId;
+contract MOSSAI_Island_NFG is OwnableUpgradeable {
     address public _MOSSAIRolesCfgAddress;
+    address public _MOSSAIStorageAddress;
+    address public _IslandNFTAddress;
 
-    mapping(uint256 => uint32) public _tokenSeed;
-    mapping(uint32 => uint256) public _seedToken;
-    mapping(uint32 => uint256[]) public _mintTokens;
-    mapping(uint32 => string) public _locationTokenURI;
-    mapping(uint32 => uint32) public _locationSeed;
-    mapping(uint32 => uint32) public _seedLocation;
+    function initialize() public initializer {
+        __Ownable_init(msg.sender);
+    }
 
-    constructor() ERC721("MOSSAI_Island_NFG", "MIN") {}
-
-    function mint(address to, uint32 location) public returns (uint32) {
+    function mint(address to, uint32 location) public returns (uint256) {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 
-        string memory uri = _locationTokenURI[location];
-        uint32 seed = _locationSeed[location];
+        MOSSAI_721 mossai721 = MOSSAI_721(_IslandNFTAddress);
+
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+
+        string memory uri = mossaiStorage.getString(
+            mossaiStorage.genKey("tokenURI", location)
+        );
         require(bytes(uri).length > 0, "location not exists");
 
-        require(_seedToken[seed] == 0, "seed already exists");
+        uint256 seed = mossaiStorage.getUint(
+            mossaiStorage.genKey("seed", location)
+        );
 
-        uint256 tokenId = _nextTokenId++;
-        _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);
+        uint256 mintTokenId = mossaiStorage.getUint(
+            mossaiStorage.genKey("seedToken", seed)
+        );
+        require(mintTokenId == 0, "seed already exists");
 
-        _tokenSeed[tokenId] = seed;
-        _seedToken[seed] = tokenId;
+        uint256 tokenId = mossai721.safeMint(to, uri);
 
-        _mintTokens[seed].push(tokenId);
+        mossaiStorage.setUint(mossaiStorage.genKey("tokenSeed", tokenId), seed);
+        mossaiStorage.setUint(mossaiStorage.genKey("seedToken", seed), tokenId);
+
+        mossaiStorage.setUintArray(
+            mossaiStorage.genKey("mintTokens", seed),
+            tokenId
+        );
 
         return seed;
     }
 
-    function mintBySeed(address to, uint32 seed) public returns (uint256) {
+    function mintBySeed(address to, uint256 seed) public returns (uint256) {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 
-        uint32 location = _seedLocation[seed];
+        MOSSAI_721 mossai721 = MOSSAI_721(_IslandNFTAddress);
 
-        string memory uri = _locationTokenURI[location];
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+
+        uint256 location = mossaiStorage.getUint(
+            mossaiStorage.genKey("location", seed)
+        );
+
+        uint256 mintTokenId = mossaiStorage.getUint(
+            mossaiStorage.genKey("seedToken", seed)
+        );
+
+        require(mintTokenId > 0, "seed not exists");
+
+        string memory uri = mossaiStorage.getString(
+            mossaiStorage.genKey("tokenURI", location)
+        );
+
         require(bytes(uri).length > 0, "location not exists");
 
-        require(_seedToken[seed] > 0, "seed not exists");
+        uint256 tokenId = mossai721.safeMint(to, uri);
 
-        uint256 tokenId = _nextTokenId++;
-        _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);
+        mossaiStorage.setUint(mossaiStorage.genKey("tokenSeed", tokenId), seed);
+        mossaiStorage.setUint(mossaiStorage.genKey("seedToken", seed), tokenId);
 
-        _tokenSeed[tokenId] = seed;
-        _seedToken[seed] = tokenId;
-
-        _mintTokens[seed].push(tokenId);
+        mossaiStorage.setUintArray(
+            mossaiStorage.genKey("mintTokens", seed),
+            tokenId
+        );
 
         return tokenId;
     }
 
-    function getSeedOwer(uint32 seed) public view returns (address) {
-        uint256 tokenId = _seedToken[seed];
+    function getSeedOwer(uint256 seed) public view returns (address) {
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+
+        uint256 tokenId = mossaiStorage.getUint(
+            mossaiStorage.genKey("seedToken", seed)
+        );
+
         require(tokenId > 0, "seed not exists");
 
-        return ownerOf(tokenId);
-    }
-
-    function getToken(
-        uint256 tokenId
-    ) public view returns (uint32, string memory) {
-        require(_exists(tokenId), "token not exists");
-
-        uint32 seed = _tokenSeed[tokenId];
-        string memory tokenURI = tokenURI(tokenId);
-
-        return (seed, tokenURI);
-    }
-
-    function _burn(
-        uint256 tokenId
-    ) internal override(ERC721, ERC721URIStorage) {
-        super._burn(tokenId);
-    }
-
-    function tokenURI(
-        uint256 tokenId
-    ) public view override(ERC721, ERC721URIStorage) returns (string memory) {
-        return super.tokenURI(tokenId);
-    }
-
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view override(ERC721, ERC721URIStorage) returns (bool) {
-        return super.supportsInterface(interfaceId);
+        return IERC721(_IslandNFTAddress).ownerOf(tokenId);
     }
 
     function batchAddNFG(
@@ -116,24 +115,63 @@ contract MOSSAI_Island_NFG is
         uint32[] memory locations
     ) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+
         for (uint256 i = 0; i < seeds.length; i++) {
-            _locationTokenURI[locations[i]] = uris[i];
-            _locationSeed[locations[i]] = seeds[i];
-            _seedLocation[seeds[i]] = locations[i];
+            mossaiStorage.setString(
+                mossaiStorage.genKey("tokenURI", locations[i]),
+                uris[i]
+            );
+            mossaiStorage.setUint(
+                mossaiStorage.genKey("seed", locations[i]),
+                seeds[i]
+            );
+
+            mossaiStorage.setUint(
+                mossaiStorage.genKey("location", seeds[i]),
+                locations[i]
+            );
         }
     }
 
-    function getMintTokens(uint32 seed) public view returns (uint256[] memory) {
-        return _mintTokens[seed];
+    function getMintTokens(
+        uint256 seed
+    ) public view returns (uint256[] memory) {
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+
+        return
+            mossaiStorage.getUintArray(
+                mossaiStorage.genKey("mintTokens", seed)
+            );
     }
 
     function setMOSSAIRolesCfgAddress(
         address MOSSAIRolesCfgAddress
     ) public onlyOwner {
         _MOSSAIRolesCfgAddress = MOSSAIRolesCfgAddress;
+    }
+
+    function setMOSSAIStorageAddress(
+        address MOSSAIStorageAddress
+    ) public onlyOwner {
+        _MOSSAIStorageAddress = MOSSAIStorageAddress;
+    }
+
+    function setIslandNFTAddress(address IslandNFTAddress) public onlyOwner {
+        _IslandNFTAddress = IslandNFTAddress;
+    }
+
+    function setContractAddress(
+        address[] memory contractaddressArray
+    ) public onlyOwner {
+        _MOSSAIRolesCfgAddress = contractaddressArray[0];
+        _MOSSAIStorageAddress = contractaddressArray[1];
+        _IslandNFTAddress = contractaddressArray[2];
     }
 }

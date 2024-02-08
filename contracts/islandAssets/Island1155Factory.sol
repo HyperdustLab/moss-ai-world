@@ -2,25 +2,22 @@ pragma solidity ^0.8.0;
 
 import "./Island_1155.sol";
 
-contract Island1155Factory {
-    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-    bytes32 public constant URI_SETTER_ROLE = keccak256("URI_SETTER_ROLE");
+contract Island1155Factory is OwnableUpgradeable {
+    function initialize() public initializer {
+        __Ownable_init(msg.sender);
+    }
 
     function deploy(
         address account,
-        address islandAssetsCfgAddress
+        string memory name,
+        string memory symbol
     ) public returns (address) {
-        Island_1155 island1155Address = new Island_1155(islandAssetsCfgAddress);
-
-        island1155Address.grantRole(DEFAULT_ADMIN_ROLE, account);
-        island1155Address.grantRole(MINTER_ROLE, account);
-
-        island1155Address.grantRole(URI_SETTER_ROLE, account);
-        island1155Address.grantRole(PAUSER_ROLE, account);
+        require(account != address(0x0), "account is zero address");
+        Island_1155 island1155Address = new Island_1155(account, name, symbol);
 
         address _island1155Address = address(island1155Address);
 

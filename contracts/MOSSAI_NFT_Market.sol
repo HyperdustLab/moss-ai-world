@@ -5,34 +5,33 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
 import "./utils/StrUtil.sol";
 import "./MOSSAI_NFT_Product.sol";
 
+import "./MOSSAI_Storage.sol";
+
 abstract contract IWalletAccount {
     function addAmount(uint256 amount) public {}
+
+    function _GasFeeCollectionWallet() public view returns (address) {}
 }
 
 abstract contract IHyperdustTransactionCfg {
     function getGasFee(string memory func) public view returns (uint256) {}
 }
 
-contract MOSSAI_NFT_Market is Ownable {
+contract MOSSAI_NFT_Market is OwnableUpgradeable {
     using Strings for *;
     using StrUtil for *;
 
-    using Counters for Counters.Counter;
-
-    Counters.Counter private _id;
-
-    mapping(string => uint256) public _nftProductMap;
-
-    TransactionRecord[] public _transactionRecords;
     /**
      * @dev Contract variables for MOSSAI NFT Market.
      */
@@ -40,6 +39,11 @@ contract MOSSAI_NFT_Market is Ownable {
     address public _walletAccountAddress;
     address public _HyperdustTransactionCfgAddress;
     address public _HYDTTokenAddress;
+    address public _MOSSAIStorageAddress;
+
+    function initialize() public initializer {
+        __Ownable_init(msg.sender);
+    }
 
     function setMOSSAINFTProductAddress(
         address MOSSAI_NFT_Product_Address
@@ -63,6 +67,12 @@ contract MOSSAI_NFT_Market is Ownable {
         _HYDTTokenAddress = HYDTTokenAddress;
     }
 
+    function setMOSSAIStorageAddress(
+        address MOSSAIStorageAddress
+    ) public onlyOwner {
+        _MOSSAIStorageAddress = MOSSAIStorageAddress;
+    }
+
     function setContractAddress(
         address[] memory contractaddressArray
     ) public onlyOwner {
@@ -70,6 +80,7 @@ contract MOSSAI_NFT_Market is Ownable {
         _walletAccountAddress = contractaddressArray[1];
         _HyperdustTransactionCfgAddress = contractaddressArray[2];
         _HYDTTokenAddress = contractaddressArray[3];
+        _MOSSAIStorageAddress = contractaddressArray[4];
     }
 
     /**
@@ -101,7 +112,19 @@ contract MOSSAI_NFT_Market is Ownable {
      * @param NFTProductId The ID of the NFT product to buy.
      * @param num The number of NFT products to buy.
      */
-    function buyNFTProduct(uint256 NFTProductId, uint32 num) public {
+    function buyNFTProduct(uint256 NFTProductId, uint256 num) public {
+        IWalletAccount walletAccountAddress = IWalletAccount(
+            _walletAccountAddress
+        );
+
+        address _GasFeeCollectionWallet = walletAccountAddress
+            ._GasFeeCollectionWallet();
+
+        require(
+            _GasFeeCollectionWallet != address(0),
+            "not set GasFeeCollectionWallet"
+        );
+
         require(num > 0, "num error");
         require(NFTProductId > 0, "NFTProductId error");
 
@@ -109,16 +132,22 @@ contract MOSSAI_NFT_Market is Ownable {
             _MOSSAI_NFT_Product_Address
         );
 
-        MOSSAI_NFT_Product.NFTProduct memory nftProduct = MOSSAINFTProductAddres
-            .getNFTProductObj(NFTProductId);
+        (
+            ,
+            address owner,
+            uint256 putawayNum,
+            uint256 sellNum,
+            address contractAddress,
+            uint256 tokenId,
+            uint256 price,
+            bytes1 status,
+            bytes1 contractType
+        ) = MOSSAINFTProductAddres.getNFTProduct(NFTProductId);
 
-        require(nftProduct.status == 0x01, "status error");
-        require(
-            nftProduct.sellNum + num <= nftProduct.putawayNum,
-            "in no stock"
-        );
+        require(status == 0x01, "status error");
+        require(sellNum + num <= putawayNum, "in no stock");
 
-        uint256 amount = nftProduct.price * num;
+        uint256 amount = price * num;
 
         uint256 commission = IHyperdustTransactionCfg(
             _HyperdustTransactionCfgAddress
@@ -135,44 +164,52 @@ contract MOSSAI_NFT_Market is Ownable {
 
         require(erc20.balanceOf(msg.sender) >= payAmount, "balance error");
 
-        erc20.transferFrom(msg.sender, nftProduct.owner, amount);
-        erc20.transferFrom(msg.sender, _walletAccountAddress, commission);
+        erc20.transferFrom(msg.sender, owner, amount);
 
-        IWalletAccount(_walletAccountAddress).addAmount(commission);
+        if (commission > 0) {
+            erc20.transferFrom(msg.sender, _GasFeeCollectionWallet, commission);
 
-        if (nftProduct.contractType == 0x01) {
-            IERC721(nftProduct.contractAddress).safeTransferFrom(
-                nftProduct.owner,
+            IWalletAccount(_walletAccountAddress).addAmount(commission);
+        }
+
+        if (contractType == 0x01) {
+            IERC721(contractAddress).safeTransferFrom(
+                owner,
                 msg.sender,
-                nftProduct.tokenId
+                tokenId
             );
         } else {
-            IERC1155(nftProduct.contractAddress).safeTransferFrom(
-                nftProduct.owner,
+            IERC1155(contractAddress).safeTransferFrom(
+                owner,
                 msg.sender,
-                nftProduct.tokenId,
+                tokenId,
                 num,
                 "0x0"
             );
         }
 
-        MOSSAINFTProductAddres.addSellNum(nftProduct.id, num);
+        MOSSAINFTProductAddres.addSellNum(NFTProductId, num);
 
-        _id.increment();
-        uint256 id = _id.current();
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
-        TransactionRecord memory transactionRecord = TransactionRecord(
-            id,
-            NFTProductId,
-            msg.sender,
-            nftProduct.owner,
-            payAmount,
-            nftProduct.price,
-            num,
-            commission
+        uint256 id = mossaiStorage.getNextId();
+
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("NFTProductId", id),
+            NFTProductId
         );
 
-        _transactionRecords.push(transactionRecord);
+        mossaiStorage.setAddress(mossaiStorage.genKey("buyer", id), msg.sender);
+        mossaiStorage.setAddress(mossaiStorage.genKey("seller", id), owner);
+
+        mossaiStorage.setUint(mossaiStorage.genKey("payAmount", id), payAmount);
+        mossaiStorage.setUint(mossaiStorage.genKey("price", id), price);
+
+        mossaiStorage.setUint(mossaiStorage.genKey("num", id), num);
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("commission", id),
+            commission
+        );
 
         emit eveSave(id);
     }
@@ -189,23 +226,27 @@ contract MOSSAI_NFT_Market is Ownable {
             address,
             uint256,
             uint256,
-            uint32,
+            uint256,
             uint256
         )
     {
-        TransactionRecord memory transactionRecord = _transactionRecords[
-            id - 1
-        ];
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+
+        uint256 NFTProductId = mossaiStorage.getUint(
+            mossaiStorage.genKey("NFTProductId", id)
+        );
+
+        require(NFTProductId > 0, "not found");
 
         return (
-            transactionRecord.id,
-            transactionRecord.NFTProductId,
-            transactionRecord.buyer,
-            transactionRecord.seller,
-            transactionRecord.amount,
-            transactionRecord.price,
-            transactionRecord.num,
-            transactionRecord.commission
+            id,
+            NFTProductId,
+            mossaiStorage.getAddress(mossaiStorage.genKey("buyer", id)),
+            mossaiStorage.getAddress(mossaiStorage.genKey("seller", id)),
+            mossaiStorage.getUint(mossaiStorage.genKey("amount", id)),
+            mossaiStorage.getUint(mossaiStorage.genKey("price", id)),
+            mossaiStorage.getUint(mossaiStorage.genKey("num", id)),
+            mossaiStorage.getUint(mossaiStorage.genKey("commission", id))
         );
     }
 }

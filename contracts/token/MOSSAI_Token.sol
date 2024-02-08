@@ -10,7 +10,7 @@ abstract contract IHyperdustRolesCfg {
 }
 
 contract Hyperdust_Token is ERC20, ERC20Burnable, Ownable {
-    constructor() ERC20("Hyperdust", "HYDT") {}
+    constructor() ERC20("Hyperdust", "HYDT") Ownable(msg.sender) {}
 
     address public _rolesCfgAddress;
 

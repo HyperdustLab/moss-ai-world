@@ -1,57 +1,37 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
 import "./utils/StrUtil.sol";
-import "./MOSSAI_Roles_Cfg.sol";
+import "./Hyperdust_Roles_Cfg.sol";
+
+import "./MOSSAI_Storage.sol";
 
 /**
  * @title MOSSAI_NFT_Product
  * @dev This contract represents an NFT product marketplace where users can save, retrieve, and sell NFT products.
  */
-contract MOSSAI_NFT_Product is Ownable {
+contract MOSSAI_NFT_Product is OwnableUpgradeable {
     using Strings for *;
     using StrUtil for *;
-
-    mapping(bytes32 => uint256) public _nftProductMap;
-
-    NFTProduct[] public _NFTProducts;
 
     address public _MOSSAI_NFT_Market_Address;
     address public _MOSSAIRolesCfgAddress;
     address public _MOSSAI_Island_NFG_Address;
-    using Counters for Counters.Counter;
-    Counters.Counter private _id;
-    /**
-     * @dev Struct representing an NFT product.
-     * @param id The unique identifier of the product.
-     * @param owner The address of the owner of the product.
-     * @param putawayNum The number of times the product has been put up for sale.
-     * @param sellNum The number of times the product has been sold.
-     * @param contractAddress The address of the NFT contract.
-     * @param tokenId The unique identifier of the NFT.
-     * @param price The price of the product.
-     * @param status The status of the product.
-     * @param contractType The type of NFT contract.
-     */
-    struct NFTProduct {
-        uint256 id;
-        address owner;
-        uint32 putawayNum;
-        uint32 sellNum;
-        address contractAddress;
-        uint256 tokenId;
-        uint256 price;
-        bytes1 status;
-        bytes1 contractType;
-    }
+    address public _MOSSAIStorageAddress;
 
     event eveSave(uint256 id);
+
+    function initialize() public initializer {
+        __Ownable_init(msg.sender);
+    }
 
     function setMOSSAINFTMarketAddress(
         address __MOSSAI_NFT_Market_Address
@@ -71,12 +51,19 @@ contract MOSSAI_NFT_Product is Ownable {
         _MOSSAI_Island_NFG_Address = MOSSAI_Island_NFG_Address;
     }
 
+    function setMOSSAIStorageAddress(
+        address MOSSAIStorageAddress
+    ) public onlyOwner {
+        _MOSSAIStorageAddress = MOSSAIStorageAddress;
+    }
+
     function setContractAddress(
         address[] memory contractaddressArray
     ) public onlyOwner {
         _MOSSAI_NFT_Market_Address = contractaddressArray[0];
         _MOSSAIRolesCfgAddress = contractaddressArray[1];
         _MOSSAI_Island_NFG_Address = contractaddressArray[2];
+        _MOSSAIStorageAddress = contractaddressArray[3];
     }
 
     /**
@@ -112,10 +99,6 @@ contract MOSSAI_NFT_Product is Ownable {
 
         require(status == 0x01 || status == 0x00, "status error");
 
-        bytes32 key = keccak256(
-            abi.encodePacked(contractAddress, tokenId, msg.sender)
-        );
-
         bool allow;
 
         if (contractType == 0x01) {
@@ -131,41 +114,47 @@ contract MOSSAI_NFT_Product is Ownable {
 
         require(allow, "not allow");
 
-        uint256 id = _nftProductMap[key];
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
-        NFTProduct memory nftProduct;
+        string memory key = string(
+            abi.encodePacked(
+                contractAddress.toHexString(),
+                tokenId.toString(),
+                msg.sender.toHexString()
+            )
+        );
+
+        uint256 id = mossaiStorage.getUint(key);
 
         if (id == 0) {
-            _id.increment();
-            id = _id.current();
-
-            _nftProductMap[key] = id;
-
-            nftProduct = NFTProduct({
-                id: id,
-                owner: msg.sender,
-                putawayNum: putawayNum,
-                contractAddress: contractAddress,
-                sellNum: 0,
-                tokenId: tokenId,
-                price: price,
-                status: status,
-                contractType: contractType
-            });
-
-            _NFTProducts.push(nftProduct);
-
-            _nftProductMap[key] = id;
+            id = mossaiStorage.getNextId();
+            mossaiStorage.setUint(key, id);
         } else {
-            nftProduct = _NFTProducts[id - 1];
+            address owner = mossaiStorage.getAddress(
+                mossaiStorage.genKey("owner", id)
+            );
 
-            _NFTProducts[id - 1].status = status;
-            _NFTProducts[id - 1].putawayNum = putawayNum;
-            _NFTProducts[id - 1].price = price;
-            _NFTProducts[id - 1].sellNum = 0;
-
-            require(_NFTProducts[id - 1].owner == msg.sender, "not owner");
+            require(owner == msg.sender, "not owner");
         }
+
+        mossaiStorage.setAddress(mossaiStorage.genKey("owner", id), msg.sender);
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("putawayNum", id),
+            putawayNum
+        );
+
+        mossaiStorage.setAddress(
+            mossaiStorage.genKey("contractAddress", id),
+            contractAddress
+        );
+
+        mossaiStorage.setUint(mossaiStorage.genKey("tokenId", id), tokenId);
+        mossaiStorage.setUint(mossaiStorage.genKey("price", id), price);
+        mossaiStorage.setBytes1(mossaiStorage.genKey("status", id), status);
+        mossaiStorage.setBytes1(
+            mossaiStorage.genKey("contractType", id),
+            contractType
+        );
 
         emit eveSave(id);
     }
@@ -178,8 +167,8 @@ contract MOSSAI_NFT_Product is Ownable {
         returns (
             uint256,
             address,
-            uint32,
-            uint32,
+            uint256,
+            uint256,
             address,
             uint256,
             uint256,
@@ -187,44 +176,62 @@ contract MOSSAI_NFT_Product is Ownable {
             bytes1
         )
     {
-        NFTProduct memory nftProduct = _NFTProducts[id - 1];
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+
+        uint256 tokenId = mossaiStorage.getUint(
+            mossaiStorage.genKey("tokenId", id)
+        );
+
+        require(tokenId > 0, "not found");
 
         return (
-            nftProduct.id,
-            nftProduct.owner,
-            nftProduct.putawayNum,
-            nftProduct.sellNum,
-            nftProduct.contractAddress,
-            nftProduct.tokenId,
-            nftProduct.price,
-            nftProduct.status,
-            nftProduct.contractType
+            id,
+            mossaiStorage.getAddress(mossaiStorage.genKey("owner", id)),
+            mossaiStorage.getUint(mossaiStorage.genKey("putawayNum", id)),
+            mossaiStorage.getUint(mossaiStorage.genKey("sellNum", id)),
+            mossaiStorage.getAddress(
+                mossaiStorage.genKey("contractAddress", id)
+            ),
+            tokenId,
+            mossaiStorage.getUint(mossaiStorage.genKey("price", id)),
+            mossaiStorage.getBytes1(mossaiStorage.genKey("status", id)),
+            mossaiStorage.getBytes1(mossaiStorage.genKey("contractType", id))
         );
     }
 
-    function getNFTProductObj(
-        uint256 id
-    ) public view returns (NFTProduct memory) {
-        return _NFTProducts[id - 1];
-    }
-
-    function addSellNum(uint256 id, uint32 num) public {
+    function addSellNum(uint256 id, uint256 num) public {
         require(
-            MOSSAI_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender),
+            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
             "not admin role"
         );
 
-        NFTProduct memory nftProduct = _NFTProducts[id - 1];
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
-        require(
-            nftProduct.sellNum + num <= nftProduct.putawayNum,
-            "Insufficient stock"
+        uint256 tokenId = mossaiStorage.getUint(
+            mossaiStorage.genKey("tokenId", id)
         );
 
-        _NFTProducts[id - 1].sellNum += num;
+        require(tokenId > 0, "not found");
 
-        if (nftProduct.sellNum + num == nftProduct.putawayNum) {
-            _NFTProducts[id - 1].status = 0x00;
+        uint256 sellNum = mossaiStorage.getUint(
+            mossaiStorage.genKey("sellNum", id)
+        );
+
+        uint256 putawayNum = mossaiStorage.getUint(
+            mossaiStorage.genKey("putawayNum", id)
+        );
+
+        require(sellNum + num <= putawayNum, "Insufficient stock");
+
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("sellNum", id),
+            sellNum + num
+        );
+
+        if (sellNum + num == putawayNum) {
+            mossaiStorage.setBytes1(mossaiStorage.genKey("status", id), 0x00);
         }
 
         emit eveSave(id);
