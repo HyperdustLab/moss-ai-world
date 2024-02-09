@@ -45,6 +45,16 @@
       "address": "0x1DF8A1979aB0473a6e26C0E71b181775270D0645",
       "txHash": "0x2a59e5616ee21b48af5b988f1ae02d649858de897aab8aaca38b2ee12122693c",
       "kind": "transparent"
+    },
+    {
+      "address": "0xb83522C6BdC7B6cFa050671096e51aB3c9D75C06",
+      "txHash": "0x3d2c198fce6d6013d36892faf2d6b61c8b0fd329c3a79266e1c4ac077eab8686",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xEf7Cea50CB776d23379611B121983058B9Df616D",
+      "txHash": "0xf3ef2cd57103f21b7c878d22530e837ed3a5d98d88732bcfdf423db688a5f39a",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -1019,6 +1029,244 @@
             "type": "t_address",
             "contract": "MOSSAI_mNFT_Mint",
             "src": "contracts\\MOSSAI_mNFT_Mint.sol:51"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)64_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)14_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "269134d419b3fd13a6d113f7b404b1da923196469824e45bb9d9496f21557569": {
+      "address": "0x79e994ccc1BA450e6d510e946e359df52f95bEf0",
+      "txHash": "0xa0ef88dc126cde99eedeaaacbec11e101d8e2c0af32ece67283430a608c8b6ed",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "_MOSSAI_NFT_Product_Address",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address",
+            "contract": "MOSSAI_NFT_Market",
+            "src": "contracts\\MOSSAI_NFT_Market.sol:38"
+          },
+          {
+            "label": "_walletAccountAddress",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address",
+            "contract": "MOSSAI_NFT_Market",
+            "src": "contracts\\MOSSAI_NFT_Market.sol:39"
+          },
+          {
+            "label": "_HyperdustTransactionCfgAddress",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_address",
+            "contract": "MOSSAI_NFT_Market",
+            "src": "contracts\\MOSSAI_NFT_Market.sol:40"
+          },
+          {
+            "label": "_HYDTTokenAddress",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_address",
+            "contract": "MOSSAI_NFT_Market",
+            "src": "contracts\\MOSSAI_NFT_Market.sol:41"
+          },
+          {
+            "label": "_MOSSAIStorageAddress",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_address",
+            "contract": "MOSSAI_NFT_Market",
+            "src": "contracts\\MOSSAI_NFT_Market.sol:42"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)64_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)14_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "4869a9a5528bbb38e3d45deb7d1b0158c737d24189462a30d29847d714395a3e": {
+      "address": "0xe55ee8fecf66C2DB05BCd9FF024F69FD226b072a",
+      "txHash": "0xc997c381e153767aff530375a367a10e70f2e7fb1412fb62ba735ee908f26cf3",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "_MOSSAI_NFT_Market_Address",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address",
+            "contract": "MOSSAI_NFT_Product",
+            "src": "contracts\\MOSSAI_NFT_Product.sol:25"
+          },
+          {
+            "label": "_MOSSAIRolesCfgAddress",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address",
+            "contract": "MOSSAI_NFT_Product",
+            "src": "contracts\\MOSSAI_NFT_Product.sol:26"
+          },
+          {
+            "label": "_MOSSAI_Island_NFG_Address",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_address",
+            "contract": "MOSSAI_NFT_Product",
+            "src": "contracts\\MOSSAI_NFT_Product.sol:27"
+          },
+          {
+            "label": "_MOSSAIStorageAddress",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_address",
+            "contract": "MOSSAI_NFT_Product",
+            "src": "contracts\\MOSSAI_NFT_Product.sol:28"
           }
         ],
         "types": {
