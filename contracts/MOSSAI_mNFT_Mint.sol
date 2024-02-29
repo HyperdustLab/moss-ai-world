@@ -225,18 +225,18 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
     function getMintInfo(
         uint256 id
     )
-        public
-        view
-        returns (
-            uint256,
-            string memory,
-            uint256,
-            address,
-            uint256,
-            bytes1,
-            uint256,
-            uint256
-        )
+    public
+    view
+    returns (
+        uint256,
+        string memory,
+        uint256,
+        address,
+        uint256,
+        bytes1,
+        uint256,
+        uint256
+    )
     {
         MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
@@ -251,8 +251,8 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
             mossaiStorage.getString(mossaiStorage.genKey("tokenURI", id)),
             mossaiStorage.getUint(mossaiStorage.genKey("price", id)),
             mossaiStorage.getAddress(
-                mossaiStorage.genKey("contractAddress", id)
-            ),
+            mossaiStorage.genKey("contractAddress", id)
+        ),
             mossaiStorage.getUint(mossaiStorage.genKey("tokenId", id)),
             mossaiStorage.getBytes1(mossaiStorage.genKey("contractType", id)),
             mossaiStorage.getUint(mossaiStorage.genKey("mintNum", id)),
@@ -284,6 +284,10 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
         require(bytes(_tokenURI).length > 0, "not found");
 
         mossaiStorage.setString(mossaiStorage.genKey("tokenURI", id), "");
+
+
+        emit eveDelete(id);
+
     }
 
     /**
