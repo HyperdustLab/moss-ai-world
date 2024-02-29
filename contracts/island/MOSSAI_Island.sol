@@ -187,45 +187,6 @@ contract MOSSAI_Island is OwnableUpgradeable {
         emit eveSaveIsland(id);
     }
 
-    function update(
-        uint256 id,
-        string memory name,
-        string memory coverImage,
-        string memory file,
-        string memory fileHash,
-        string memory scenesData
-    ) public {
-        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
-        string memory _name = mossaiStorage.getString(
-            mossaiStorage.genKey("name", id)
-        );
-
-        require(bytes(_name).length > 0, "not found");
-
-        uint256 seed = mossaiStorage.getUint(mossaiStorage.genKey("seed", id));
-
-        address owner = MOSSAI_Island_NFG(_islandNFGAddress).getSeedOwer(
-            uint32(seed)
-        );
-
-        require(owner == msg.sender, "not owner");
-
-        mossaiStorage.setString(mossaiStorage.genKey("name", id), name);
-        mossaiStorage.setString(
-            mossaiStorage.genKey("coverImage", id),
-            coverImage
-        );
-
-        mossaiStorage.setString(mossaiStorage.genKey("file", id), file);
-        mossaiStorage.setString(mossaiStorage.genKey("fileHash", id), fileHash);
-        mossaiStorage.setString(
-            mossaiStorage.genKey("scenesData", id),
-            scenesData
-        );
-
-        emit eveSaveIsland(id);
-    }
-
     function generateHash(string memory input) public returns (bytes32) {
         bytes32 hash = keccak256(abi.encodePacked(input));
 
@@ -254,55 +215,6 @@ contract MOSSAI_Island is OwnableUpgradeable {
             bytesArray[i] = _bytes32[i];
         }
         return string(bytesArray);
-    }
-
-    function getIsland(
-        uint256 islandId
-    )
-        public
-        view
-        returns (
-            uint256,
-            string memory,
-            string memory,
-            string memory,
-            string memory,
-            address,
-            address,
-            uint256,
-            uint256,
-            bytes32,
-            string memory
-        )
-    {
-        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
-        string memory _name = mossaiStorage.getString(
-            mossaiStorage.genKey("name", islandId)
-        );
-
-        require(bytes(_name).length > 0, "not found");
-
-        return (
-            islandId,
-            _name,
-            mossaiStorage.getString(
-                mossaiStorage.genKey("coverImage", islandId)
-            ),
-            mossaiStorage.getString(mossaiStorage.genKey("file", islandId)),
-            mossaiStorage.getString(mossaiStorage.genKey("fileHash", islandId)),
-            mossaiStorage.getAddress(
-                mossaiStorage.genKey("erc721Address", islandId)
-            ),
-            mossaiStorage.getAddress(
-                mossaiStorage.genKey("erc1155Address", islandId)
-            ),
-            mossaiStorage.getUint(mossaiStorage.genKey("coordinate", islandId)),
-            mossaiStorage.getUint(mossaiStorage.genKey("seed", islandId)),
-            mossaiStorage.getBytes32(mossaiStorage.genKey("sid", islandId)),
-            mossaiStorage.getString(
-                mossaiStorage.genKey("scenesData", islandId)
-            )
-        );
     }
 
     function updateErc721Address(
@@ -368,5 +280,103 @@ contract MOSSAI_Island is OwnableUpgradeable {
             erc1155Address
         );
         emit eveSaveIsland(islandId);
+    }
+
+    function update(
+        uint256 id,
+        string memory name,
+        string memory coverImage,
+        string memory file,
+        string memory fileHash,
+        string memory scenesData,
+        string memory placementRecord
+    ) public {
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+        string memory _name = mossaiStorage.getString(
+            mossaiStorage.genKey("name", id)
+        );
+
+        require(bytes(_name).length > 0, "not found");
+
+        uint256 seed = mossaiStorage.getUint(mossaiStorage.genKey("seed", id));
+
+        address owner = MOSSAI_Island_NFG(_islandNFGAddress).getSeedOwer(
+            uint32(seed)
+        );
+
+        require(owner == msg.sender, "not owner");
+
+        mossaiStorage.setString(mossaiStorage.genKey("name", id), name);
+        mossaiStorage.setString(
+            mossaiStorage.genKey("coverImage", id),
+            coverImage
+        );
+
+        mossaiStorage.setString(mossaiStorage.genKey("file", id), file);
+        mossaiStorage.setString(mossaiStorage.genKey("fileHash", id), fileHash);
+        mossaiStorage.setString(
+            mossaiStorage.genKey("scenesData", id),
+            scenesData
+        );
+
+        mossaiStorage.setString(
+            mossaiStorage.genKey("placementRecord", id),
+            placementRecord
+        );
+
+        emit eveSaveIsland(id);
+    }
+
+    function getIsland(
+        uint256 islandId
+    )
+        public
+        view
+        returns (
+            uint256,
+            string memory,
+            string memory,
+            string memory,
+            string memory,
+            address,
+            address,
+            uint256,
+            uint256,
+            bytes32,
+            string memory,
+            string memory
+        )
+    {
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+        string memory _name = mossaiStorage.getString(
+            mossaiStorage.genKey("name", islandId)
+        );
+
+        require(bytes(_name).length > 0, "not found");
+
+        return (
+            islandId,
+            _name,
+            mossaiStorage.getString(
+                mossaiStorage.genKey("coverImage", islandId)
+            ),
+            mossaiStorage.getString(mossaiStorage.genKey("file", islandId)),
+            mossaiStorage.getString(mossaiStorage.genKey("fileHash", islandId)),
+            mossaiStorage.getAddress(
+                mossaiStorage.genKey("erc721Address", islandId)
+            ),
+            mossaiStorage.getAddress(
+                mossaiStorage.genKey("erc1155Address", islandId)
+            ),
+            mossaiStorage.getUint(mossaiStorage.genKey("coordinate", islandId)),
+            mossaiStorage.getUint(mossaiStorage.genKey("seed", islandId)),
+            mossaiStorage.getBytes32(mossaiStorage.genKey("sid", islandId)),
+            mossaiStorage.getString(
+                mossaiStorage.genKey("scenesData", islandId)
+            ),
+            mossaiStorage.getString(
+                mossaiStorage.genKey("placementRecord", islandId)
+            )
+        );
     }
 }

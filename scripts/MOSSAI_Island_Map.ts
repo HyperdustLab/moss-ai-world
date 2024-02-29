@@ -18,12 +18,12 @@ async function main() {
     console.info("Hyperdust_Storage:", MOSSAI_Storage.target)
 
 
-    // await (await MOSSAI_Storage.setServiceAddress(instance.target)).wait()
+    await (await MOSSAI_Storage.setServiceAddress(instance.target)).wait()
 
 
 
-    // await (await instance.setMOSSAIRolesCfgAddress("0x9bDaf3912e7b4794fE8aF2E748C35898265D5615")).wait()
-    // await (await instance.setMOSSAIStorageAddress(MOSSAI_Storage.target)).wait()
+    await (await instance.setMOSSAIRolesCfgAddress("0x9bDaf3912e7b4794fE8aF2E748C35898265D5615")).wait()
+    await (await instance.setMOSSAIStorageAddress(MOSSAI_Storage.target)).wait()
 
 
 
