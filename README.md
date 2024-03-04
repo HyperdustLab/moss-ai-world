@@ -1,1 +1,2 @@
-[![Video Title](https://i.vimeocdn.com/video/123456789.jpg)](https://player.vimeo.com/video/918370279)
+
+[![MOSSAI: Open AI World](https://raw.githubusercontent.com/HyperdustLab/MOSSAI/main/MOSSAI_2050_OpenAIWorld.jpg)](https://player.vimeo.com/video/918370279)
