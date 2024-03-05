@@ -27,6 +27,7 @@ async function main() {
             "0x9bDaf3912e7b4794fE8aF2E748C35898265D5615",
             MOSSAI_Storage.target,
             "0x7872Db8dCea6E3865C604a9D5dA9C5a2607Bb66a",
+            "0x605DC1c559315Cc3ea65E2a6840a5523029d0bbe"
         ])).wait();
 
 
@@ -39,9 +40,9 @@ async function main() {
 
     await (
         await instance.setDefParameter(
-            "https://vniverse.s3.ap-east-1.amazonaws.com/upload/2023/8/10/13e02181-24b5-4e41-8481-4d7bb4886619.jpg",
-            "https://s3.hyperdust.io/upload/2024/1/24/63241709-6683-404c-b35c-b5466a57dad3.7z",
-            "83e56d1e198ac71e493706073e2547b99f35baa53801d7127ebe2448e04ce5f0"
+            "https://s3.hyperdust.io/upload/2024/3/5/cc33c0ab-1d12-4ad4-93f9-cb34481c85dc.jpg",
+            "https://s3.hyperdust.io/upload/2024/3/4/7d012ce0-9bd0-48f1-ba2c-49228936a250.7z",
+            "db055fa3753903af2075421cd0b9977fa9390f808c46ac628adcb65bc6bbae51"
         )
     ).wait();
 

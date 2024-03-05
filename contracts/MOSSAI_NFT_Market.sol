@@ -243,7 +243,7 @@ contract MOSSAI_NFT_Market is OwnableUpgradeable {
             NFTProductId,
             mossaiStorage.getAddress(mossaiStorage.genKey("buyer", id)),
             mossaiStorage.getAddress(mossaiStorage.genKey("seller", id)),
-            mossaiStorage.getUint(mossaiStorage.genKey("amount", id)),
+            mossaiStorage.getUint(mossaiStorage.genKey("payAmount", id)),
             mossaiStorage.getUint(mossaiStorage.genKey("price", id)),
             mossaiStorage.getUint(mossaiStorage.genKey("num", id)),
             mossaiStorage.getUint(mossaiStorage.genKey("commission", id))
