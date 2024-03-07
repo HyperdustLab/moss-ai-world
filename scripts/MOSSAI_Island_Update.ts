@@ -7,7 +7,7 @@ async function main() {
 
     // Upgrading
     const MOSSAI_Island = await ethers.getContractFactory("MOSSAI_Island");
-    const upgraded = await upgrades.upgradeProxy("0x5197De6b2353d4720e08992c938eeb44E4F83206", MOSSAI_Island);
+    const upgraded = await upgrades.upgradeProxy("0x57B885bD763007B5b89e8cB2D1fD5d7995b5fC31", MOSSAI_Island);
 
 
 

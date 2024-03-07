@@ -31,12 +31,11 @@ abstract contract IHyperdustTransactionCfg {
 
 abstract contract IMOSSAIIsland {
     function getIsland(
-        uint256 islandId
+        bytes32 sid
     )
         public
         view
         returns (
-            uint256,
             string memory,
             string memory,
             string memory,
@@ -46,6 +45,7 @@ abstract contract IMOSSAIIsland {
             uint256,
             uint256,
             bytes32,
+            string memory,
             string memory
         )
     {}
@@ -111,7 +111,7 @@ contract Island_Mint is OwnableUpgradeable {
         _HyperdustRolesCfgAddress = contractaddressArray[5];
     }
 
-    function mint721(uint256 islandId, string memory tokenURI) public {
+    function mint721(bytes32 sid, string memory tokenURI) public {
         IWalletAccount walletAccountAddress = IWalletAccount(
             _WalletAccountAddress
         );
@@ -123,9 +123,10 @@ contract Island_Mint is OwnableUpgradeable {
             _GasFeeCollectionWallet != address(0),
             "not set GasFeeCollectionWallet"
         );
-        (, , , , , address erc721Address, , , uint256 seed, , ) = IMOSSAIIsland(
+        (, , , , address erc721Address, , , uint256 seed, , , ) = IMOSSAIIsland(
             _MOSSAIIslandAddres
-        ).getIsland(islandId);
+        ).getIsland(sid);
+
         address seedOwer = MOSSAI_Island_NFG(_MOSSAIIslandNFGAddress)
             .getSeedOwer(seed);
         require(seedOwer == msg.sender, "not island owner");
@@ -143,11 +144,13 @@ contract Island_Mint is OwnableUpgradeable {
             IWalletAccount(_WalletAccountAddress).addAmount(gasFee);
         }
 
+        require(erc721Address != address(0), "erc721Address is zero address");
+
         Island_721(erc721Address).safeMint(msg.sender, tokenURI);
     }
 
     function mint1155(
-        uint256 islandId,
+        bytes32 sid,
         uint256 id,
         uint256 amount,
         string memory tokenURI
@@ -169,13 +172,13 @@ contract Island_Mint is OwnableUpgradeable {
             ,
             ,
             ,
-            ,
             address erc1155Address,
             ,
             uint256 seed,
             ,
+            ,
 
-        ) = IMOSSAIIsland(_MOSSAIIslandAddres).getIsland(islandId);
+        ) = IMOSSAIIsland(_MOSSAIIslandAddres).getIsland(sid);
         address seedOwer = MOSSAI_Island_NFG(_MOSSAIIslandNFGAddress)
             .getSeedOwer(seed);
         require(seedOwer == msg.sender, "not island owner");

@@ -29,6 +29,13 @@ abstract contract IHyperdustSpaceAddress {
         string memory coverImage,
         string memory remark
     ) public returns (bytes32) {}
+
+    function edit(
+        bytes32 sid,
+        string memory name,
+        string memory coverImage,
+        string memory remark
+    ) public {}
 }
 
 contract MOSSAI_Island is OwnableUpgradeable {
@@ -351,6 +358,12 @@ contract MOSSAI_Island is OwnableUpgradeable {
             mossaiStorage.genKey("placementRecord", id),
             placementRecord
         );
+
+        IHyperdustSpaceAddress hyperdustSpaceAddress = IHyperdustSpaceAddress(
+            _HyperdustSpaceAddress
+        );
+
+        hyperdustSpaceAddress.edit(sid, name, coverImage, "");
 
         emit eveSaveIsland(sid);
     }
