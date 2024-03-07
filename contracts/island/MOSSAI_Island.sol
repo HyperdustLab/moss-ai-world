@@ -55,7 +55,13 @@ contract MOSSAI_Island is OwnableUpgradeable {
     string public defFile;
     string public fileHash;
 
+    uint256 public _erc721Version;
+    uint256 public _erc1155Version;
+
     event eveSaveIsland(bytes32 sid);
+
+    event eveErc721Version();
+    event eveErc1155Version();
 
     function initialize(address onlyOwner) public initializer {
         __Ownable_init(onlyOwner);
@@ -422,5 +428,28 @@ contract MOSSAI_Island is OwnableUpgradeable {
                 mossaiStorage.genKey("placementRecord", islandId)
             )
         );
+    }
+
+    function updateErc721Version(uint256 version) public {
+        require(
+            Hyperdust_Roles_Cfg(_HyperdustRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
+            "not admin role"
+        );
+        _erc721Version = version;
+        emit eveErc721Version();
+    }
+
+    function updateErc1155Version(uint256 version) public {
+        require(
+            Hyperdust_Roles_Cfg(_HyperdustRolesCfgAddress).hasAdminRole(
+                msg.sender
+            ),
+            "not admin role"
+        );
+        _erc1155Version = version;
+
+        emit eveErc1155Version();
     }
 }

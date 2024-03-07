@@ -174,4 +174,14 @@ contract MOSSAI_Island_NFG is OwnableUpgradeable {
         _MOSSAIStorageAddress = contractaddressArray[1];
         _IslandNFTAddress = contractaddressArray[2];
     }
+
+    function getSeed(uint256 tokenId) public view returns (uint32) {
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+
+        uint256 seed = mossaiStorage.getUint(
+            mossaiStorage.genKey("tokenSeed", tokenId)
+        );
+
+        return uint32(seed);
+    }
 }
