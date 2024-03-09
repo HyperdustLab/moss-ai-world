@@ -1,12 +1,12 @@
 /** @format */
 
-import { ethers, run } from "hardhat";
+import { ethers, run } from "hardhat"
 
 
 async function main() {
 
 
-    const MOSSAI_Island_NFG = await ethers.getContractAt("MOSSAI_Island_NFG", "0xCB25085841CD8230d652e99aD240568E21A00F10");
+    const MOSSAI_Island_NFG = await ethers.getContractAt("MOSSAI_Island_NFG", "0x29E996B43072af9adF3Eb80d55523a34A4d7Add2")
 
 
     let seeds = []
@@ -15,17 +15,17 @@ async function main() {
 
     let locations = []
 
-    let seed = 5000;
+    let seed = 5000
 
-    for (let i = 1; i <= 1000; i++) {
+    for (let i = 1; i <= 100; i++) {
 
 
-        tokenURIS.push(`https://s3.hyperdust.io/island/${i}.json`);
+        tokenURIS.push(`https://s3.hyperdust.io/island/${i}.json`)
 
-        locations.push(i);
-        seeds.push(seed);
+        locations.push(i)
+        seeds.push(seed)
 
-        seed++;
+        seed++
 
         if (i % 100 === 0) {
 
@@ -41,12 +41,11 @@ async function main() {
     }
 
 
-
 }
 
 // We recommend this pattern to be able to use async/await everywhere q
 // and properly handle errors.
 main().catch((error) => {
-    console.error(error);
-    process.exitCode = 1;
-});
+    console.error(error)
+    process.exitCode = 1
+})

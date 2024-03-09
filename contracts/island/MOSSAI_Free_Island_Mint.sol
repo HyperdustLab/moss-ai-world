@@ -1,4 +1,5 @@
 pragma solidity ^0.8.0;
+
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -79,6 +80,7 @@ contract MOSSAI_Free_Island_Mint is OwnableUpgradeable {
 
     function mintIsland(
         uint32 coordinate,
+        string memory islandName,
         string[] memory names,
         string[] memory symbols
     ) public {
@@ -122,9 +124,11 @@ contract MOSSAI_Free_Island_Mint is OwnableUpgradeable {
             walletAccountAddress.addAmount(mintIslandAmount);
         }
 
+
         MOSSAI_Island(_MOSSAIIslandAddres).mint(
             coordinate,
             msg.sender,
+            islandName,
             names,
             symbols
         );

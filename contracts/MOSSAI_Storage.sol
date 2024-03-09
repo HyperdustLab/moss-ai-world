@@ -1,13 +1,21 @@
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./utils/StrUtil.sol";
 
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-contract MOSSAI_Storage is Ownable {
-    constructor(address onlyOwner) Ownable(onlyOwner) {}
+
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
+contract MOSSAI_Storage is OwnableUpgradeable {
+
+
+    function initialize(address ownable) public initializer {
+        __Ownable_init(ownable);
+    }
 
     using Strings for *;
     using StrUtil for *;
@@ -26,6 +34,7 @@ contract MOSSAI_Storage is Ownable {
     mapping(string => string[]) public stringArrayStorage;
     mapping(string => bytes[]) public bytesArrayStorage;
     mapping(string => bool[]) public boolArrayStorage;
+    mapping(bytes32 => uint256) public bytes32UintStorage;
 
     uint256 public _id;
 
@@ -116,7 +125,7 @@ contract MOSSAI_Storage is Ownable {
 
         uintArrayStorage[key][index] = uintArrayStorage[key][
             uintArrayStorage[key].length - 1
-        ];
+            ];
 
         uintArrayStorage[key].pop();
     }
@@ -167,7 +176,7 @@ contract MOSSAI_Storage is Ownable {
 
         addressArrayStorage[key][index] = addressArrayStorage[key][
             addressArrayStorage[key].length - 1
-        ];
+            ];
 
         addressArrayStorage[key].pop();
     }
@@ -208,7 +217,7 @@ contract MOSSAI_Storage is Ownable {
 
         stringArrayStorage[key][index] = stringArrayStorage[key][
             stringArrayStorage[key].length - 1
-        ];
+            ];
 
         stringArrayStorage[key].pop();
     }
@@ -249,7 +258,7 @@ contract MOSSAI_Storage is Ownable {
 
         bytesArrayStorage[key][index] = bytesArrayStorage[key][
             bytesArrayStorage[key].length - 1
-        ];
+            ];
 
         bytesArrayStorage[key].pop();
     }
@@ -283,7 +292,7 @@ contract MOSSAI_Storage is Ownable {
 
         boolArrayStorage[key][index] = boolArrayStorage[key][
             boolArrayStorage[key].length - 1
-        ];
+            ];
 
         boolArrayStorage[key].pop();
     }
@@ -308,5 +317,16 @@ contract MOSSAI_Storage is Ownable {
         uint256 id
     ) public pure returns (string memory) {
         return string(abi.encodePacked(key, "_", id.toString()));
+    }
+
+    function setBytes32Uint(bytes32 key, uint256 value) public {
+        require(msg.sender == _serviceAddress, "only service can set");
+        bytes32UintStorage[key] = value;
+
+    }
+
+
+    function getBytes32Uint(bytes32 key) public view returns (uint256) {
+        return bytes32UintStorage[key];
     }
 }

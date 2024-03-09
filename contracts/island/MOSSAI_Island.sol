@@ -137,6 +137,7 @@ contract MOSSAI_Island is OwnableUpgradeable {
     function mint(
         uint32 coordinate,
         address owner,
+        string memory islandName,
         string[] memory names,
         string[] memory symbols
     ) public {
@@ -185,18 +186,15 @@ contract MOSSAI_Island is OwnableUpgradeable {
         uint256 id = mossaiStorage.getNextId();
 
         bytes32 sid = hyperdustSpaceAddress.add(
-            owner.toHexString(),
+            islandName,
             defCoverImage,
             ""
         );
-
-        string memory sidStr = bytes32ToString(sid);
-
-        mossaiStorage.setUint(sidStr, id);
+        mossaiStorage.setBytes32Uint(sid, id);
 
         mossaiStorage.setString(
             mossaiStorage.genKey("name", id),
-            owner.toHexString()
+            islandName
         );
 
         mossaiStorage.setString(
@@ -225,22 +223,19 @@ contract MOSSAI_Island is OwnableUpgradeable {
         mossaiStorage.setUint(mossaiStorage.genKey("seed", id), seed);
         mossaiStorage.setBytes32(mossaiStorage.genKey("sid", id), sid);
 
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("erc721Version", id),
+            _erc721Version
+        );
+
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("erc1155Version", id),
+            _erc1155Version
+        );
+
         emit eveSaveIsland(sid);
     }
 
-    function bytes32ToString(
-        bytes32 _bytes32
-    ) public pure returns (string memory) {
-        uint8 i = 0;
-        while (i < 32 && _bytes32[i] != 0) {
-            i++;
-        }
-        bytes memory bytesArray = new bytes(i);
-        for (i = 0; i < 32 && _bytes32[i] != 0; i++) {
-            bytesArray[i] = _bytes32[i];
-        }
-        return string(bytesArray);
-    }
 
     function updateErc721Address(
         bytes32 sid,
@@ -249,9 +244,8 @@ contract MOSSAI_Island is OwnableUpgradeable {
     ) public {
         MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
-        string memory sidStr = bytes32ToString(sid);
 
-        uint256 id = mossaiStorage.getUint(sidStr);
+        uint256 id = mossaiStorage.getBytes32Uint(sid);
 
         require(id > 0, "not found");
 
@@ -278,6 +272,11 @@ contract MOSSAI_Island is OwnableUpgradeable {
             mossaiStorage.genKey("erc721Address", id),
             erc721Address
         );
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("erc721Version", id),
+            _erc721Version
+        );
+
         emit eveSaveIsland(sid);
     }
 
@@ -288,9 +287,8 @@ contract MOSSAI_Island is OwnableUpgradeable {
     ) public {
         MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
-        string memory sidStr = bytes32ToString(sid);
 
-        uint256 id = mossaiStorage.getUint(sidStr);
+        uint256 id = mossaiStorage.getBytes32Uint(sid);
 
         require(id > 0, "not found");
 
@@ -314,6 +312,11 @@ contract MOSSAI_Island is OwnableUpgradeable {
             mossaiStorage.genKey("erc1155Address", id),
             erc1155Address
         );
+
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("erc1155Version", id),
+            _erc1155Version
+        );
         emit eveSaveIsland(sid);
     }
 
@@ -328,9 +331,8 @@ contract MOSSAI_Island is OwnableUpgradeable {
     ) public {
         MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
-        string memory sidStr = bytes32ToString(sid);
 
-        uint256 id = mossaiStorage.getUint(sidStr);
+        uint256 id = mossaiStorage.getBytes32Uint(sid);
         require(id > 0, "not found");
 
         string memory _name = mossaiStorage.getString(
@@ -377,27 +379,28 @@ contract MOSSAI_Island is OwnableUpgradeable {
     function getIsland(
         bytes32 sid
     )
-        public
-        view
-        returns (
-            string memory,
-            string memory,
-            string memory,
-            string memory,
-            address,
-            address,
-            uint256,
-            uint256,
-            bytes32,
-            string memory,
-            string memory
-        )
+    public
+    view
+    returns (
+        string memory,
+        string memory,
+        string memory,
+        string memory,
+        address,
+        address,
+        uint256,
+        uint256,
+        bytes32,
+        string memory,
+        string memory,
+        uint256,
+        uint256
+    )
     {
         MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
-        string memory sidStr = bytes32ToString(sid);
 
-        uint256 islandId = mossaiStorage.getUint(sidStr);
+        uint256 islandId = mossaiStorage.getBytes32Uint(sid);
 
         string memory _name = mossaiStorage.getString(
             mossaiStorage.genKey("name", islandId)
@@ -408,25 +411,31 @@ contract MOSSAI_Island is OwnableUpgradeable {
         return (
             _name,
             mossaiStorage.getString(
-                mossaiStorage.genKey("coverImage", islandId)
-            ),
+            mossaiStorage.genKey("coverImage", islandId)
+        ),
             mossaiStorage.getString(mossaiStorage.genKey("file", islandId)),
             mossaiStorage.getString(mossaiStorage.genKey("fileHash", islandId)),
             mossaiStorage.getAddress(
-                mossaiStorage.genKey("erc721Address", islandId)
-            ),
+            mossaiStorage.genKey("erc721Address", islandId)
+        ),
             mossaiStorage.getAddress(
-                mossaiStorage.genKey("erc1155Address", islandId)
-            ),
+            mossaiStorage.genKey("erc1155Address", islandId)
+        ),
             mossaiStorage.getUint(mossaiStorage.genKey("coordinate", islandId)),
             mossaiStorage.getUint(mossaiStorage.genKey("seed", islandId)),
             mossaiStorage.getBytes32(mossaiStorage.genKey("sid", islandId)),
             mossaiStorage.getString(
-                mossaiStorage.genKey("scenesData", islandId)
-            ),
+            mossaiStorage.genKey("scenesData", islandId)
+        ),
             mossaiStorage.getString(
-                mossaiStorage.genKey("placementRecord", islandId)
-            )
+            mossaiStorage.genKey("placementRecord", islandId)
+        ),
+            mossaiStorage.getUint(
+            mossaiStorage.genKey("erc721Version", islandId)
+        ),
+            mossaiStorage.getUint(
+            mossaiStorage.genKey("erc1155Version", islandId)
+        )
         );
     }
 
@@ -452,4 +461,10 @@ contract MOSSAI_Island is OwnableUpgradeable {
 
         emit eveErc1155Version();
     }
+
+    function getVersions() public view returns (uint256, uint256) {
+        return (_erc721Version, _erc1155Version);
+    }
+
+
 }
