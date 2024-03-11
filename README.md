@@ -24,4 +24,5 @@ This repository has all smart contracts used in MOSSAI.
 
 ## Contributing
 Hyperdust Foundation
+Singapore
 
