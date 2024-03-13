@@ -31,7 +31,7 @@ const config: HardhatUserConfig = {
     networks: {
         dev: {
             url: "HTTP://127.0.0.1:8545",
-            accounts: [process.env.PRIVATE_KEY],
+            accounts: [process.env.PRIVATE_KEY, process.env.PRIVATE_KEY_1],
             loggingEnabled: true
         },
         sepolia: {
@@ -41,7 +41,7 @@ const config: HardhatUserConfig = {
         },
         arbitrumSepolia: {
             url: process.env.Arbitrum_Sepolia_Testnet_RPC_URL,
-            accounts: [process.env.PRIVATE_KEY],
+            accounts: [process.env.PRIVATE_KEY, process.env.PRIVATE_KEY_1],
             loggingEnabled: true
 
         },

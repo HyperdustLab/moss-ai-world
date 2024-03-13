@@ -13,6 +13,8 @@ import "./utils/StrUtil.sol";
 import "./Hyperdust_Roles_Cfg.sol";
 
 import "./MOSSAI_Storage.sol";
+import "./island/MOSSAI_Island.sol";
+import "./island/MOSSAI_Island_NFG.sol";
 
 /**
  * @title MOSSAI_NFT_Product
@@ -26,6 +28,7 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
     address public _MOSSAIRolesCfgAddress;
     address public _MOSSAI_Island_NFG_Address;
     address public _MOSSAIStorageAddress;
+    address public _MOSSAIIslandAddress;
 
     event eveSave(uint256 id);
 
@@ -57,6 +60,12 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
         _MOSSAIStorageAddress = MOSSAIStorageAddress;
     }
 
+    function setMOSSAIIslandAddress(
+        address MOSSAIIslandAddress
+    ) public onlyOwner {
+        _MOSSAIIslandAddress = MOSSAIIslandAddress;
+    }
+
     function setContractAddress(
         address[] memory contractaddressArray
     ) public onlyOwner {
@@ -64,18 +73,11 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
         _MOSSAIRolesCfgAddress = contractaddressArray[1];
         _MOSSAI_Island_NFG_Address = contractaddressArray[2];
         _MOSSAIStorageAddress = contractaddressArray[3];
+        _MOSSAIIslandAddress = contractaddressArray[4];
     }
 
-    /**
-     * @dev Saves an NFT product to the marketplace.
-     * @param contractAddress The address of the NFT contract.
-     * @param tokenId The ID of the NFT.
-     * @param status The status of the NFT product.
-     * @param putawayNum The number of NFT products put away.
-     * @param price The price of the NFT product.
-     * @param contractType The type of the NFT contract.
-     */
     function saveNFTProduct(
+        bytes32 sid,
         address contractAddress,
         uint256 tokenId,
         bytes1 status,
@@ -88,14 +90,16 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
             "contractType error"
         );
 
-        uint256 balance = IERC721(_MOSSAI_Island_NFG_Address).balanceOf(
-            msg.sender
+        MOSSAI_Island islandService = MOSSAI_Island(_MOSSAIIslandAddress);
+        MOSSAI_Island_NFG islandNFGService = MOSSAI_Island_NFG(
+            _MOSSAI_Island_NFG_Address
         );
 
-        require(
-            balance > 0,
-            "You must have an Island NFG in order to list an NFT"
-        );
+        (, , , , , , , uint256 seed, , , , , ) = islandService.getIsland(sid);
+
+        address seedOwer = islandNFGService.getSeedOwer(seed);
+
+        require(msg.sender == seedOwer, "not Island owner");
 
         require(status == 0x01 || status == 0x00, "status error");
 
@@ -137,6 +141,8 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
             require(owner == msg.sender, "not owner");
         }
 
+        mossaiStorage.setBytes32(mossaiStorage.genKey("sid", id), sid);
+
         mossaiStorage.setAddress(mossaiStorage.genKey("owner", id), msg.sender);
         mossaiStorage.setUint(
             mossaiStorage.genKey("putawayNum", id),
@@ -173,7 +179,8 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
             uint256,
             uint256,
             bytes1,
-            bytes1
+            bytes1,
+            bytes32
         )
     {
         MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
@@ -195,7 +202,8 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
             tokenId,
             mossaiStorage.getUint(mossaiStorage.genKey("price", id)),
             mossaiStorage.getBytes1(mossaiStorage.genKey("status", id)),
-            mossaiStorage.getBytes1(mossaiStorage.genKey("contractType", id))
+            mossaiStorage.getBytes1(mossaiStorage.genKey("contractType", id)),
+            mossaiStorage.getBytes32(mossaiStorage.genKey("sid", id))
         );
     }
 

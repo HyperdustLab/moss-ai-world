@@ -141,11 +141,14 @@ contract MOSSAI_NFT_Market is OwnableUpgradeable {
             uint256 tokenId,
             uint256 price,
             bytes1 status,
-            bytes1 contractType
+            bytes1 contractType,
+            bytes32 sid
         ) = MOSSAINFTProductAddres.getNFTProduct(NFTProductId);
 
         require(status == 0x01, "status error");
         require(sellNum + num <= putawayNum, "in no stock");
+
+        require(msg.sender != owner, "You can't buy your own products");
 
         uint256 amount = price * num;
 
@@ -210,6 +213,7 @@ contract MOSSAI_NFT_Market is OwnableUpgradeable {
             mossaiStorage.genKey("commission", id),
             commission
         );
+        mossaiStorage.setBytes32(mossaiStorage.genKey("sid", id), sid);
 
         emit eveSave(id);
     }
@@ -227,7 +231,8 @@ contract MOSSAI_NFT_Market is OwnableUpgradeable {
             uint256,
             uint256,
             uint256,
-            uint256
+            uint256,
+            bytes32
         )
     {
         MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
@@ -246,7 +251,8 @@ contract MOSSAI_NFT_Market is OwnableUpgradeable {
             mossaiStorage.getUint(mossaiStorage.genKey("payAmount", id)),
             mossaiStorage.getUint(mossaiStorage.genKey("price", id)),
             mossaiStorage.getUint(mossaiStorage.genKey("num", id)),
-            mossaiStorage.getUint(mossaiStorage.genKey("commission", id))
+            mossaiStorage.getUint(mossaiStorage.genKey("commission", id)),
+            mossaiStorage.getBytes32(mossaiStorage.genKey("sid", id))
         );
     }
 }
