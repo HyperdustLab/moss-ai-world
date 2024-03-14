@@ -141,6 +141,8 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
             require(owner == msg.sender, "not owner");
         }
 
+        mossaiStorage.setUint(mossaiStorage.genKey("sellNum", id), 0);
+
         mossaiStorage.setBytes32(mossaiStorage.genKey("sid", id), sid);
 
         mossaiStorage.setAddress(mossaiStorage.genKey("owner", id), msg.sender);
@@ -240,6 +242,7 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
 
         if (sellNum + num == putawayNum) {
             mossaiStorage.setBytes1(mossaiStorage.genKey("status", id), 0x00);
+            mossaiStorage.setUint(mossaiStorage.genKey("sellNum", id), 0);
         }
 
         emit eveSave(id);
