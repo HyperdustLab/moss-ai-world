@@ -343,6 +343,7 @@ contract MOSSAI_Island is OwnableUpgradeable {
             uint32(seed)
         );
 
+
         require(owner == msg.sender, "not owner");
 
         mossaiStorage.setString(mossaiStorage.genKey("name", id), name);
@@ -350,6 +351,7 @@ contract MOSSAI_Island is OwnableUpgradeable {
             mossaiStorage.genKey("coverImage", id),
             coverImage
         );
+
 
         mossaiStorage.setString(mossaiStorage.genKey("file", id), file);
         mossaiStorage.setString(mossaiStorage.genKey("fileHash", id), fileHash);
@@ -367,7 +369,9 @@ contract MOSSAI_Island is OwnableUpgradeable {
             _HyperdustSpaceAddress
         );
 
+
         hyperdustSpaceAddress.edit(sid, name, coverImage, "", "");
+
 
         emit eveSaveIsland(sid);
     }
@@ -375,23 +379,23 @@ contract MOSSAI_Island is OwnableUpgradeable {
     function getIsland(
         bytes32 sid
     )
-        public
-        view
-        returns (
-            string memory,
-            string memory,
-            string memory,
-            string memory,
-            address,
-            address,
-            uint256,
-            uint256,
-            bytes32,
-            string memory,
-            string memory,
-            uint256,
-            uint256
-        )
+    public
+    view
+    returns (
+        string memory,
+        string memory,
+        string memory,
+        string memory,
+        address,
+        address,
+        uint256,
+        uint256,
+        bytes32,
+        string memory,
+        string memory,
+        uint256,
+        uint256
+    )
     {
         MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
@@ -406,31 +410,31 @@ contract MOSSAI_Island is OwnableUpgradeable {
         return (
             _name,
             mossaiStorage.getString(
-                mossaiStorage.genKey("coverImage", islandId)
-            ),
+            mossaiStorage.genKey("coverImage", islandId)
+        ),
             mossaiStorage.getString(mossaiStorage.genKey("file", islandId)),
             mossaiStorage.getString(mossaiStorage.genKey("fileHash", islandId)),
             mossaiStorage.getAddress(
-                mossaiStorage.genKey("erc721Address", islandId)
-            ),
+            mossaiStorage.genKey("erc721Address", islandId)
+        ),
             mossaiStorage.getAddress(
-                mossaiStorage.genKey("erc1155Address", islandId)
-            ),
+            mossaiStorage.genKey("erc1155Address", islandId)
+        ),
             mossaiStorage.getUint(mossaiStorage.genKey("coordinate", islandId)),
             mossaiStorage.getUint(mossaiStorage.genKey("seed", islandId)),
             mossaiStorage.getBytes32(mossaiStorage.genKey("sid", islandId)),
             mossaiStorage.getString(
-                mossaiStorage.genKey("scenesData", islandId)
-            ),
+            mossaiStorage.genKey("scenesData", islandId)
+        ),
             mossaiStorage.getString(
-                mossaiStorage.genKey("placementRecord", islandId)
-            ),
+            mossaiStorage.genKey("placementRecord", islandId)
+        ),
             mossaiStorage.getUint(
-                mossaiStorage.genKey("erc721Version", islandId)
-            ),
+            mossaiStorage.genKey("erc721Version", islandId)
+        ),
             mossaiStorage.getUint(
-                mossaiStorage.genKey("erc1155Version", islandId)
-            )
+            mossaiStorage.genKey("erc1155Version", islandId)
+        )
         );
     }
 
