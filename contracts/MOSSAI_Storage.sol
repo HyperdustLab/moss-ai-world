@@ -1,17 +1,26 @@
 pragma solidity ^0.8.0;
 
+<<<<<<< HEAD
 import './utils/StrUtil.sol';
+=======
+import "@openzeppelin/contracts/access/Ownable.sol";
+>>>>>>> dacce8ff683955fd9370fc56347408d9d6169c2b
 
 import '@openzeppelin/contracts/utils/Strings.sol';
 
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 
+<<<<<<< HEAD
 import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 
 contract MOSSAI_Storage is OwnableUpgradeable {
     function initialize(address ownable) public initializer {
         __Ownable_init(ownable);
     }
+=======
+contract MOSSAI_Storage is Ownable {
+    constructor() Ownable(msg.sender) {}
+>>>>>>> dacce8ff683955fd9370fc56347408d9d6169c2b
 
     using Strings for *;
     using StrUtil for *;
@@ -30,7 +39,6 @@ contract MOSSAI_Storage is OwnableUpgradeable {
     mapping(string => string[]) public stringArrayStorage;
     mapping(string => bytes[]) public bytesArrayStorage;
     mapping(string => bool[]) public boolArrayStorage;
-    mapping(bytes32 => uint256) public bytes32UintStorage;
 
     uint256 public _id;
 
@@ -112,7 +120,13 @@ contract MOSSAI_Storage is OwnableUpgradeable {
 
         require(index < uintArrayStorage[key].length, 'Index out of bounds');
 
+<<<<<<< HEAD
         uintArrayStorage[key][index] = uintArrayStorage[key][uintArrayStorage[key].length - 1];
+=======
+        uintArrayStorage[key][index] = uintArrayStorage[key][
+            uintArrayStorage[key].length - 1
+        ];
+>>>>>>> dacce8ff683955fd9370fc56347408d9d6169c2b
 
         uintArrayStorage[key].pop();
     }
@@ -152,7 +166,13 @@ contract MOSSAI_Storage is OwnableUpgradeable {
 
         require(index < addressArrayStorage[key].length, 'Index out of bounds');
 
+<<<<<<< HEAD
         addressArrayStorage[key][index] = addressArrayStorage[key][addressArrayStorage[key].length - 1];
+=======
+        addressArrayStorage[key][index] = addressArrayStorage[key][
+            addressArrayStorage[key].length - 1
+        ];
+>>>>>>> dacce8ff683955fd9370fc56347408d9d6169c2b
 
         addressArrayStorage[key].pop();
     }
@@ -182,7 +202,13 @@ contract MOSSAI_Storage is OwnableUpgradeable {
 
         require(index < stringArrayStorage[key].length, 'Index out of bounds');
 
+<<<<<<< HEAD
         stringArrayStorage[key][index] = stringArrayStorage[key][stringArrayStorage[key].length - 1];
+=======
+        stringArrayStorage[key][index] = stringArrayStorage[key][
+            stringArrayStorage[key].length - 1
+        ];
+>>>>>>> dacce8ff683955fd9370fc56347408d9d6169c2b
 
         stringArrayStorage[key].pop();
     }
@@ -212,7 +238,13 @@ contract MOSSAI_Storage is OwnableUpgradeable {
 
         require(index < bytesArrayStorage[key].length, 'Index out of bounds');
 
+<<<<<<< HEAD
         bytesArrayStorage[key][index] = bytesArrayStorage[key][bytesArrayStorage[key].length - 1];
+=======
+        bytesArrayStorage[key][index] = bytesArrayStorage[key][
+            bytesArrayStorage[key].length - 1
+        ];
+>>>>>>> dacce8ff683955fd9370fc56347408d9d6169c2b
 
         bytesArrayStorage[key].pop();
     }
@@ -242,7 +274,13 @@ contract MOSSAI_Storage is OwnableUpgradeable {
 
         require(index < boolArrayStorage[key].length, 'Index out of bounds');
 
+<<<<<<< HEAD
         boolArrayStorage[key][index] = boolArrayStorage[key][boolArrayStorage[key].length - 1];
+=======
+        boolArrayStorage[key][index] = boolArrayStorage[key][
+            boolArrayStorage[key].length - 1
+        ];
+>>>>>>> dacce8ff683955fd9370fc56347408d9d6169c2b
 
         boolArrayStorage[key].pop();
     }
@@ -263,6 +301,7 @@ contract MOSSAI_Storage is OwnableUpgradeable {
     function genKey(string memory key, uint256 id) public pure returns (string memory) {
         return string(abi.encodePacked(key, '_', id.toString()));
     }
+<<<<<<< HEAD
 
     function setBytes32Uint(bytes32 key, uint256 value) public {
         require(msg.sender == _serviceAddress, 'only service can set');
@@ -272,4 +311,6 @@ contract MOSSAI_Storage is OwnableUpgradeable {
     function getBytes32Uint(bytes32 key) public view returns (uint256) {
         return bytes32UintStorage[key];
     }
+=======
+>>>>>>> dacce8ff683955fd9370fc56347408d9d6169c2b
 }

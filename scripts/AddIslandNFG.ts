@@ -1,12 +1,13 @@
 /** @format */
 
-import { ethers, run } from "hardhat"
+import { ethers, run } from "hardhat";
+
 
 async function main() {
-    const MOSSAI_Island_NFG = await ethers.getContractAt(
-        "MOSSAI_Island_NFG",
-        "0x29E996B43072af9adF3Eb80d55523a34A4d7Add2",
-    )
+
+
+    const MOSSAI_Island_NFG = await ethers.getContractAt("MOSSAI_Island_NFG", "0xC31A364A09c85319cFAc88Bb3F8F0dB874acBeFA");
+
 
     let seeds = []
 
@@ -14,32 +15,38 @@ async function main() {
 
     let locations = []
 
-    let seed = 6800
+    let seed = 5000;
 
-    for (let i = 1801; i <= 1884; i++) {
-        tokenURIS.push(`https://s3.hyperdust.io/island/${i}.json`)
+    for (let i = 1; i <= 1000; i++) {
 
-        locations.push(i)
-        seeds.push(seed)
 
-        seed++
+        tokenURIS.push(`https://s3.hyperdust.io/island/${i}.json`);
 
-        if (i % 100 === 0 || i % 100 < 100) {
-            await (
-                await MOSSAI_Island_NFG.batchAddNFG(seeds, tokenURIS, locations)
-            ).wait()
+        locations.push(i);
+        seeds.push(seed);
+
+        seed++;
+
+        if (i % 100 === 0) {
+
+            await (await MOSSAI_Island_NFG.batchAddNFG(seeds, tokenURIS, locations)).wait()
 
             console.info(seeds, tokenURIS, locations)
             seeds = []
             tokenURIS = []
             locations = []
         }
+
+
     }
+
+
+
 }
 
 // We recommend this pattern to be able to use async/await everywhere q
 // and properly handle errors.
 main().catch((error) => {
-    console.error(error)
-    process.exitCode = 1
-})
+    console.error(error);
+    process.exitCode = 1;
+});

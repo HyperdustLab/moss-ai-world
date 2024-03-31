@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "semi": false,
   "trailingComma": "es5",
   "singleQuote": true,
@@ -23,4 +24,10 @@
       }
     }
   ]
+=======
+    "tabWidth": 4,
+    "useTabs": false,
+    "semi": false,
+    "singleQuote": false
+>>>>>>> dacce8ff683955fd9370fc56347408d9d6169c2b
 }

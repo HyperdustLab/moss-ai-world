@@ -63,8 +63,8 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
 
     event eveDelete(uint256 id);
 
-    function initialize(address onlyOwner) public initializer {
-        __Ownable_init(onlyOwner);
+    function initialize() public initializer {
+        __Ownable_init(msg.sender);
     }
 
     function setMOSSAIRolesCfgAddress(
@@ -218,7 +218,10 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
             uint256,
             bytes1,
             uint256,
+<<<<<<< HEAD
             uint256,
+=======
+>>>>>>> dacce8ff683955fd9370fc56347408d9d6169c2b
             uint256
         )
     {
@@ -329,6 +332,7 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
 
         require(allowNum >= mintNum + num, "Insufficient inventory");
 
+<<<<<<< HEAD
         uint256 allowBuyNum = mossaiStorage.getUint(
             mossaiStorage.genKey("allowBuyNum", id)
         );
@@ -344,6 +348,9 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
 
             mossaiStorage.setUint(buyNumKey, buyNum + num);
         }
+=======
+        
+>>>>>>> dacce8ff683955fd9370fc56347408d9d6169c2b
 
         erc20.transferFrom(msg.sender, _GasFeeCollectionWallet, payAmount);
 

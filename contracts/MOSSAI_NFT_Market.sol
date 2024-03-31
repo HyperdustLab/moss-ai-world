@@ -41,8 +41,8 @@ contract MOSSAI_NFT_Market is OwnableUpgradeable {
     address public _HYDTTokenAddress;
     address public _MOSSAIStorageAddress;
 
-    function initialize(address onlyOwner) public initializer {
-        __Ownable_init(onlyOwner);
+    function initialize() public initializer {
+        __Ownable_init(msg.sender);
     }
 
     function setMOSSAINFTProductAddress(
@@ -143,6 +143,7 @@ contract MOSSAI_NFT_Market is OwnableUpgradeable {
             uint256 tokenId,
             uint256 price,
             bytes1 status,
+<<<<<<< HEAD
             bytes1 contractType,
             bytes32 sid,
             uint256 allowBuyNum
@@ -159,11 +160,13 @@ contract MOSSAI_NFT_Market is OwnableUpgradeable {
 
             mossaiStorage.setUint(buyNumKey, buyNum + num);
         }
+=======
+            bytes1 contractType
+        ) = MOSSAINFTProductAddres.getNFTProduct(NFTProductId);
+>>>>>>> dacce8ff683955fd9370fc56347408d9d6169c2b
 
         require(status == 0x01, "status error");
         require(sellNum + num <= putawayNum, "in no stock");
-
-        require(msg.sender != owner, "You can't buy your own products");
 
         uint256 amount = price * num;
 
@@ -226,7 +229,6 @@ contract MOSSAI_NFT_Market is OwnableUpgradeable {
             mossaiStorage.genKey("commission", id),
             commission
         );
-        mossaiStorage.setBytes32(mossaiStorage.genKey("sid", id), sid);
 
         emit eveSave(id);
     }
@@ -244,8 +246,7 @@ contract MOSSAI_NFT_Market is OwnableUpgradeable {
             uint256,
             uint256,
             uint256,
-            uint256,
-            bytes32
+            uint256
         )
     {
         MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
@@ -261,11 +262,10 @@ contract MOSSAI_NFT_Market is OwnableUpgradeable {
             NFTProductId,
             mossaiStorage.getAddress(mossaiStorage.genKey("buyer", id)),
             mossaiStorage.getAddress(mossaiStorage.genKey("seller", id)),
-            mossaiStorage.getUint(mossaiStorage.genKey("payAmount", id)),
+            mossaiStorage.getUint(mossaiStorage.genKey("amount", id)),
             mossaiStorage.getUint(mossaiStorage.genKey("price", id)),
             mossaiStorage.getUint(mossaiStorage.genKey("num", id)),
-            mossaiStorage.getUint(mossaiStorage.genKey("commission", id)),
-            mossaiStorage.getBytes32(mossaiStorage.genKey("sid", id))
+            mossaiStorage.getUint(mossaiStorage.genKey("commission", id))
         );
     }
 }

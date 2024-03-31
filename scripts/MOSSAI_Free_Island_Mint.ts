@@ -1,24 +1,26 @@
 /** @format */
 
-import { ethers, run, upgrades } from "hardhat"
+import { ethers, run, upgrades } from "hardhat";
 
 async function main() {
 
 
-    const contract = await ethers.getContractFactory("MOSSAI_Free_Island_Mint")
-    const instance = await upgrades.deployProxy(contract, [process.env.ADMIN_Wallet_Address])
-    await instance.waitForDeployment()
+
+    const contract = await ethers.getContractFactory("MOSSAI_Free_Island_Mint");
+    const instance = await upgrades.deployProxy(contract);
+    await instance.waitForDeployment();
+
 
 
     await (await instance.setContractAddress([
-        "0x9C3e908AA9346D24bf86D12F350A2f2d05351DE3",
-        "0x5270b6273fd0E6fA5979EC28c1cB9FE98b8eEBe4",
-        "0xe8ADeF97900b154f89417817C6621cd33D39d009",
-        "0xfcb8A945DC86D72f906D9C63222Dc470b5A35548",
-        "0x29E996B43072af9adF3Eb80d55523a34A4d7Add2"
+        "0x5197De6b2353d4720e08992c938eeb44E4F83206",
+        "0x3812D0341D721F66698228B0b10De0396117499e",
+        "0x7C94D4145c2d2ad2712B496DF6C27EEA5E0252C2",
+        "0x1a41f86248E33e5327B26092b898bDfe04C6d8b4",
+        "0xD11F65E5A55Cd7CA459a659734951901c8E57D30"
     ])).wait()
 
-    console.info("contractFactory address:", instance.target)
+    console.info("contractFactory address:", instance.target);
 
 
 }
@@ -26,6 +28,6 @@ async function main() {
 // We recommend this pattern to be able to use async/await everywhere q
 // and properly handle errors.
 main().catch((error) => {
-    console.error(error)
-    process.exitCode = 1
-})
+    console.error(error);
+    process.exitCode = 1;
+});

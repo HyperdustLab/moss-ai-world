@@ -14,11 +14,12 @@ import "../MOSSAI_Storage.sol";
 
 abstract contract IMOSSAIIsland {
     function getIsland(
-        bytes32 sid
+        uint256 islandId
     )
         public
         view
         returns (
+            uint256,
             string memory,
             string memory,
             string memory,
@@ -26,12 +27,8 @@ abstract contract IMOSSAIIsland {
             address,
             address,
             uint256,
-            uint256,
-            bytes32,
-            string memory,
-            string memory,
-            uint256,
-            uint256
+            uint32,
+            bytes32
         )
     {}
 }
@@ -52,9 +49,9 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
     address public _MOSSAIIslandNFGAddress;
     address public _MOSSAIStorageAddress;
 
-    function initialize(address onlyOwner) public initializer {
+    function initialize() public initializer {
         _rand = 1;
-        __Ownable_init(onlyOwner);
+        __Ownable_init(msg.sender);
     }
 
     function setMOSSAIRolesCfgAddress(
@@ -94,7 +91,6 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
     function addIslandAirdrop(
         string memory name,
         uint256[] memory uint256Array,
-        bytes32 sid,
         uint256 startTime,
         uint256 endTime,
         string memory airdropConfig,
@@ -109,7 +105,13 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
             "not admin role"
         );
 
-        IMOSSAIIsland(_MOSSAIIslandAddress).getIsland(sid);
+        if (uint256Array[3] != 0) {
+            (uint256 _id, , , , , , , , , ) = IMOSSAIIsland(
+                _MOSSAIIslandAddress
+            ).getIsland(uint256Array[3]);
+
+            require(_id > 0, "island not found");
+        }
 
         MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
@@ -132,7 +134,10 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
 
         mossaiStorage.setUint(mossaiStorage.genKey("startTime", id), startTime);
         mossaiStorage.setUint(mossaiStorage.genKey("endTime", id), endTime);
-        mossaiStorage.setBytes32(mossaiStorage.genKey("sid", id), sid);
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("islandId", id),
+            uint256Array[3]
+        );
 
         mossaiStorage.setString(
             mossaiStorage.genKey("airdropConfig", id),
@@ -164,7 +169,7 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
         string memory airdropConfig,
         uint256 intervalTime,
         uint256 totalAmount,
-        bytes32 sid
+        uint256 islandId
     ) public {
         require(
             Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
@@ -175,7 +180,13 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
 
         MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
-        IMOSSAIIsland(_MOSSAIIslandAddress).getIsland(sid);
+        if (islandId != 0) {
+            (uint256 _id, , , , , , , , , ) = IMOSSAIIsland(
+                _MOSSAIIslandAddress
+            ).getIsland(islandId);
+
+            require(_id > 0, "island not found");
+        }
 
         string memory _name = mossaiStorage.getString(
             mossaiStorage.genKey("name", id)
@@ -209,7 +220,7 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
 
         mossaiStorage.setUint(mossaiStorage.genKey("startTime", id), startTime);
         mossaiStorage.setUint(mossaiStorage.genKey("endTime", id), endTime);
-        mossaiStorage.setBytes32(mossaiStorage.genKey("sid", id), sid);
+        mossaiStorage.setUint(mossaiStorage.genKey("islandId", id), islandId);
 
         mossaiStorage.setString(
             mossaiStorage.genKey("airdropConfig", id),
@@ -282,7 +293,6 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
         view
         returns (
             uint256[] memory,
-            bytes32 sid,
             string memory,
             bytes1,
             address,
@@ -315,20 +325,23 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
         );
 
         uint256Array[5] = mossaiStorage.getUint(
-            mossaiStorage.genKey("startTime", id)
+            mossaiStorage.genKey("islandId", id)
         );
 
         uint256Array[6] = mossaiStorage.getUint(
-            mossaiStorage.genKey("endTime", id)
+            mossaiStorage.genKey("startTime", id)
         );
 
         uint256Array[7] = mossaiStorage.getUint(
+            mossaiStorage.genKey("endTime", id)
+        );
+
+        uint256Array[8] = mossaiStorage.getUint(
             mossaiStorage.genKey("intervalTime", id)
         );
 
         return (
             uint256Array,
-            mossaiStorage.getBytes32(mossaiStorage.genKey("sid", id)),
             mossaiStorage.getString(mossaiStorage.genKey("airdropConfig", id)),
             mossaiStorage.getBytes1(mossaiStorage.genKey("status", id)),
             mossaiStorage.getAddress(mossaiStorage.genKey("fromAddress", id)),
@@ -443,14 +456,15 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
 
         require(bytes(_name).length > 0, "not found");
 
-        bytes32 sid = mossaiStorage.getBytes32(mossaiStorage.genKey("sid", id));
+        uint256 islandId = mossaiStorage.getUint(
+            mossaiStorage.genKey("islandId", id)
+        );
 
-        (, , , , , , , uint256 seed, , , , , ) = IMOSSAIIsland(
-            _MOSSAIIslandAddress
-        ).getIsland(sid);
+        (, , , , , , , , uint32 seed, ) = IMOSSAIIsland(_MOSSAIIslandAddress)
+            .getIsland(islandId);
 
         address seedOwer = IMOSSAIIslandNFG(_MOSSAIIslandNFGAddress)
-            .getSeedOwer(uint32(seed));
+            .getSeedOwer(seed);
 
         require(msg.sender == seedOwer, "not island ower");
 

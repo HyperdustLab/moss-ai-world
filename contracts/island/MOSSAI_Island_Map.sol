@@ -22,8 +22,8 @@ contract MOSSAI_Island_Map is OwnableUpgradeable {
     event eveDeleteIslandMap(uint256[] coordinates);
     event eveUpdateIslandMap(uint256 coordinate, bool isMint);
 
-    function initialize(address onlyOwner) public initializer {
-        __Ownable_init(onlyOwner);
+    function initialize() public initializer {
+        __Ownable_init(msg.sender);
     }
 
     function setMOSSAIRolesCfgAddress(

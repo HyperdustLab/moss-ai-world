@@ -13,8 +13,8 @@ contract MOSSAI_Island_NFG is OwnableUpgradeable {
     address public _MOSSAIStorageAddress;
     address public _IslandNFTAddress;
 
-    function initialize(address onlyOwner) public initializer {
-        __Ownable_init(onlyOwner);
+    function initialize() public initializer {
+        __Ownable_init(msg.sender);
     }
 
     function mint(address to, uint32 location) public returns (uint256) {
@@ -173,15 +173,5 @@ contract MOSSAI_Island_NFG is OwnableUpgradeable {
         _MOSSAIRolesCfgAddress = contractaddressArray[0];
         _MOSSAIStorageAddress = contractaddressArray[1];
         _IslandNFTAddress = contractaddressArray[2];
-    }
-
-    function getSeed(uint256 tokenId) public view returns (uint32) {
-        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
-
-        uint256 seed = mossaiStorage.getUint(
-            mossaiStorage.genKey("tokenSeed", tokenId)
-        );
-
-        return uint32(seed);
     }
 }

@@ -5,13 +5,17 @@ import { ethers, run, upgrades } from "hardhat";
 async function main() {
 
 
-    const _MOSSAI_Storage = await ethers.getContractFactory("MOSSAI_Storage")
-    const MOSSAI_Storage = await upgrades.deployProxy(_MOSSAI_Storage, [process.env.ADMIN_Wallet_Address])
+
+
+
+
+    const MOSSAI_Storage = await ethers.deployContract("MOSSAI_Storage");
     await MOSSAI_Storage.waitForDeployment()
 
 
+
     const contract = await ethers.getContractFactory("MOSSAI_NFT_Market");
-    const instance = await upgrades.deployProxy(contract, [process.env.ADMIN_Wallet_Address]);
+    const instance = await upgrades.deployProxy(contract);
     await instance.waitForDeployment();
 
 
@@ -19,10 +23,10 @@ async function main() {
 
 
     await (await instance.setContractAddress([
-        "0x569E97c2f5d0d0c51E04ffd5637D6a09e43C6c9D",
-        "0x5270b6273fd0E6fA5979EC28c1cB9FE98b8eEBe4",
-        "0xe8ADeF97900b154f89417817C6621cd33D39d009",
-        "0xfcb8A945DC86D72f906D9C63222Dc470b5A35548",
+        "0x8d4C83A551e646b13E9e16556c29604Bb3F71b1c",
+        "0x3812D0341D721F66698228B0b10De0396117499e",
+        "0x7C94D4145c2d2ad2712B496DF6C27EEA5E0252C2",
+        "0x1a41f86248E33e5327B26092b898bDfe04C6d8b4",
         MOSSAI_Storage.target
     ])).wait()
 
@@ -32,7 +36,7 @@ async function main() {
     await (await MOSSAI_Roles_Cfg.addAdmin(instance.target)).wait()
 
 
-    const MOSSAI_NFT_Product = await ethers.getContractAt("MOSSAI_NFT_Product", "0x569E97c2f5d0d0c51E04ffd5637D6a09e43C6c9D");
+    const MOSSAI_NFT_Product = await ethers.getContractAt("MOSSAI_NFT_Product", "0x8d4C83A551e646b13E9e16556c29604Bb3F71b1c");
 
     await (await MOSSAI_NFT_Product.setMOSSAINFTMarketAddress(instance.target)).wait();
 
