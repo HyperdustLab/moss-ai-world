@@ -132,6 +132,8 @@ contract MOSSAI_NFT_Market is OwnableUpgradeable {
             _MOSSAI_NFT_Product_Address
         );
 
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+
         (
             ,
             address owner,
@@ -142,8 +144,21 @@ contract MOSSAI_NFT_Market is OwnableUpgradeable {
             uint256 price,
             bytes1 status,
             bytes1 contractType,
-            bytes32 sid
-        ) = MOSSAINFTProductAddres.getNFTProduct(NFTProductId);
+            bytes32 sid,
+            uint256 allowBuyNum
+        ) = MOSSAINFTProductAddres.getNFTProductV2(NFTProductId);
+
+        if (allowBuyNum > 0) {
+            string memory buyNumKey = string(
+                abi.encode(NFTProductId.toString(), msg.sender.toHexString())
+            );
+
+            uint256 buyNum = mossaiStorage.getUint(buyNumKey);
+
+            require(buyNum + num <= allowBuyNum, "exceeds the purchase limit");
+
+            mossaiStorage.setUint(buyNumKey, buyNum + num);
+        }
 
         require(status == 0x01, "status error");
         require(sellNum + num <= putawayNum, "in no stock");
@@ -192,8 +207,6 @@ contract MOSSAI_NFT_Market is OwnableUpgradeable {
         }
 
         MOSSAINFTProductAddres.addSellNum(NFTProductId, num);
-
-        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
         uint256 id = mossaiStorage.getNextId();
 

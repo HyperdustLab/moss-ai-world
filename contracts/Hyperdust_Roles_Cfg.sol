@@ -1,12 +1,12 @@
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/utils/Strings.sol";
+import '@openzeppelin/contracts/utils/Strings.sol';
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 
-import "./utils/StrUtil.sol";
+import './utils/StrUtil.sol';
 
 contract Hyperdust_Roles_Cfg is OwnableUpgradeable {
     using Strings for *;
@@ -21,18 +21,18 @@ contract Hyperdust_Roles_Cfg is OwnableUpgradeable {
     }
 
     function addAdmin(address account) public onlyOwner {
-        require(!_adminRole[account], "administrator already exists");
+        require(!_adminRole[account], 'administrator already exists');
         _adminRole[account] = true;
     }
 
     function addSuperAdmin(address account) public onlyOwner {
-        require(!_superAsdminRole[account], "administrator already exists");
+        require(!_superAsdminRole[account], 'administrator already exists');
         _superAsdminRole[account] = true;
     }
 
     function addAdmin2(address account) public {
-        require(_superAsdminRole[msg.sender], "not super admin role");
-        require(!_adminRole[account], "administrator already exists");
+        require(_superAsdminRole[msg.sender], 'not super admin role');
+        require(!_adminRole[account], 'administrator already exists');
         _adminRole[account] = true;
     }
 

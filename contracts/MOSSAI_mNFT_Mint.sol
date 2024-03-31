@@ -115,22 +115,14 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
         _MOSSAIStorageAddress = contractaddressArray[4];
     }
 
-    /**
-     * @dev Adds mint information to the `_mintInfos` array.
-     * @param tokenURI The URI of the token being minted.
-     * @param price The price of the token being minted.
-     * @param contractAddress The address of the contract being used to mint the token.
-     * @param tokenId The ID of the token being minted.
-     * @param contractType The type of contract being used to mint the token.
-     * @param allowNum The number of tokens allowed to be minted.
-     */
     function addMintInfo(
         string memory tokenURI,
         uint256 price,
         address contractAddress,
         uint256 tokenId,
         bytes1 contractType,
-        uint256 allowNum
+        uint256 allowNum,
+        uint256 allowBuyNum
     ) public {
         require(
             Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
@@ -157,23 +149,14 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
         );
 
         mossaiStorage.setUint(mossaiStorage.genKey("allowNum", id), allowNum);
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("allowBuyNum", id),
+            allowBuyNum
+        );
 
         emit eveSave(id);
     }
 
-    /**
-     * @dev Updates the information of an existing mNFT.
-     * @param id The ID of the mNFT to update.
-     * @param tokenURI The new token URI of the mNFT.
-     * @param price The new price of the mNFT.
-     * @param contractAddress The new contract address of the mNFT.
-     * @param tokenId The new token ID of the mNFT.
-     * @param contractType The new contract type of the mNFT.
-     * @param allowNum The new allowed number of the mNFT.
-     * Requirements:
-     * - The caller must have the admin role.
-     * - The mNFT with the given ID must exist.
-     */
     function updateNFT(
         uint256 id,
         string memory tokenURI,
@@ -181,7 +164,8 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
         address contractAddress,
         uint256 tokenId,
         bytes1 contractType,
-        uint256 allowNum
+        uint256 allowNum,
+        uint256 allowBuyNum
     ) public {
         require(
             Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
@@ -213,30 +197,30 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
 
         mossaiStorage.setUint(mossaiStorage.genKey("allowNum", id), allowNum);
 
+        mossaiStorage.setUint(
+            mossaiStorage.genKey("allowBuyNum", id),
+            allowNum
+        );
+
         emit eveSave(id);
     }
 
-    /**
-     * @dev Retrieves the mint information for a given NFT ID.
-     * @param id The ID of the NFT to retrieve the mint information for.
-     * @return A tuple containing the mint information for the NFT, including its ID, token URI, price, contract address, token ID, contract type, mint number, and allowed number.
-     * @dev If the NFT does not exist, reverts with an error message.
-     */
     function getMintInfo(
         uint256 id
     )
-    public
-    view
-    returns (
-        uint256,
-        string memory,
-        uint256,
-        address,
-        uint256,
-        bytes1,
-        uint256,
-        uint256
-    )
+        public
+        view
+        returns (
+            uint256,
+            string memory,
+            uint256,
+            address,
+            uint256,
+            bytes1,
+            uint256,
+            uint256,
+            uint256
+        )
     {
         MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
@@ -251,12 +235,13 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
             mossaiStorage.getString(mossaiStorage.genKey("tokenURI", id)),
             mossaiStorage.getUint(mossaiStorage.genKey("price", id)),
             mossaiStorage.getAddress(
-            mossaiStorage.genKey("contractAddress", id)
-        ),
+                mossaiStorage.genKey("contractAddress", id)
+            ),
             mossaiStorage.getUint(mossaiStorage.genKey("tokenId", id)),
             mossaiStorage.getBytes1(mossaiStorage.genKey("contractType", id)),
             mossaiStorage.getUint(mossaiStorage.genKey("mintNum", id)),
-            mossaiStorage.getUint(mossaiStorage.genKey("allowNum", id))
+            mossaiStorage.getUint(mossaiStorage.genKey("allowNum", id)),
+            mossaiStorage.getUint(mossaiStorage.genKey("allowBuyNum", id))
         );
     }
 
@@ -284,10 +269,6 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
         require(bytes(_tokenURI).length > 0, "not found");
 
         mossaiStorage.setString(mossaiStorage.genKey("tokenURI", id), "");
-
-
-        emit eveDelete(id);
-
     }
 
     /**
@@ -347,6 +328,22 @@ contract MOSSAI_mNFT_Mint is OwnableUpgradeable {
         );
 
         require(allowNum >= mintNum + num, "Insufficient inventory");
+
+        uint256 allowBuyNum = mossaiStorage.getUint(
+            mossaiStorage.genKey("allowBuyNum", id)
+        );
+
+        if (allowBuyNum > 0) {
+            string memory buyNumKey = string(
+                abi.encode(id.toString(), msg.sender.toHexString())
+            );
+
+            uint256 buyNum = mossaiStorage.getUint(buyNumKey);
+
+            require(buyNum + num <= allowBuyNum, "exceeds the purchase limit");
+
+            mossaiStorage.setUint(buyNumKey, buyNum + num);
+        }
 
         erc20.transferFrom(msg.sender, _GasFeeCollectionWallet, payAmount);
 
