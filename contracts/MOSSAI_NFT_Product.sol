@@ -97,6 +97,28 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
         emit eveSave(id);
     }
 
+    function getNFTProductV2(uint256 id) public view returns (uint256, address, uint256, uint256, address, uint256, uint256, bytes1, bytes1, bytes32, uint256) {
+        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
+
+        uint256 tokenId = mossaiStorage.getUint(mossaiStorage.genKey("tokenId", id));
+
+        require(tokenId > 0, "not found");
+
+        return (
+            id,
+            mossaiStorage.getAddress(mossaiStorage.genKey("owner", id)),
+            mossaiStorage.getUint(mossaiStorage.genKey("putawayNum", id)),
+            mossaiStorage.getUint(mossaiStorage.genKey("sellNum", id)),
+            mossaiStorage.getAddress(mossaiStorage.genKey("contractAddress", id)),
+            tokenId,
+            mossaiStorage.getUint(mossaiStorage.genKey("price", id)),
+            mossaiStorage.getBytes1(mossaiStorage.genKey("status", id)),
+            mossaiStorage.getBytes1(mossaiStorage.genKey("contractType", id)),
+            mossaiStorage.getBytes32(mossaiStorage.genKey("sid", id)),
+            mossaiStorage.getUint(mossaiStorage.genKey("allowBuyNum", id))
+        );
+    }
+
     function saveNFTProductV2(bytes32 sid, address contractAddress, uint256 tokenId, bytes1 status, uint32 putawayNum, uint256 price, bytes1 contractType, uint256 allowBuyNum) public {
         require(contractType == 0x01 || contractType == 0x02, "contractType error");
 
@@ -153,27 +175,5 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
         mossaiStorage.setUint(mossaiStorage.genKey("allowBuyNum", id), allowBuyNum);
 
         emit eveSave(id);
-    }
-
-    function getNFTProductV2(uint256 id) public view returns (uint256, address, uint256, uint256, address, uint256, uint256, bytes1, bytes1, bytes32, uint256) {
-        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
-
-        uint256 tokenId = mossaiStorage.getUint(mossaiStorage.genKey("tokenId", id));
-
-        require(tokenId > 0, "not found");
-
-        return (
-            id,
-            mossaiStorage.getAddress(mossaiStorage.genKey("owner", id)),
-            mossaiStorage.getUint(mossaiStorage.genKey("putawayNum", id)),
-            mossaiStorage.getUint(mossaiStorage.genKey("sellNum", id)),
-            mossaiStorage.getAddress(mossaiStorage.genKey("contractAddress", id)),
-            tokenId,
-            mossaiStorage.getUint(mossaiStorage.genKey("price", id)),
-            mossaiStorage.getBytes1(mossaiStorage.genKey("status", id)),
-            mossaiStorage.getBytes1(mossaiStorage.genKey("contractType", id)),
-            mossaiStorage.getBytes32(mossaiStorage.genKey("sid", id)),
-            mossaiStorage.getUint(mossaiStorage.genKey("allowBuyNum", id))
-        );
     }
 }
