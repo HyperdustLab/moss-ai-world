@@ -1,17 +1,16 @@
 /** @format */
-require("dotenv").config()
-import { HardhatUserConfig } from "hardhat/config";
-import "@nomicfoundation/hardhat-toolbox";
-import "hardhat-gas-reporter";
-import '@openzeppelin/hardhat-upgrades';
-const { ProxyAgent, setGlobalDispatcher } = require("undici");
-const proxyAgent = new ProxyAgent("http://127.0.0.1:7890");
-setGlobalDispatcher(proxyAgent);
-
+require('dotenv').config()
+import { HardhatUserConfig } from 'hardhat/config'
+import '@nomicfoundation/hardhat-toolbox'
+import 'hardhat-gas-reporter'
+import '@openzeppelin/hardhat-upgrades'
+const { ProxyAgent, setGlobalDispatcher } = require('undici')
+const proxyAgent = new ProxyAgent('http://127.0.0.1:7890')
+setGlobalDispatcher(proxyAgent)
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.20",
+    version: '0.8.20',
     settings: {
       optimizer: {
         enabled: true,
@@ -20,8 +19,8 @@ const config: HardhatUserConfig = {
           yul: true,
           yulDetails: {
             stackAllocation: true,
-            optimizerSteps: "dhfoDgvulfnTUtnIf"
-          }
+            optimizerSteps: 'dhfoDgvulfnTUtnIf',
+          },
         },
       },
       viaIR: true,
@@ -29,8 +28,8 @@ const config: HardhatUserConfig = {
   },
   networks: {
     dev: {
-      url: "HTTP://127.0.0.1:8545",
-      accounts: [process.env.PRIVATE_KEY]
+      url: 'HTTP://127.0.0.1:8545',
+      accounts: [process.env.PRIVATE_KEY],
     },
     sepolia: {
       url: process.env.SEPOLIA_RPC_URL,
@@ -41,20 +40,20 @@ const config: HardhatUserConfig = {
       url: process.env.Arbitrum_Sepolia_Testnet_RPC_URL,
       accounts: [process.env.PRIVATE_KEY],
       loggingEnabled: true,
-    }
+    },
   },
   etherscan: {
     apiKey: {
       sepolia: process.env.ETHERSCAN_API_KEY,
-      arbitrumSepolia: process.env.Arbitrum_Sepolia_KEY
+      arbitrumSepolia: process.env.Arbitrum_Sepolia_KEY,
     },
     customChains: [
       {
-        network: "arbitrumSepolia",
+        network: 'arbitrumSepolia',
         chainId: 421614,
         urls: {
-          apiURL: "https://api-sepolia.arbiscan.io/api",
-          browserURL: "https://sepolia.arbiscan.io/",
+          apiURL: 'https://api-sepolia.arbiscan.io/api',
+          browserURL: 'https://sepolia.arbiscan.io/',
         },
       },
     ],
@@ -62,6 +61,6 @@ const config: HardhatUserConfig = {
   sourcify: {
     enabled: true,
   },
-};
+}
 
-export default config;
+export default config

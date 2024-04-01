@@ -5,7 +5,7 @@
   "plugins": [
     "prettier-plugin-solidity"
   ],
-  "printWidth": 80,
+  "printWidth": 300,
   "tabWidth": 2,
   "useTabs": false,
   "bracketSpacing": true,
@@ -15,7 +15,7 @@
       "files": "*.sol",
       "options": {
         "parser": "solidity-parse",
-        "printWidth": 80,
+        "printWidth": 300,
         "tabWidth": 4,
         "useTabs": false,
         "singleQuote": false,

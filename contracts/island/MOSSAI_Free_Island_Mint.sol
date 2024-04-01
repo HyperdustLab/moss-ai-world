@@ -1,4 +1,5 @@
 pragma solidity ^0.8.0;
+
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -35,25 +36,19 @@ contract MOSSAI_Free_Island_Mint is OwnableUpgradeable {
     address public _erc20Address;
     address public _MOSSAIIslandNFGAddress;
 
-    function initialize() public initializer {
-        __Ownable_init(msg.sender);
+    function initialize(address onlyOwner) public initializer {
+        __Ownable_init(onlyOwner);
     }
 
-    function setMOSSAIIslandAddres(
-        address MOSSAIIslandAddres
-    ) public onlyOwner {
+    function setMOSSAIIslandAddres(address MOSSAIIslandAddres) public onlyOwner {
         _MOSSAIIslandAddres = MOSSAIIslandAddres;
     }
 
-    function setWalletAccountAddress(
-        address WalletAccountAddress
-    ) public onlyOwner {
+    function setWalletAccountAddress(address WalletAccountAddress) public onlyOwner {
         _WalletAccountAddress = WalletAccountAddress;
     }
 
-    function setHyperdustTransactionCfg(
-        address HyperdustTransactionCfgAddress
-    ) public onlyOwner {
+    function setHyperdustTransactionCfg(address HyperdustTransactionCfgAddress) public onlyOwner {
         _HyperdustTransactionCfgAddress = HyperdustTransactionCfgAddress;
     }
 
@@ -61,15 +56,11 @@ contract MOSSAI_Free_Island_Mint is OwnableUpgradeable {
         _erc20Address = erc20Address;
     }
 
-    function setMOSSAIIslandNFGAddress(
-        address MOSSAIIslandNFGAddress
-    ) public onlyOwner {
+    function setMOSSAIIslandNFGAddress(address MOSSAIIslandNFGAddress) public onlyOwner {
         _MOSSAIIslandNFGAddress = MOSSAIIslandNFGAddress;
     }
 
-    function setContractAddress(
-        address[] memory contractaddressArray
-    ) public onlyOwner {
+    function setContractAddress(address[] memory contractaddressArray) public onlyOwner {
         _MOSSAIIslandAddres = contractaddressArray[0];
         _WalletAccountAddress = contractaddressArray[1];
         _HyperdustTransactionCfgAddress = contractaddressArray[2];
@@ -77,56 +68,30 @@ contract MOSSAI_Free_Island_Mint is OwnableUpgradeable {
         _MOSSAIIslandNFGAddress = contractaddressArray[4];
     }
 
-    function mintIsland(
-        uint32 coordinate,
-        string[] memory names,
-        string[] memory symbols
-    ) public {
-        IWalletAccount walletAccountAddress = IWalletAccount(
-            _WalletAccountAddress
-        );
+    function mintIsland(uint32 coordinate, string memory islandName, string[] memory names, string[] memory symbols) public {
+        IWalletAccount walletAccountAddress = IWalletAccount(_WalletAccountAddress);
 
-        address _GasFeeCollectionWallet = walletAccountAddress
-            ._GasFeeCollectionWallet();
-        require(
-            _GasFeeCollectionWallet != address(0),
-            "not set GasFeeCollectionWallet"
-        );
+        address _GasFeeCollectionWallet = walletAccountAddress._GasFeeCollectionWallet();
+        require(_GasFeeCollectionWallet != address(0), "not set GasFeeCollectionWallet");
 
-        uint256 balance = IERC721(_MOSSAIIslandNFGAddress).balanceOf(
-            msg.sender
-        );
+        uint256 balance = IERC721(_MOSSAIIslandNFGAddress).balanceOf(msg.sender);
 
-        require(
-            balance == 0,
-            "You have held the island and are not allowed to cast it again"
-        );
+        require(balance == 0, "You have held the island and are not allowed to cast it again");
 
         IERC20 erc20 = IERC20(_erc20Address);
 
-        uint256 mintIslandAmount = IHyperdustTransactionCfg(
-            _HyperdustTransactionCfgAddress
-        ).getGasFee("mintIsland");
+        uint256 mintIslandAmount = IHyperdustTransactionCfg(_HyperdustTransactionCfgAddress).getGasFee("mintIsland");
 
         uint256 amount = erc20.allowance(msg.sender, address(this));
 
         require(amount >= mintIslandAmount, "Insufficient authorized amount");
 
         if (mintIslandAmount > 0) {
-            erc20.transferFrom(
-                msg.sender,
-                _WalletAccountAddress,
-                mintIslandAmount
-            );
+            erc20.transferFrom(msg.sender, _WalletAccountAddress, mintIslandAmount);
 
             walletAccountAddress.addAmount(mintIslandAmount);
         }
 
-        MOSSAI_Island(_MOSSAIIslandAddres).mint(
-            coordinate,
-            msg.sender,
-            names,
-            symbols
-        );
+        MOSSAI_Island(_MOSSAIIslandAddres).mint(coordinate, msg.sender, islandName, names, symbols);
     }
 }

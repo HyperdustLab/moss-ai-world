@@ -13,6 +13,8 @@ import "./utils/StrUtil.sol";
 import "./Hyperdust_Roles_Cfg.sol";
 
 import "./MOSSAI_Storage.sol";
+import "./island/MOSSAI_Island.sol";
+import "./island/MOSSAI_Island_NFG.sol";
 
 /**
  * @title MOSSAI_NFT_Product
@@ -26,117 +28,66 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
     address public _MOSSAIRolesCfgAddress;
     address public _MOSSAI_Island_NFG_Address;
     address public _MOSSAIStorageAddress;
+    address public _MOSSAIIslandAddress;
 
     event eveSave(uint256 id);
 
-    function initialize() public initializer {
-        __Ownable_init(msg.sender);
+    function initialize(address onlyOwner) public initializer {
+        __Ownable_init(onlyOwner);
     }
 
-    function setMOSSAINFTMarketAddress(
-        address __MOSSAI_NFT_Market_Address
-    ) public onlyOwner {
+    function setMOSSAINFTMarketAddress(address __MOSSAI_NFT_Market_Address) public onlyOwner {
         _MOSSAI_NFT_Market_Address = __MOSSAI_NFT_Market_Address;
     }
 
-    function setMOSSAIRolesCfgAddress(
-        address __MOSSAIRolesCfgAddress
-    ) public onlyOwner {
+    function setMOSSAIRolesCfgAddress(address __MOSSAIRolesCfgAddress) public onlyOwner {
         _MOSSAIRolesCfgAddress = __MOSSAIRolesCfgAddress;
     }
 
-    function setMOSSAIIslandNFGAddress(
-        address MOSSAI_Island_NFG_Address
-    ) public onlyOwner {
+    function setMOSSAIIslandNFGAddress(address MOSSAI_Island_NFG_Address) public onlyOwner {
         _MOSSAI_Island_NFG_Address = MOSSAI_Island_NFG_Address;
     }
 
-    function setMOSSAIStorageAddress(
-        address MOSSAIStorageAddress
-    ) public onlyOwner {
+    function setMOSSAIStorageAddress(address MOSSAIStorageAddress) public onlyOwner {
         _MOSSAIStorageAddress = MOSSAIStorageAddress;
     }
 
-    function setContractAddress(
-        address[] memory contractaddressArray
-    ) public onlyOwner {
+    function setMOSSAIIslandAddress(address MOSSAIIslandAddress) public onlyOwner {
+        _MOSSAIIslandAddress = MOSSAIIslandAddress;
+    }
+
+    function setContractAddress(address[] memory contractaddressArray) public onlyOwner {
         _MOSSAI_NFT_Market_Address = contractaddressArray[0];
         _MOSSAIRolesCfgAddress = contractaddressArray[1];
         _MOSSAI_Island_NFG_Address = contractaddressArray[2];
         _MOSSAIStorageAddress = contractaddressArray[3];
+        _MOSSAIIslandAddress = contractaddressArray[4];
     }
 
-    /**
-     * @dev Saves an NFT product to the marketplace.
-     * @param contractAddress The address of the NFT contract.
-     * @param tokenId The ID of the NFT.
-     * @param status The status of the NFT product.
-     * @param putawayNum The number of NFT products put away.
-     * @param price The price of the NFT product.
-     * @param contractType The type of the NFT contract.
-     */
-    function saveNFTProduct(
-        address contractAddress,
-        uint256 tokenId,
-        bytes1 status,
-        uint32 putawayNum,
-        uint256 price,
-        bytes1 contractType
-    ) public {
+    function saveNFTProduct(bytes32 sid, address contractAddress, uint256 tokenId, bytes1 status, uint32 putawayNum, uint256 price, bytes1 contractType) public {
         revert("Not implemented");
     }
 
-    function getNFTProduct(
-        uint256 id
-    )
-        public
-        view
-        returns (
-            uint256,
-            address,
-            uint256,
-            uint256,
-            address,
-            uint256,
-            uint256,
-            bytes1,
-            bytes1,
-            bytes32
-        )
-    {
+    function getNFTProduct(uint256 id) public view returns (uint256, address, uint256, uint256, address, uint256, uint256, bytes1, bytes1, bytes32) {
         revert("Not implemented");
     }
 
     function addSellNum(uint256 id, uint256 num) public {
-        require(
-            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
-                msg.sender
-            ),
-            "not admin role"
-        );
+        require(Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(msg.sender), "not admin role");
 
         MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
-        uint256 tokenId = mossaiStorage.getUint(
-            mossaiStorage.genKey("tokenId", id)
-        );
+        uint256 tokenId = mossaiStorage.getUint(mossaiStorage.genKey("tokenId", id));
 
         require(tokenId > 0, "not found");
 
-        uint256 sellNum = mossaiStorage.getUint(
-            mossaiStorage.genKey("sellNum", id)
-        );
+        uint256 sellNum = mossaiStorage.getUint(mossaiStorage.genKey("sellNum", id));
 
-        uint256 putawayNum = mossaiStorage.getUint(
-            mossaiStorage.genKey("putawayNum", id)
-        );
+        uint256 putawayNum = mossaiStorage.getUint(mossaiStorage.genKey("putawayNum", id));
 
         require(sellNum + num <= putawayNum, "Insufficient stock");
 
-        mossaiStorage.setUint(
-            mossaiStorage.genKey("sellNum", id),
-            sellNum + num
-        );
+        mossaiStorage.setUint(mossaiStorage.genKey("sellNum", id), sellNum + num);
 
         if (sellNum + num == putawayNum) {
             mossaiStorage.setBytes1(mossaiStorage.genKey("status", id), 0x00);
@@ -146,56 +97,33 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
         emit eveSave(id);
     }
 
-    function saveNFTProductV2(
-        bytes32 sid,
-        address contractAddress,
-        uint256 tokenId,
-        bytes1 status,
-        uint32 putawayNum,
-        uint256 price,
-        bytes1 contractType,
-        uint256 allowBuyNum
-    ) public {
-        require(
-            contractType == 0x01 || contractType == 0x02,
-            "contractType error"
-        );
+    function saveNFTProductV2(bytes32 sid, address contractAddress, uint256 tokenId, bytes1 status, uint32 putawayNum, uint256 price, bytes1 contractType, uint256 allowBuyNum) public {
+        require(contractType == 0x01 || contractType == 0x02, "contractType error");
 
-        uint256 balance = IERC721(_MOSSAI_Island_NFG_Address).balanceOf(
-            msg.sender
-        );
+        MOSSAI_Island islandService = MOSSAI_Island(_MOSSAIIslandAddress);
+        MOSSAI_Island_NFG islandNFGService = MOSSAI_Island_NFG(_MOSSAI_Island_NFG_Address);
 
-        require(
-            balance > 0,
-            "You must have an Island NFG in order to list an NFT"
-        );
+        (, , , , , , , uint256 seed, , , , , ) = islandService.getIsland(sid);
+
+        address seedOwer = islandNFGService.getSeedOwer(seed);
+
+        require(msg.sender == seedOwer, "not Island owner");
 
         require(status == 0x01 || status == 0x00, "status error");
 
         bool allow;
 
         if (contractType == 0x01) {
-            allow =
-                IERC721(contractAddress).getApproved(tokenId) ==
-                _MOSSAI_NFT_Market_Address;
+            allow = IERC721(contractAddress).getApproved(tokenId) == _MOSSAI_NFT_Market_Address;
         } else {
-            allow = IERC1155(contractAddress).isApprovedForAll(
-                msg.sender,
-                _MOSSAI_NFT_Market_Address
-            );
+            allow = IERC1155(contractAddress).isApprovedForAll(msg.sender, _MOSSAI_NFT_Market_Address);
         }
 
         require(allow, "not allow");
 
         MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
-        string memory key = string(
-            abi.encodePacked(
-                contractAddress.toHexString(),
-                tokenId.toString(),
-                msg.sender.toHexString()
-            )
-        );
+        string memory key = string(abi.encodePacked(contractAddress.toHexString(), tokenId.toString(), msg.sender.toHexString()));
 
         uint256 id = mossaiStorage.getUint(key);
 
@@ -203,68 +131,34 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
             id = mossaiStorage.getNextId();
             mossaiStorage.setUint(key, id);
         } else {
-            address owner = mossaiStorage.getAddress(
-                mossaiStorage.genKey("owner", id)
-            );
+            address owner = mossaiStorage.getAddress(mossaiStorage.genKey("owner", id));
 
             require(owner == msg.sender, "not owner");
         }
 
-        mossaiStorage.setAddress(mossaiStorage.genKey("owner", id), msg.sender);
-        mossaiStorage.setUint(
-            mossaiStorage.genKey("putawayNum", id),
-            putawayNum
-        );
+        mossaiStorage.setUint(mossaiStorage.genKey("sellNum", id), 0);
 
-        mossaiStorage.setAddress(
-            mossaiStorage.genKey("contractAddress", id),
-            contractAddress
-        );
+        mossaiStorage.setBytes32(mossaiStorage.genKey("sid", id), sid);
+
+        mossaiStorage.setAddress(mossaiStorage.genKey("owner", id), msg.sender);
+        mossaiStorage.setUint(mossaiStorage.genKey("putawayNum", id), putawayNum);
+
+        mossaiStorage.setAddress(mossaiStorage.genKey("contractAddress", id), contractAddress);
 
         mossaiStorage.setUint(mossaiStorage.genKey("tokenId", id), tokenId);
         mossaiStorage.setUint(mossaiStorage.genKey("price", id), price);
         mossaiStorage.setBytes1(mossaiStorage.genKey("status", id), status);
-        mossaiStorage.setBytes1(
-            mossaiStorage.genKey("contractType", id),
-            contractType
-        );
+        mossaiStorage.setBytes1(mossaiStorage.genKey("contractType", id), contractType);
 
-        mossaiStorage.setUint(
-            mossaiStorage.genKey("allowBuyNum", id),
-            allowBuyNum
-        );
+        mossaiStorage.setUint(mossaiStorage.genKey("allowBuyNum", id), allowBuyNum);
 
         emit eveSave(id);
     }
 
-    function getNFTProductV2(
-        uint256 id
-    )
-        public
-        view
-        returns (
-            uint256,
-            address,
-            uint256,
-            uint256,
-            address,
-            uint256,
-            uint256,
-            bytes1,
-<<<<<<< HEAD
-            bytes1,
-            bytes32,
-            uint256
-=======
-            bytes1
->>>>>>> dacce8ff683955fd9370fc56347408d9d6169c2b
-        )
-    {
+    function getNFTProductV2(uint256 id) public view returns (uint256, address, uint256, uint256, address, uint256, uint256, bytes1, bytes1, bytes32, uint256) {
         MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
 
-        uint256 tokenId = mossaiStorage.getUint(
-            mossaiStorage.genKey("tokenId", id)
-        );
+        uint256 tokenId = mossaiStorage.getUint(mossaiStorage.genKey("tokenId", id));
 
         require(tokenId > 0, "not found");
 
@@ -273,59 +167,13 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
             mossaiStorage.getAddress(mossaiStorage.genKey("owner", id)),
             mossaiStorage.getUint(mossaiStorage.genKey("putawayNum", id)),
             mossaiStorage.getUint(mossaiStorage.genKey("sellNum", id)),
-            mossaiStorage.getAddress(
-                mossaiStorage.genKey("contractAddress", id)
-            ),
+            mossaiStorage.getAddress(mossaiStorage.genKey("contractAddress", id)),
             tokenId,
             mossaiStorage.getUint(mossaiStorage.genKey("price", id)),
             mossaiStorage.getBytes1(mossaiStorage.genKey("status", id)),
-<<<<<<< HEAD
             mossaiStorage.getBytes1(mossaiStorage.genKey("contractType", id)),
             mossaiStorage.getBytes32(mossaiStorage.genKey("sid", id)),
             mossaiStorage.getUint(mossaiStorage.genKey("allowBuyNum", id))
         );
     }
-=======
-            mossaiStorage.getBytes1(mossaiStorage.genKey("contractType", id))
-        );
-    }
-
-    function addSellNum(uint256 id, uint256 num) public {
-        require(
-            Hyperdust_Roles_Cfg(_MOSSAIRolesCfgAddress).hasAdminRole(
-                msg.sender
-            ),
-            "not admin role"
-        );
-
-        MOSSAI_Storage mossaiStorage = MOSSAI_Storage(_MOSSAIStorageAddress);
-
-        uint256 tokenId = mossaiStorage.getUint(
-            mossaiStorage.genKey("tokenId", id)
-        );
-
-        require(tokenId > 0, "not found");
-
-        uint256 sellNum = mossaiStorage.getUint(
-            mossaiStorage.genKey("sellNum", id)
-        );
-
-        uint256 putawayNum = mossaiStorage.getUint(
-            mossaiStorage.genKey("putawayNum", id)
-        );
-
-        require(sellNum + num <= putawayNum, "Insufficient stock");
-
-        mossaiStorage.setUint(
-            mossaiStorage.genKey("sellNum", id),
-            sellNum + num
-        );
-
-        if (sellNum + num == putawayNum) {
-            mossaiStorage.setBytes1(mossaiStorage.genKey("status", id), 0x00);
-        }
-
-        emit eveSave(id);
-    }
->>>>>>> dacce8ff683955fd9370fc56347408d9d6169c2b
 }
