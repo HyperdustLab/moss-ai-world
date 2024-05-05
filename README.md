@@ -28,7 +28,7 @@ The smart contracts of the MOSSAI are the core of the MOSSAI platform, containin
 
 - `MOSSAI_Island_NFG.sol`:  The island NFG asset contract.
 
-- `MOSSAI_Island.sol`: The island archive contract, managing all archival information for islands, such as names, sids, and placement records.
+- `MOSSAI_Island.sol`: The island archive contract, managing all archival information for islands, such as names, sids, and Gym space state data.
 
 - `Island_721.sol`: The exclusive ERC-721 asset contract assigned to users when they mint islands.
 
@@ -42,8 +42,6 @@ The smart contracts of the MOSSAI are the core of the MOSSAI platform, containin
 
 - `MOSSAI_mNFT_Mint.sol`: The platform NFT minting contract, where users can mint official platform-issued NFT assets.
 
-- `MOSSAI_NFT_Market.sol`:  The NFT product contract, responsible for storing the information of NFTs listed by users in their own shops, such as selling price and quantity.
+- `MOSSAI_NFT_Product.sol`: The NFT product contract, responsible for storing the information of NFTs listed by users in their own shops, such as selling price and quantity.
 
-- `MOSSAI_NFT_Market.sol`: The NFT product contract, responsible for storing the information of NFTs listed by users in their own shops, such as selling price and quantity.
-
-- `MOSSAI_NFT_Product.sol`: The NFT trading market contract, responsible for the transactions of NFTs that users list in their own shops.
+- `MOSSAI_NFT_Transaction.sol`: NFT trading contract, responsible for trading NFTs listed in the user's own store.

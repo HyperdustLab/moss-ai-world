@@ -24,7 +24,7 @@ abstract contract IHyperdustTransactionCfg {
     function getGasFee(string memory func) public view returns (uint256) {}
 }
 
-contract MOSSAI_NFT_Market is OwnableUpgradeable {
+contract MOSSAI_NFT_Transaction is OwnableUpgradeable {
     using Strings for *;
     using StrUtil for *;
 
