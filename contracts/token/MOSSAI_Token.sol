@@ -19,10 +19,7 @@ contract Hyperdust_Token is ERC20, ERC20Burnable, Ownable {
     }
 
     function mint(address to, uint256 amount) public {
-        require(
-            IHyperdustRolesCfg(_rolesCfgAddress).hasAdminRole(msg.sender),
-            "not admin role"
-        );
+        require(IHyperdustRolesCfg(_rolesCfgAddress).hasAdminRole(msg.sender), "not admin role");
 
         _mint(to, amount);
     }

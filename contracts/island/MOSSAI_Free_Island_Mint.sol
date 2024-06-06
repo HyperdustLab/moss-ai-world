@@ -19,10 +19,10 @@ contract MOSSAI_Free_Island_Mint is OwnableUpgradeable {
     using Strings for *;
     using StrUtil for *;
 
-    address public _islandAddres;
+    address public _islandAddress;
     address public _walletAccountAddress;
     address public _transactionCfgAddress;
-    address public _islandNFGAddress;
+    address public _islandNFTAddress;
 
     function initialize(address onlyOwner) public initializer {
         __Ownable_init(onlyOwner);
@@ -40,8 +40,8 @@ contract MOSSAI_Free_Island_Mint is OwnableUpgradeable {
         _transactionCfgAddress = transactionCfgAddress;
     }
 
-    function setIslandNFGAddress(address islandNFGAddress) public onlyOwner {
-        _islandNFGAddress = islandNFGAddress;
+    function setIslandNFTAddress(address islandNFTAddress) public onlyOwner {
+        _islandNFTAddress = islandNFTAddress;
     }
 
     function setContractAddress(address[] memory contractaddressArray) public onlyOwner {
@@ -49,7 +49,7 @@ contract MOSSAI_Free_Island_Mint is OwnableUpgradeable {
         setIslandAddress(contractaddressArray[0]);
         setWalletAccountAddress(contractaddressArray[1]);
         setTransactionCfgAddress(contractaddressArray[2]);
-        setIslandNFGAddress(contractaddressArray[3]);
+        setIslandNFTAddress(contractaddressArray[3]);
     }
 
     function mintIsland(uint32 coordinate, string memory islandName, string[] memory names, string[] memory symbols) public payable {
@@ -62,17 +62,17 @@ contract MOSSAI_Free_Island_Mint is OwnableUpgradeable {
         address _GasFeeCollectionWallet = walletAccountAddress._GasFeeCollectionWallet();
         require(_GasFeeCollectionWallet != address(0), "not set GasFeeCollectionWallet");
 
-        uint256 balance = IERC721(_MOSSAIIslandNFGAddress).balanceOf(msg.sender);
+        uint256 balance = IERC721(_islandNFTAddress).balanceOf(msg.sender);
 
         require(balance == 0, "You have held the island and are not allowed to cast it again");
 
         if (mintIslandAmount > 0) {
-            transferETH(_GasFeeCollectionWallet, mintIslandAmount);
+            transferETH(payable(_GasFeeCollectionWallet), mintIslandAmount);
 
             walletAccountAddress.addAmount(mintIslandAmount);
         }
 
-        MOSSAI_Island(_MOSSAIIslandAddres).mint(coordinate, msg.sender, islandName, names, symbols);
+        MOSSAI_Island(_islandAddress).mint(coordinate, msg.sender, islandName, names, symbols);
     }
 
     function transferETH(address payable recipient, uint256 amount) private {

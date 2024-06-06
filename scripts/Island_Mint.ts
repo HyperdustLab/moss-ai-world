@@ -4,20 +4,14 @@ import { ethers, run, upgrades } from 'hardhat'
 
 async function main() {
   const Island_Mint = await ethers.getContractFactory('Island_Mint')
-  const instance = await upgrades.deployProxy(Island_Mint)
+  const instance = await upgrades.deployProxy(Island_Mint, [process.env.ADMIN_Wallet_Address])
+  await (
+    await instance.setContractAddress([ethers.ZeroAddress, '0xb2342E1Bf4B4e0d340B97F5CdD8Fd9Cf24525D26', '0x859133fA725Cd252FD633E0Bc9ef7BbA270d6BE7', '0x74A6B3D4d0A9a7acC5a4e181d76dc7F0E49A978A', '0xC31A364A09c85319cFAc88Bb3F8F0dB874acBeFA', '0x5745090BFB28C3399223215DfbBb4e729aeF8cFD'])
+  ).wait()
 
-  instance.setContractAddress([
-    '0x0000000000000000000000000000000000000000',
-    '0x3812D0341D721F66698228B0b10De0396117499e',
-    '0x7C94D4145c2d2ad2712B496DF6C27EEA5E0252C2',
-    '0x1a41f86248E33e5327B26092b898bDfe04C6d8b4',
-    '0xC31A364A09c85319cFAc88Bb3F8F0dB874acBeFA',
-    '0x9bDaf3912e7b4794fE8aF2E748C35898265D5615',
-  ])
+  const IHyperAGI_Roles_Cfg = await ethers.getContractAt('IHyperAGI_Roles_Cfg', '0x5745090BFB28C3399223215DfbBb4e729aeF8cFD')
 
-  const MOSSAI_Roles_Cfg = await ethers.getContractAt('Hyperdust_Roles_Cfg', '0x9bDaf3912e7b4794fE8aF2E748C35898265D5615')
-
-  await (await MOSSAI_Roles_Cfg.addAdmin(instance.target)).wait()
+  await (await IHyperAGI_Roles_Cfg.addAdmin(instance.target)).wait()
 
   console.info('contractFactory address:', instance.target)
 }

@@ -65,7 +65,7 @@ contract Island_Mint is OwnableUpgradeable {
         setRolesCfgAddress(contractaddressArray[4]);
     }
 
-    function mint721(uint256 islandId, string memory tokenURI) public payable {
+    function mint721(bytes32 sid, string memory tokenURI) public payable {
         IHyperAGI_Wallet_Account walletAccountAddress = IHyperAGI_Wallet_Account(_walletAccountAddress);
 
         uint256 gasFee = IHyperAGI_Transaction_Cfg(_transactionCfgAddress).getGasFee("mintNFT");
@@ -75,12 +75,12 @@ contract Island_Mint is OwnableUpgradeable {
         address _GasFeeCollectionWallet = walletAccountAddress._GasFeeCollectionWallet();
 
         require(_GasFeeCollectionWallet != address(0), "not set GasFeeCollectionWallet");
-        (, , , , , address erc721Address, , , uint256 seed, , ) = MOSSAI_Island(_islandAddress).getIsland(islandId);
-        address seedOwer = MOSSAI_Island_NFG(_iandNFGAddress).getSeedOwer(seed);
+        (, uint256[] memory uint256Array, address erc721Address, ) = MOSSAI_Island(_islandAddress).getIsland(sid);
+        address seedOwer = MOSSAI_Island_NFG(_iandNFGAddress).getSeedOwer(uint256Array[0]);
         require(seedOwer == msg.sender, "not island owner");
 
         if (gasFee > 0) {
-            transferETH(_GasFeeCollectionWallet, gasFee);
+            transferETH(payable(_GasFeeCollectionWallet), gasFee);
 
             IHyperAGI_Wallet_Account(_walletAccountAddress).addAmount(gasFee);
         }
@@ -88,8 +88,8 @@ contract Island_Mint is OwnableUpgradeable {
         Island_721(erc721Address).safeMint(msg.sender, tokenURI);
     }
 
-    function mint1155(uint256 islandId, uint256 id, uint256 amount, string memory tokenURI) public {
-        IWalletAccount walletAccountAddress = IWalletAccount(_WalletAccountAddress);
+    function mint1155(bytes32 sid, uint256 id, uint256 amount, string memory tokenURI) public payable {
+        IHyperAGI_Wallet_Account walletAccountAddress = IHyperAGI_Wallet_Account(_walletAccountAddress);
 
         uint256 gasFee = IHyperAGI_Transaction_Cfg(_transactionCfgAddress).getGasFee("mintNFT");
 
@@ -98,12 +98,12 @@ contract Island_Mint is OwnableUpgradeable {
         address _GasFeeCollectionWallet = walletAccountAddress._GasFeeCollectionWallet();
 
         require(_GasFeeCollectionWallet != address(0), "not set GasFeeCollectionWallet");
-        (, , , , , , address erc1155Address, , uint256 seed, , ) = MOSSAI_Island(_islandAddress).getIsland(islandId);
-        address seedOwer = MOSSAI_Island_NFG(_MOSSAIIslandNFGAddress).getSeedOwer(seed);
+        (, uint256[] memory uint256Array, , address erc1155Address) = MOSSAI_Island(_islandAddress).getIsland(sid);
+        address seedOwer = MOSSAI_Island_NFG(_iandNFGAddress).getSeedOwer(uint256Array[0]);
         require(seedOwer == msg.sender, "not island owner");
 
         if (gasFee > 0) {
-            transferETH(_GasFeeCollectionWallet, gasFee);
+            transferETH(payable(_GasFeeCollectionWallet), gasFee);
             IHyperAGI_Wallet_Account(_walletAccountAddress).addAmount(gasFee);
         }
 

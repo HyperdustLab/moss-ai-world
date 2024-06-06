@@ -33,6 +33,7 @@ task('extract-metadata', 'Extracts and modifies metadata from build info')
       let metadataObject = null
       if (buildJson.output.contracts && buildJson.output.contracts[contractPath] && buildJson.output.contracts[contractPath][contractName]) {
         const metadata = buildJson.output.contracts[contractPath][contractName].metadata
+
         metadataObject = JSON.parse(metadata)
       }
 

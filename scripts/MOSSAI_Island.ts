@@ -3,41 +3,40 @@
 import { ethers, run, upgrades } from 'hardhat'
 
 async function main() {
-  const MOSSAI_Storage = await ethers.deployContract('MOSSAI_Storage')
+  const _MOSSAI_Storage = await ethers.getContractFactory('MOSSAI_Storage')
+  const MOSSAI_Storage = await upgrades.deployProxy(_MOSSAI_Storage, [process.env.ADMIN_Wallet_Address])
   await MOSSAI_Storage.waitForDeployment()
 
   const contract = await ethers.getContractFactory('MOSSAI_Island')
-  const instance = await upgrades.deployProxy(contract)
+  const instance = await upgrades.deployProxy(contract, [process.env.ADMIN_Wallet_Address])
   await instance.waitForDeployment()
 
   console.info('Hyperdust_Storage:', MOSSAI_Storage.target)
 
   await (
     await instance.setContractAddress([
-      '0xC31A364A09c85319cFAc88Bb3F8F0dB874acBeFA',
-      '0xBb9fa5E512802Ae2AA92A235e5e7c091E366d2ec',
-      '0x92bf83aF19DE8bbBfC50dD96196668569D0C779a',
-      '0x81cD3746573C5b6121d19b285D32D7233aEcB11b',
-      '0x9bDaf3912e7b4794fE8aF2E748C35898265D5615',
-      '0xcd17a8A93391F90dCc8ba3C2001840723ae5B8C6',
+      '0x74A6B3D4d0A9a7acC5a4e181d76dc7F0E49A978A',
+      '0x7f81A464FaBA5C984ADCA52E3a919B1D73026aBE',
+      '0x63798eb3e135CA2543D3136f4E314a9A3e819141',
+      '0x3d091D360694a9A488f3CD8A4f0903bCD230083b',
+      '0x5745090BFB28C3399223215DfbBb4e729aeF8cFD',
       MOSSAI_Storage.target,
-      '0xed8069499F24e24101b04cdf5A740e6BEED825B1',
+      '0xD18Bd75b4d2311dF45dD846Bb51c077AFAEF55df',
+      '0xc49F8d724A33A59d1A95436fC521C94608F06655',
     ])
   ).wait()
 
-  const MOSSAI_Roles_Cfg = await ethers.getContractAt('Hyperdust_Roles_Cfg', '0x9bDaf3912e7b4794fE8aF2E748C35898265D5615')
+  const IHyperAGI_Roles_Cfg = await ethers.getContractAt('IHyperAGI_Roles_Cfg', '0x5745090BFB28C3399223215DfbBb4e729aeF8cFD')
 
-  await (await MOSSAI_Roles_Cfg.addAdmin(instance.target)).wait()
+  await (await IHyperAGI_Roles_Cfg.addAdmin(instance.target)).wait()
 
   await (await MOSSAI_Storage.setServiceAddress(instance.target)).wait()
 
-  await (
-    await instance.setDefParameter('https://vniverse.s3.ap-east-1.amazonaws.com/upload/2023/8/10/13e02181-24b5-4e41-8481-4d7bb4886619.jpg', 'https://s3.hyperdust.io/upload/2024/1/24/63241709-6683-404c-b35c-b5466a57dad3.7z', '83e56d1e198ac71e493706073e2547b99f35baa53801d7127ebe2448e04ce5f0')
-  ).wait()
+  await (await instance.setDefParameter('https://s3.hyperdust.io/upload/2024/3/11/e78b4816-4b81-4241-ac19-cb5758f300df.png', 'https://s3.hyperdust.io/upload/2024/3/4/7d012ce0-9bd0-48f1-ba2c-49228936a250.7z', 'db055fa3753903af2075421cd0b9977fa9390f808c46ac628adcb65bc6bbae51')).wait()
 
-  const Island_Mint = await ethers.getContractAt('Island_Mint', '0xed8069499F24e24101b04cdf5A740e6BEED825B1')
+  const Island_Mint = await ethers.getContractAt('Island_Mint', '0xD18Bd75b4d2311dF45dD846Bb51c077AFAEF55df')
 
-  await (await Island_Mint.setMOSSAIIslandAddres(instance.target)).wait()
+  await (await Island_Mint.setIslandAddress(instance.target)).wait()
 
   console.info('contractFactory address:', instance.target)
 }

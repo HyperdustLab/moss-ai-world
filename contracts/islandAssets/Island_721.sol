@@ -9,11 +9,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Island_721 is Ownable, ERC721, ERC721URIStorage, ERC721Burnable {
     uint256 private _nextTokenId;
 
-    constructor(
-        address initialAuthority,
-        string memory name,
-        string memory symbol
-    ) ERC721(name, symbol) Ownable(initialAuthority) {}
+    constructor(address initialAuthority, string memory name, string memory symbol) ERC721(name, symbol) Ownable(initialAuthority) {}
 
     function safeMint(address to, string memory uri) public onlyOwner {
         uint256 tokenId = _nextTokenId++;
@@ -23,15 +19,11 @@ contract Island_721 is Ownable, ERC721, ERC721URIStorage, ERC721Burnable {
 
     // The following functions are overrides required by Solidity.
 
-    function tokenURI(
-        uint256 tokenId
-    ) public view override(ERC721, ERC721URIStorage) returns (string memory) {
+    function tokenURI(uint256 tokenId) public view override(ERC721, ERC721URIStorage) returns (string memory) {
         return super.tokenURI(tokenId);
     }
 
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view override(ERC721, ERC721URIStorage) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721URIStorage) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }

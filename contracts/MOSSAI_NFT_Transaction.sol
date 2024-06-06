@@ -97,26 +97,26 @@ contract MOSSAI_NFT_Transaction is OwnableUpgradeable {
 
         MOSSAI_NFT_Product NFT_Product_Address = MOSSAI_NFT_Product(_NFT_Product_Address);
 
-        MOSSAI_Storage storageAddress = MOSSAI_Storage(_storageAddressAddress);
+        MOSSAI_Storage storageAddress = MOSSAI_Storage(_storageAddress);
 
-        (, address owner, uint256 putawayNum, uint256 sellNum, address contractAddress, uint256 tokenId, uint256 price, bytes1 status, bytes1 contractType, bytes32 sid, uint256 allowBuyNum) = NFT_Product_Address.getNFTProduct(NFTProductId);
+        (uint256[] memory uint256Array, address owner, address contractAddress, bytes1 status, bytes1 contractType, bytes32 sid) = NFT_Product_Address.getNFTProduct(NFTProductId);
 
-        if (allowBuyNum > 0) {
+        if (uint256Array[4] > 0) {
             string memory buyNumKey = string(abi.encode(NFTProductId.toString(), msg.sender.toHexString()));
 
             uint256 buyNum = storageAddress.getUint(buyNumKey);
 
-            require(buyNum + num <= allowBuyNum, "exceeds the purchase limit");
+            require(buyNum + num <= uint256Array[4], "exceeds the purchase limit");
 
             storageAddress.setUint(buyNumKey, buyNum + num);
         }
 
         require(status == 0x01, "status error");
-        require(sellNum + num <= putawayNum, "in no stock");
+        require(uint256Array[2] + num <= uint256Array[1], "in no stock");
 
         require(msg.sender != owner, "You can't buy your own products");
 
-        uint256 amount = price * num;
+        uint256 amount = uint256Array[3] * num;
 
         uint256 commission = transactionCfgAddress.getGasFee("NFT_Market");
 
@@ -124,20 +124,20 @@ contract MOSSAI_NFT_Transaction is OwnableUpgradeable {
 
         require(msg.value == payAmount, "Insufficient gas fee");
 
-        transferETH(owner, amount);
+        transferETH(payable(owner), amount);
 
         if (commission > 0) {
-            transferETH(_GasFeeCollectionWallet, commission);
+            transferETH(payable(_GasFeeCollectionWallet), commission);
             walletAccountAddress.addAmount(commission);
         }
 
         if (contractType == 0x01) {
-            IERC721(contractAddress).safeTransferFrom(owner, msg.sender, tokenId);
+            IERC721(contractAddress).safeTransferFrom(owner, msg.sender, uint256Array[5]);
         } else {
-            IERC1155(contractAddress).safeTransferFrom(owner, msg.sender, tokenId, num, "0x0");
+            IERC1155(contractAddress).safeTransferFrom(owner, msg.sender, uint256Array[5], num, "0x0");
         }
 
-        MOSSAINFTProductAddres.addSellNum(NFTProductId, num);
+        NFT_Product_Address.addSellNum(NFTProductId, num);
 
         uint256 id = storageAddress.getNextId();
 
@@ -147,7 +147,7 @@ contract MOSSAI_NFT_Transaction is OwnableUpgradeable {
         storageAddress.setAddress(storageAddress.genKey("seller", id), owner);
 
         storageAddress.setUint(storageAddress.genKey("payAmount", id), payAmount);
-        storageAddress.setUint(storageAddress.genKey("price", id), price);
+        storageAddress.setUint(storageAddress.genKey("price", id), uint256Array[3]);
 
         storageAddress.setUint(storageAddress.genKey("num", id), num);
         storageAddress.setUint(storageAddress.genKey("commission", id), commission);

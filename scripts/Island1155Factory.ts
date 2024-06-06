@@ -4,7 +4,7 @@ import { ethers, run, upgrades } from 'hardhat'
 
 async function main() {
   const contract = await ethers.getContractFactory('Island1155Factory')
-  const instance = await upgrades.deployProxy(contract)
+  const instance = await upgrades.deployProxy(contract, [process.env.ADMIN_Wallet_Address])
 
   console.info('contractFactory address:', instance.target)
 }

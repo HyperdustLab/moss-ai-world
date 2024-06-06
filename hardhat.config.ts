@@ -15,6 +15,9 @@ const config: HardhatUserConfig = {
   solidity: {
     version: '0.8.20',
     settings: {
+      metadata: {
+        useLiteralContent: true,
+      },
       optimizer: {
         enabled: true,
         runs: 2000,

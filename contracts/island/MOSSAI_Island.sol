@@ -102,7 +102,7 @@ contract MOSSAI_Island is OwnableUpgradeable {
 
         MOSSAI_Storage storageAddress = MOSSAI_Storage(_storageAddress);
 
-        IIHyperAGI_GYM_Space GYMSpaceAddress = IIHyperAGI_GYM_Space(_GYMSpaceAddress);
+        IHyperAGI_GYM_Space GYMSpaceAddress = IHyperAGI_GYM_Space(_GYMSpaceAddress);
 
         string memory key = string(abi.encodePacked("coordinate_", coordinate.toString()));
 
@@ -194,7 +194,7 @@ contract MOSSAI_Island is OwnableUpgradeable {
         emit eveSaveIsland(sid);
     }
 
-    function update(bytes32 sid, string memory name, string memory coverImage, string memory file, string memory fileHash, string memory scenesData, string memory placementRecord) public {
+    function update(bytes32 sid, string memory name, string memory coverImage, string memory file, string memory _fileHash, string memory scenesData, string memory placementRecord) public {
         MOSSAI_Storage storageAddress = MOSSAI_Storage(_storageAddress);
         IHyperAGI_GYM_Space GYMSpaceAddress = IHyperAGI_GYM_Space(_GYMSpaceAddress);
 
@@ -215,7 +215,7 @@ contract MOSSAI_Island is OwnableUpgradeable {
         storageAddress.setString(storageAddress.genKey("coverImage", id), coverImage);
 
         storageAddress.setString(storageAddress.genKey("file", id), file);
-        storageAddress.setString(storageAddress.genKey("fileHash", id), fileHash);
+        storageAddress.setString(storageAddress.genKey("fileHash", id), _fileHash);
         storageAddress.setString(storageAddress.genKey("scenesData", id), scenesData);
 
         storageAddress.setString(storageAddress.genKey("placementRecord", id), placementRecord);
@@ -225,7 +225,7 @@ contract MOSSAI_Island is OwnableUpgradeable {
         emit eveSaveIsland(sid);
     }
 
-    function getIsland(bytes32 sid) public view returns (string memory, string memory, string memory, string memory, address, address, uint256, uint256, bytes32, string memory, string memory, uint256, uint256) {
+    function getIsland(bytes32 sid) public view returns (string[] memory, uint256[] memory, address, address) {
         MOSSAI_Storage storageAddress = MOSSAI_Storage(_storageAddress);
         uint256 islandId = storageAddress.getBytes32Uint(sid);
 
@@ -233,31 +233,31 @@ contract MOSSAI_Island is OwnableUpgradeable {
 
         require(bytes(_name).length > 0, "not found");
 
-        return (
-            _name,
-            storageAddress.getString(storageAddress.genKey("coverImage", islandId)),
-            storageAddress.getString(storageAddress.genKey("file", islandId)),
-            storageAddress.getString(storageAddress.genKey("fileHash", islandId)),
-            storageAddress.getAddress(storageAddress.genKey("erc721Address", islandId)),
-            storageAddress.getAddress(storageAddress.genKey("erc1155Address", islandId)),
-            storageAddress.getUint(storageAddress.genKey("coordinate", islandId)),
-            storageAddress.getUint(storageAddress.genKey("seed", islandId)),
-            storageAddress.getBytes32(storageAddress.genKey("sid", islandId)),
-            storageAddress.getString(storageAddress.genKey("scenesData", islandId)),
-            storageAddress.getString(storageAddress.genKey("placementRecord", islandId)),
-            storageAddress.getUint(storageAddress.genKey("erc721Version", islandId)),
-            storageAddress.getUint(storageAddress.genKey("erc1155Version", islandId))
-        );
+        string[] memory stringArray = new string[](6);
+        stringArray[0] = _name;
+        stringArray[1] = storageAddress.getString(storageAddress.genKey("coverImage", islandId));
+        stringArray[2] = storageAddress.getString(storageAddress.genKey("file", islandId));
+        stringArray[3] = storageAddress.getString(storageAddress.genKey("fileHash", islandId));
+        stringArray[4] = storageAddress.getString(storageAddress.genKey("scenesData", islandId));
+        stringArray[5] = storageAddress.getString(storageAddress.genKey("placementRecord", islandId));
+
+        uint256[] memory uint256Array = new uint256[](4);
+        uint256Array[0] = storageAddress.getUint(storageAddress.genKey("seed", islandId));
+        uint256Array[1] = storageAddress.getUint(storageAddress.genKey("coordinate", islandId));
+        uint256Array[2] = storageAddress.getUint(storageAddress.genKey("erc721Version", islandId));
+        uint256Array[3] = storageAddress.getUint(storageAddress.genKey("erc1155Version", islandId));
+
+        return (stringArray, uint256Array, storageAddress.getAddress(storageAddress.genKey("erc721Address", islandId)), storageAddress.getAddress(storageAddress.genKey("erc1155Address", islandId)));
     }
 
     function updateErc721Version(uint256 version) public {
-        require(IHyperAGI_Roles_Cfg(_HyperdustRolesCfgAddress).hasAdminRole(msg.sender), "not admin role");
+        require(IHyperAGI_Roles_Cfg(_rolesCfgAddress).hasAdminRole(msg.sender), "not admin role");
         _erc721Version = version;
         emit eveErc721Version();
     }
 
     function updateErc1155Version(uint256 version) public {
-        require(IHyperAGI_Roles_Cfg(_HyperdustRolesCfgAddress).hasAdminRole(msg.sender), "not admin role");
+        require(IHyperAGI_Roles_Cfg(_rolesCfgAddress).hasAdminRole(msg.sender), "not admin role");
         _erc1155Version = version;
 
         emit eveErc1155Version();

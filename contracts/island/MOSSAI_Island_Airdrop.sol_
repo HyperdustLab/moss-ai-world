@@ -60,14 +60,10 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
 
     event eveReceiveAirdrop(uint256 id, address to, uint256 amount);
 
-    function addIslandAirdrop(string memory name, uint256[] memory uint256Array, uint256 startTime, uint256 endTime, string memory airdropConfig, bytes1 status, uint256 intervalTime) public {
+    function addIslandAirdrop(bytes32 sid, string memory name, uint256[] memory uint256Array, uint256 startTime, uint256 endTime, string memory airdropConfig, bytes1 status, uint256 intervalTime) public {
         require(IHyperAGI_Roles_Cfg(_rolesCfgAddress).hasAdminRole(msg.sender), "not admin role");
 
-        if (uint256Array[3] != 0) {
-            (uint256 _id, , , , , , , , , ) = MOSSAI_Island(_islandAddress).getIsland(uint256Array[3]);
-
-            require(_id > 0, "island not found");
-        }
+        MOSSAI_Island(_islandAddress).getIsland(sid);
 
         MOSSAI_Storage storageAddress = MOSSAI_Storage(_storageAddress);
 
@@ -81,7 +77,7 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
 
         storageAddress.setUint(storageAddress.genKey("startTime", id), startTime);
         storageAddress.setUint(storageAddress.genKey("endTime", id), endTime);
-        storageAddress.setUint(storageAddress.genKey("islandId", id), uint256Array[3]);
+        storageAddress.setBytes32(storageAddress.genKey("sid", id), sid);
 
         storageAddress.setString(storageAddress.genKey("airdropConfig", id), airdropConfig);
 
@@ -92,16 +88,10 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
         emit eveSave(id);
     }
 
-    function updateIslandAirdrop(uint256 id, string memory name, uint256 minRandomAmount, uint256 maxRandomAmount, uint256 startTime, uint256 endTime, string memory airdropConfig, uint256 intervalTime, uint256 totalAmount, uint256 islandId) public {
+    function updateIslandAirdrop(uint256 id, bytes32 sid, string memory name, uint256 minRandomAmount, uint256 maxRandomAmount, uint256 startTime, uint256 endTime, string memory airdropConfig, uint256 intervalTime, uint256 totalAmount) public {
         require(IHyperAGI_Roles_Cfg(_rolesCfgAddress).hasAdminRole(msg.sender), "not admin role");
 
         MOSSAI_Storage storageAddress = MOSSAI_Storage(_storageAddress);
-
-        if (islandId != 0) {
-            (uint256 _id, , , , , , , , , ) = MOSSAI_Island(_islandAddress).getIsland(islandId);
-
-            require(_id > 0, "island not found");
-        }
 
         string memory _name = storageAddress.getString(storageAddress.genKey("name", id));
 
@@ -119,7 +109,7 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
 
         storageAddress.setUint(storageAddress.genKey("startTime", id), startTime);
         storageAddress.setUint(storageAddress.genKey("endTime", id), endTime);
-        storageAddress.setUint(storageAddress.genKey("islandId", id), islandId);
+        storageAddress.setBytes32(storageAddress.genKey("sid", id), sid);
 
         storageAddress.setString(storageAddress.genKey("airdropConfig", id), airdropConfig);
 
@@ -246,7 +236,7 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
 
         uint256 islandId = storageAddress.getUint(storageAddress.genKey("islandId", id));
 
-        (, , , , , , , , uint32 seed, ) = MOSSAI_Island(_MOSSAIIslandAddress).getIsland(islandId);
+        (, , , , , , , , uint32 seed, ) = MOSSAI_Island(_islandAddress).getIsland(islandId);
 
         address seedOwer = MOSSAI_Island_NFG(_islandNFGAddress).getSeedOwer(seed);
 
@@ -260,7 +250,7 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
 
         require(releaseAmount <= totalAmount, "release amount is not enough");
 
-        transferETH(msg.sender, amount);
+        transferETH(payable(msg.sender), amount);
 
         storageAddress.setUint(storageAddress.genKey("releaseAmount", id), releaseAmount);
 

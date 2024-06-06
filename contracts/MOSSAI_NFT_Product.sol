@@ -10,6 +10,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "./utils/StrUtil.sol";
 import "./HyperAGI_Roles_Cfg.sol";
+import "./HyperAGI_Transaction_Cfg.sol";
 
 import "./MOSSAI_Storage.sol";
 import "./island/MOSSAI_Island.sol";
@@ -65,7 +66,7 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
     }
 
     function addSellNum(uint256 id, uint256 num) public {
-        require(IHyperAGI_Transaction_Cfg(_rolesCfgAddress).hasAdminRole(msg.sender), "not admin role");
+        require(IHyperAGI_Roles_Cfg(_rolesCfgAddress).hasAdminRole(msg.sender), "not admin role");
 
         MOSSAI_Storage storageAddress = MOSSAI_Storage(_storageAddress);
 
@@ -89,25 +90,28 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
         emit eveSave(id);
     }
 
-    function getNFTProduct(uint256 id) public view returns (uint256, address, uint256, uint256, address, uint256, uint256, bytes1, bytes1, bytes32, uint256) {
-        MOSSAI_Storage storageAddress = MOSSAI_Storage(_storageAddressAddress);
+    function getNFTProduct(uint256 id) public view returns (uint256[] memory, address, address, bytes1, bytes1, bytes32) {
+        MOSSAI_Storage storageAddress = MOSSAI_Storage(_storageAddress);
 
         uint256 tokenId = storageAddress.getUint(storageAddress.genKey("tokenId", id));
 
         require(tokenId > 0, "not found");
 
+        uint256[] memory uint256Array = new uint256[](6);
+        uint256Array[0] = id;
+        uint256Array[1] = storageAddress.getUint(storageAddress.genKey("putawayNum", id));
+        uint256Array[2] = storageAddress.getUint(storageAddress.genKey("sellNum", id));
+        uint256Array[3] = storageAddress.getUint(storageAddress.genKey("price", id));
+        uint256Array[4] = storageAddress.getUint(storageAddress.genKey("allowBuyNum", id));
+        uint256Array[5] = tokenId;
+
         return (
-            id,
+            uint256Array,
             storageAddress.getAddress(storageAddress.genKey("owner", id)),
-            storageAddress.getUint(storageAddress.genKey("putawayNum", id)),
-            storageAddress.getUint(storageAddress.genKey("sellNum", id)),
             storageAddress.getAddress(storageAddress.genKey("contractAddress", id)),
-            tokenId,
-            storageAddress.getUint(storageAddress.genKey("price", id)),
             storageAddress.getBytes1(storageAddress.genKey("status", id)),
             storageAddress.getBytes1(storageAddress.genKey("contractType", id)),
-            storageAddress.getBytes32(storageAddress.genKey("sid", id)),
-            storageAddress.getUint(storageAddress.genKey("allowBuyNum", id))
+            storageAddress.getBytes32(storageAddress.genKey("sid", id))
         );
     }
 
@@ -117,9 +121,9 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
         MOSSAI_Island islandAddress = MOSSAI_Island(_islandAddress);
         MOSSAI_Island_NFG islandNFGAddress = MOSSAI_Island_NFG(_island_NFG_Address);
 
-        (, , , , , , , uint256 seed, , , , , ) = islandAddress.getIsland(sid);
+        (, uint256[] memory uint256Array, , ) = islandAddress.getIsland(sid);
 
-        address seedOwer = islandNFGAddress.getSeedOwer(seed);
+        address seedOwer = islandNFGAddress.getSeedOwer(uint256Array[0]);
 
         require(msg.sender == seedOwer, "not Island owner");
 
@@ -135,7 +139,7 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
 
         require(allow, "not allow");
 
-        MOSSAI_Storage storageAddress = MOSSAI_Storage(_sto);
+        MOSSAI_Storage storageAddress = MOSSAI_Storage(_storageAddress);
 
         string memory key = string(abi.encodePacked(contractAddress.toHexString(), tokenId.toString(), msg.sender.toHexString()));
 
