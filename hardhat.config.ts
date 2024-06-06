@@ -4,8 +4,11 @@ import { HardhatUserConfig } from 'hardhat/config'
 import '@nomicfoundation/hardhat-toolbox'
 import 'hardhat-gas-reporter'
 import '@openzeppelin/hardhat-upgrades'
+require('./tasks/extract-metadata')
 const { ProxyAgent, setGlobalDispatcher } = require('undici')
+
 const proxyAgent = new ProxyAgent('http://127.0.0.1:7890')
+
 setGlobalDispatcher(proxyAgent)
 
 const config: HardhatUserConfig = {
@@ -38,6 +41,11 @@ const config: HardhatUserConfig = {
     },
     arbitrumSepolia: {
       url: process.env.Arbitrum_Sepolia_Testnet_RPC_URL,
+      accounts: [process.env.PRIVATE_KEY],
+      loggingEnabled: true,
+    },
+    bvmTest: {
+      url: 'https://bitcoin-l2-813183-testnet.tc.l2aas.com/rpc',
       accounts: [process.env.PRIVATE_KEY],
       loggingEnabled: true,
     },

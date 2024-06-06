@@ -7,40 +7,18 @@ import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@confluxfans/contracts/token/CRC1155/extensions/CRC1155Metadata.sol";
 
-contract Island_1155 is
-    ERC1155,
-    ERC1155Burnable,
-    Ownable,
-    ERC1155Supply,
-    CRC1155Metadata
-{
-    constructor(
-        address initialAuthority,
-        string memory name_,
-        string memory symbol_
-    ) CRC1155Metadata(name_, symbol_) ERC1155("") Ownable(initialAuthority) {}
+contract Island_1155 is ERC1155, ERC1155Burnable, Ownable, ERC1155Supply, CRC1155Metadata {
+    constructor(address initialAuthority, string memory name_, string memory symbol_) CRC1155Metadata(name_, symbol_) ERC1155("") Ownable(initialAuthority) {}
 
     mapping(uint256 => string) private _tokenURIs;
 
-    function mint(
-        address account,
-        uint256 id,
-        uint256 amount,
-        string memory tokenURI,
-        bytes memory data
-    ) public onlyOwner {
+    function mint(address account, uint256 id, uint256 amount, string memory tokenURI, bytes memory data) public onlyOwner {
         _mint(account, id, amount, data);
 
         _setTokenURI(id, tokenURI);
     }
 
-    function mintBatch(
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        string[] memory tokenURIs,
-        bytes memory data
-    ) public onlyOwner {
+    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, string[] memory tokenURIs, bytes memory data) public onlyOwner {
         _mintBatch(to, ids, amounts, data);
 
         for (uint256 i = 0; i < tokenURIs.length; i++) {
@@ -48,12 +26,7 @@ contract Island_1155 is
         }
     }
 
-    function _update(
-        address from,
-        address to,
-        uint256[] memory ids,
-        uint256[] memory values
-    ) internal override(ERC1155, ERC1155Supply) {
+    function _update(address from, address to, uint256[] memory ids, uint256[] memory values) internal override(ERC1155, ERC1155Supply) {
         super._update(from, to, ids, values);
     }
 
@@ -65,14 +38,7 @@ contract Island_1155 is
         }
     }
 
-    function uri(
-        uint256 tokenId
-    )
-        public
-        view
-        override(ERC1155, IERC1155MetadataURI)
-        returns (string memory)
-    {
+    function uri(uint256 tokenId) public view override(ERC1155, IERC1155MetadataURI) returns (string memory) {
         return _tokenURIs[tokenId];
     }
 }

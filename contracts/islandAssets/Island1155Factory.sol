@@ -11,11 +11,7 @@ contract Island1155Factory is OwnableUpgradeable {
         __Ownable_init(msg.sender);
     }
 
-    function deploy(
-        address account,
-        string memory name,
-        string memory symbol
-    ) public returns (address) {
+    function deploy(address account, string memory name, string memory symbol) public returns (address) {
         require(account != address(0x0), "account is zero address");
         Island_1155 island1155Address = new Island_1155(account, name, symbol);
 
