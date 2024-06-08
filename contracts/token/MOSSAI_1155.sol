@@ -11,9 +11,9 @@ contract MOSSAI_1155 is ERC1155, ERC1155Burnable, AccessControl, ERC1155Supply, 
 
     mapping(uint256 => string) private _tokenURIs;
 
-    constructor(string memory name_, string memory symbol_) CRC1155Metadata(name_, symbol_) ERC1155("") {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(MINTER_ROLE, msg.sender);
+    constructor(address onlyOwner, string memory name_, string memory symbol_) CRC1155Metadata(name_, symbol_) ERC1155("") {
+        _grantRole(DEFAULT_ADMIN_ROLE, onlyOwner);
+        _grantRole(MINTER_ROLE, onlyOwner);
     }
 
     /**

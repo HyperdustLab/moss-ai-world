@@ -119,13 +119,10 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
         require(contractType == 0x01 || contractType == 0x02, "contractType error");
 
         MOSSAI_Island islandAddress = MOSSAI_Island(_islandAddress);
-        MOSSAI_Island_NFG islandNFGAddress = MOSSAI_Island_NFG(_island_NFG_Address);
 
-        (, uint256[] memory uint256Array, , ) = islandAddress.getIsland(sid);
+        (, , address[] memory addressArray) = islandAddress.getIsland(sid);
 
-        address seedOwer = islandNFGAddress.getSeedOwer(uint256Array[0]);
-
-        require(msg.sender == seedOwer, "not Island owner");
+        require(msg.sender == addressArray[2], "not Island owner");
 
         require(status == 0x01 || status == 0x00, "status error");
 

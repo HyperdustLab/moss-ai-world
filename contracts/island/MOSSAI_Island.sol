@@ -225,8 +225,11 @@ contract MOSSAI_Island is OwnableUpgradeable {
         emit eveSaveIsland(sid);
     }
 
-    function getIsland(bytes32 sid) public view returns (string[] memory, uint256[] memory, address, address) {
+    function getIsland(bytes32 sid) public view returns (string[] memory, uint256[] memory, address[] memory) {
         MOSSAI_Storage storageAddress = MOSSAI_Storage(_storageAddress);
+
+        MOSSAI_Island_NFG islandNFGAddress = MOSSAI_Island_NFG(_islandNFGAddress);
+
         uint256 islandId = storageAddress.getBytes32Uint(sid);
 
         string memory _name = storageAddress.getString(storageAddress.genKey("name", islandId));
@@ -247,7 +250,12 @@ contract MOSSAI_Island is OwnableUpgradeable {
         uint256Array[2] = storageAddress.getUint(storageAddress.genKey("erc721Version", islandId));
         uint256Array[3] = storageAddress.getUint(storageAddress.genKey("erc1155Version", islandId));
 
-        return (stringArray, uint256Array, storageAddress.getAddress(storageAddress.genKey("erc721Address", islandId)), storageAddress.getAddress(storageAddress.genKey("erc1155Address", islandId)));
+        address[] memory addressArray = new address[](3);
+        addressArray[0] = storageAddress.getAddress(storageAddress.genKey("erc721Address", islandId));
+        addressArray[1] = storageAddress.getAddress(storageAddress.genKey("erc1155Address", islandId));
+        addressArray[2] = islandNFGAddress.getSeedOwer(uint256Array[0]);
+
+        return (stringArray, uint256Array, addressArray);
     }
 
     function updateErc721Version(uint256 version) public {

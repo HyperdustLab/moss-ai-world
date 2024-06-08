@@ -5,11 +5,6 @@ import '@nomicfoundation/hardhat-toolbox'
 import 'hardhat-gas-reporter'
 import '@openzeppelin/hardhat-upgrades'
 require('./tasks/extract-metadata')
-const { ProxyAgent, setGlobalDispatcher } = require('undici')
-
-const proxyAgent = new ProxyAgent('http://127.0.0.1:7890')
-
-setGlobalDispatcher(proxyAgent)
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -36,6 +31,8 @@ const config: HardhatUserConfig = {
     dev: {
       url: 'HTTP://127.0.0.1:8545',
       accounts: [process.env.PRIVATE_KEY],
+      loggingEnabled: true,
+      timeout: 50000000, // 增加超时时间到 50000 毫秒
     },
     sepolia: {
       url: process.env.SEPOLIA_RPC_URL,

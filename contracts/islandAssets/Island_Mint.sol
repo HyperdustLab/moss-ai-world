@@ -75,9 +75,9 @@ contract Island_Mint is OwnableUpgradeable {
         address _GasFeeCollectionWallet = walletAccountAddress._GasFeeCollectionWallet();
 
         require(_GasFeeCollectionWallet != address(0), "not set GasFeeCollectionWallet");
-        (, uint256[] memory uint256Array, address erc721Address, ) = MOSSAI_Island(_islandAddress).getIsland(sid);
-        address seedOwer = MOSSAI_Island_NFG(_iandNFGAddress).getSeedOwer(uint256Array[0]);
-        require(seedOwer == msg.sender, "not island owner");
+        (, , address[] memory addressArray) = MOSSAI_Island(_islandAddress).getIsland(sid);
+
+        require(addressArray[2] == msg.sender, "not island owner");
 
         if (gasFee > 0) {
             transferETH(payable(_GasFeeCollectionWallet), gasFee);
@@ -85,7 +85,7 @@ contract Island_Mint is OwnableUpgradeable {
             IHyperAGI_Wallet_Account(_walletAccountAddress).addAmount(gasFee);
         }
 
-        Island_721(erc721Address).safeMint(msg.sender, tokenURI);
+        Island_721(addressArray[0]).safeMint(msg.sender, tokenURI);
     }
 
     function mint1155(bytes32 sid, uint256 id, uint256 amount, string memory tokenURI) public payable {
@@ -98,16 +98,16 @@ contract Island_Mint is OwnableUpgradeable {
         address _GasFeeCollectionWallet = walletAccountAddress._GasFeeCollectionWallet();
 
         require(_GasFeeCollectionWallet != address(0), "not set GasFeeCollectionWallet");
-        (, uint256[] memory uint256Array, , address erc1155Address) = MOSSAI_Island(_islandAddress).getIsland(sid);
-        address seedOwer = MOSSAI_Island_NFG(_iandNFGAddress).getSeedOwer(uint256Array[0]);
-        require(seedOwer == msg.sender, "not island owner");
+        (, , address[] memory addressArray) = MOSSAI_Island(_islandAddress).getIsland(sid);
+
+        require(addressArray[2] == msg.sender, "not island owner");
 
         if (gasFee > 0) {
             transferETH(payable(_GasFeeCollectionWallet), gasFee);
             IHyperAGI_Wallet_Account(_walletAccountAddress).addAmount(gasFee);
         }
 
-        Island_1155(erc1155Address).mint(msg.sender, id, amount, tokenURI, "");
+        Island_1155(addressArray[1]).mint(msg.sender, id, amount, tokenURI, "");
     }
 
     function transferETH(address payable recipient, uint256 amount) private {

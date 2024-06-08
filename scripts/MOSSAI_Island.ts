@@ -3,9 +3,11 @@
 import { ethers, run, upgrades } from 'hardhat'
 
 async function main() {
-  const _MOSSAI_Storage = await ethers.getContractFactory('MOSSAI_Storage')
-  const MOSSAI_Storage = await upgrades.deployProxy(_MOSSAI_Storage, [process.env.ADMIN_Wallet_Address])
-  await MOSSAI_Storage.waitForDeployment()
+  // const _MOSSAI_Storage = await ethers.getContractFactory('MOSSAI_Storage')
+  // const MOSSAI_Storage = await upgrades.deployProxy(_MOSSAI_Storage, [process.env.ADMIN_Wallet_Address])
+  // await MOSSAI_Storage.waitForDeployment()
+
+  const MOSSAI_Storage = await ethers.getContractAt('MOSSAI_Storage', '0x4165B41f1880cC54ac31b529e5a0a2ca25f924c1')
 
   const contract = await ethers.getContractFactory('MOSSAI_Island')
   const instance = await upgrades.deployProxy(contract, [process.env.ADMIN_Wallet_Address])
