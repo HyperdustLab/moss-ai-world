@@ -13,7 +13,7 @@ async function main() {
 
   console.info('MOSSAI_Storage:', MOSSAI_Storage.target)
 
-  await (await instance.setContractAddress([ethers.ZeroAddress, '0x5745090BFB28C3399223215DfbBb4e729aeF8cFD', '0x74A6B3D4d0A9a7acC5a4e181d76dc7F0E49A978A', MOSSAI_Storage.target, '0x2BE7F5D660967cEc585d2acbEB10230Bb731172A'])).wait()
+  await (await instance.setContractAddress([ethers.ZeroAddress, '0xF13842B9E794A0970DCbCa245B963d3d0d804317', MOSSAI_Storage.target, '0xA3Ef2A67f40601ca2FE781FFFEb3Cd193a50aaEb'])).wait()
 
   // const MOSSAI_NFT_Market = await ethers.getContractAt("MOSSAI_NFT_Market", "0xa52F3f2d571D069B6A3ce0297Ee9438B21400CDf");
 

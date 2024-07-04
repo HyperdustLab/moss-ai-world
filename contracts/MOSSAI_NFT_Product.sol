@@ -26,7 +26,6 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
 
     address public _NFT_Market_Address;
     address public _rolesCfgAddress;
-    address public _island_NFG_Address;
     address public _storageAddress;
     address public _islandAddress;
 
@@ -44,10 +43,6 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
         _rolesCfgAddress = rolesCfgAddress;
     }
 
-    function setIslandNFGAddress(address islandNFGAddress) public onlyOwner {
-        _island_NFG_Address = islandNFGAddress;
-    }
-
     function setStorageAddress(address storageAddress) public onlyOwner {
         _storageAddress = storageAddress;
     }
@@ -57,12 +52,10 @@ contract MOSSAI_NFT_Product is OwnableUpgradeable {
     }
 
     function setContractAddress(address[] memory contractaddressArray) public onlyOwner {
-        require(contractaddressArray.length >= 5, "Insufficient addresses provided");
         setNFTMarketAddress(contractaddressArray[0]);
         setRolesCfgAddress(contractaddressArray[1]);
-        setIslandNFGAddress(contractaddressArray[2]);
-        setStorageAddress(contractaddressArray[3]);
-        setIslandAddress(contractaddressArray[4]);
+        setStorageAddress(contractaddressArray[2]);
+        setIslandAddress(contractaddressArray[3]);
     }
 
     function addSellNum(uint256 id, uint256 num) public {

@@ -3,11 +3,11 @@
 import { ethers, run, upgrades } from 'hardhat'
 
 async function main() {
-  // const _MOSSAI_Storage = await ethers.getContractFactory('MOSSAI_Storage')
-  // const MOSSAI_Storage = await upgrades.deployProxy(_MOSSAI_Storage, [process.env.ADMIN_Wallet_Address])
-  // await MOSSAI_Storage.waitForDeployment()
+  const _MOSSAI_Storage = await ethers.getContractFactory('MOSSAI_Storage')
+  const MOSSAI_Storage = await upgrades.deployProxy(_MOSSAI_Storage, [process.env.ADMIN_Wallet_Address])
+  await MOSSAI_Storage.waitForDeployment()
 
-  const MOSSAI_Storage = await ethers.getContractAt('MOSSAI_Storage', '0x4165B41f1880cC54ac31b529e5a0a2ca25f924c1')
+  // const MOSSAI_Storage = await ethers.getContractAt('MOSSAI_Storage', '0x4165B41f1880cC54ac31b529e5a0a2ca25f924c1')
 
   const contract = await ethers.getContractFactory('MOSSAI_Island')
   const instance = await upgrades.deployProxy(contract, [process.env.ADMIN_Wallet_Address])
@@ -17,14 +17,14 @@ async function main() {
 
   await (
     await instance.setContractAddress([
-      '0x74A6B3D4d0A9a7acC5a4e181d76dc7F0E49A978A',
-      '0x7f81A464FaBA5C984ADCA52E3a919B1D73026aBE',
-      '0x63798eb3e135CA2543D3136f4E314a9A3e819141',
-      '0x3d091D360694a9A488f3CD8A4f0903bCD230083b',
-      '0x5745090BFB28C3399223215DfbBb4e729aeF8cFD',
+      '0x6789334f4f38F625cdAE785DE08bB7f824343e6B',
+      '0x998cCb1dF5d0b9599c8067882D75a95889a6914A',
+      '0xfc4E8E43E17B3d9bD05038E24D20cAACBe3eF97b',
+      '0x4ad5C6047f8f49f465dF18FfE2F5B15c730918c5',
+      '0xF13842B9E794A0970DCbCa245B963d3d0d804317',
       MOSSAI_Storage.target,
-      '0xD18Bd75b4d2311dF45dD846Bb51c077AFAEF55df',
-      '0xc49F8d724A33A59d1A95436fC521C94608F06655',
+      '0x50D9DC9f388A840b77AA7067D6a2AC7c2635578e',
+      '0x74BD810D6C5978cdd35873ee64244F563b78Bc6e',
     ])
   ).wait()
 
@@ -36,7 +36,7 @@ async function main() {
 
   await (await instance.setDefParameter('https://s3.hyperdust.io/upload/2024/3/11/e78b4816-4b81-4241-ac19-cb5758f300df.png', 'https://s3.hyperdust.io/upload/2024/3/4/7d012ce0-9bd0-48f1-ba2c-49228936a250.7z', 'db055fa3753903af2075421cd0b9977fa9390f808c46ac628adcb65bc6bbae51')).wait()
 
-  const Island_Mint = await ethers.getContractAt('Island_Mint', '0xD18Bd75b4d2311dF45dD846Bb51c077AFAEF55df')
+  const Island_Mint = await ethers.getContractAt('Island_Mint', '0x50D9DC9f388A840b77AA7067D6a2AC7c2635578e')
 
   await (await Island_Mint.setIslandAddress(instance.target)).wait()
 
