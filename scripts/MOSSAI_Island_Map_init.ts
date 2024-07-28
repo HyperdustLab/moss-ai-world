@@ -9,12 +9,14 @@ async function main() {
   await db.connect()
   const rows = await db.query('SELECT * FROM mgn_space_token_uri', [])
 
-  const MOSSAI_Island_Map = await ethers.getContractAt('MOSSAI_Island_Map', '0x7f81A464FaBA5C984ADCA52E3a919B1D73026aBE')
+  const MOSSAI_Island_Map = await ethers.getContractAt('MOSSAI_Island_Map', '0x998cCb1dF5d0b9599c8067882D75a95889a6914A')
 
   const batchSize = 300
   for (let i = 0; i < rows.length; i += batchSize) {
     const batch = rows.slice(i, i + batchSize)
     const coordinates = batch.map(item => item.coordinate)
+
+    console.info(coordinates)
 
     await (await MOSSAI_Island_Map.batchAdd(coordinates)).wait()
   }

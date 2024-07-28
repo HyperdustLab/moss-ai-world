@@ -8,7 +8,7 @@ async function main() {
   const MOSSAI_Island_NFT = await ethers.deployContract('MOSSAI_721', [process.env.ADMIN_Wallet_Address, 'MOSSAI_Island_NFG', 'MIN'])
   await MOSSAI_Island_NFT.waitForDeployment()
 
-  const _MOSSAI_Storage = aw0x61Ce9e4A31bFEe62e100Ef128f757EeE9012786fait ethers.getContractFactory('MOSSAI_Storage')
+  const _MOSSAI_Storage = ethers.getContractFactory('MOSSAI_Storage')
   const MOSSAI_Storage = await upgrades.deployProxy(_MOSSAI_Storage, [process.env.ADMIN_Wallet_Address])
   await MOSSAI_Storage.waitForDeployment()
 
