@@ -9,6 +9,7 @@ typechain-types
 cache
 artifacts
 test*
+.idea
 
 contracts/Hyperdust_Transaction_Cfg.sol
 contracts/Hyperdust_Wallet_Account.sol

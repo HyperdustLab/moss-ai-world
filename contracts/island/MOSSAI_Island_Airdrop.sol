@@ -149,7 +149,7 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
         emit eveSave(id);
     }
 
-    function getIslandAirdrop(uint256 id) public view returns (uint256[] memory, string memory, bytes1, string memory) {
+    function getIslandAirdrop(uint256 id) public view returns (uint256[] memory, string memory, bytes1, string memory, bytes32 sid) {
         MOSSAI_Storage storageAddress = MOSSAI_Storage(_storageAddress);
 
         string memory _name = storageAddress.getString(storageAddress.genKey("name", id));
@@ -162,18 +162,18 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
         uint256Array[2] = storageAddress.getUint(storageAddress.genKey("releaseAmount", id));
 
         uint256Array[3] = storageAddress.getUint(storageAddress.genKey("minRandomAmount", id));
-
+    
         uint256Array[4] = storageAddress.getUint(storageAddress.genKey("maxRandomAmount", id));
 
-        uint256Array[5] = storageAddress.getUint(storageAddress.genKey("islandId", id));
+        uint256Array[5] = storageAddress.getUint(storageAddress.genKey("startTime", id));
 
-        uint256Array[6] = storageAddress.getUint(storageAddress.genKey("startTime", id));
+        uint256Array[6] = storageAddress.getUint(storageAddress.genKey("endTime", id));
 
-        uint256Array[7] = storageAddress.getUint(storageAddress.genKey("endTime", id));
+        uint256Array[7] = storageAddress.getUint(storageAddress.genKey("intervalTime", id));
 
-        uint256Array[8] = storageAddress.getUint(storageAddress.genKey("intervalTime", id));
+        bytes32 sid = storageAddress.getBytes32(storageAddress.genKey("sid", id));
 
-        return (uint256Array, storageAddress.getString(storageAddress.genKey("airdropConfig", id)), storageAddress.getBytes1(storageAddress.genKey("status", id)), _name);
+        return (uint256Array, storageAddress.getString(storageAddress.genKey("airdropConfig", id)), storageAddress.getBytes1(storageAddress.genKey("status", id)), _name, sid);
     }
 
     function receiveAirdrop(uint256 id) public {
@@ -217,7 +217,7 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
 
         require(releaseAmount <= totalAmount, "This airdrop zone reached its limit.");
 
-        transferETH(msg.sender, randomAmount);
+        transferETH(payable(msg.sender), randomAmount);
 
         storageAddress.setUint(storageAddress.genKey("releaseAmount", id), releaseAmount);
 
@@ -234,11 +234,11 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
 
         require(bytes(_name).length > 0, "not found");
 
-        uint256 islandId = storageAddress.getUint(storageAddress.genKey("islandId", id));
+        bytes32 sid = storageAddress.getBytes32(storageAddress.genKey("sid", id));
 
-        (, , , , , , , , uint32 seed, ) = MOSSAI_Island(_islandAddress).getIsland(islandId);
+        (, uint256[] memory uint256Array, ) = MOSSAI_Island(_islandAddress).getIsland(sid);
 
-        address seedOwer = MOSSAI_Island_NFG(_islandNFGAddress).getSeedOwer(seed);
+        address seedOwer = MOSSAI_Island_NFG(_islandNFGAddress).getSeedOwer(uint256Array[0]);
 
         require(msg.sender == seedOwer, "not island ower");
 
