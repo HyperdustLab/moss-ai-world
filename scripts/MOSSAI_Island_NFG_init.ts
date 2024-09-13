@@ -7,7 +7,7 @@ const readdir = util.promisify(fs.readdir)
 const readFile = util.promisify(fs.readFile)
 
 async function main() {
-  const MOSSAI_Island_NFG = await ethers.getContractAt('MOSSAI_Island_NFG', '0x6789334f4f38F625cdAE785DE08bB7f824343e6B')
+  const MOSSAI_Island_NFG = await ethers.getContractAt('MOSSAI_Island_NFG', '0x4AEBF64Edd8C5Fd1f99e88b28fC404Ccd4b1dB67')
 
   const directoryPath = 'D:\\island'
 

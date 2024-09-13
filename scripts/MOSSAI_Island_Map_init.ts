@@ -9,7 +9,7 @@ async function main() {
   await db.connect()
   const rows = await db.query('SELECT * FROM mgn_space_token_uri', [])
 
-  const MOSSAI_Island_Map = await ethers.getContractAt('MOSSAI_Island_Map', '0x998cCb1dF5d0b9599c8067882D75a95889a6914A')
+  const MOSSAI_Island_Map = await ethers.getContractAt('MOSSAI_Island_Map', '0x98CeC0Fce2D50c7Bbf05D74afa3078547294587D')
 
   const batchSize = 300
   for (let i = 0; i < rows.length; i += batchSize) {

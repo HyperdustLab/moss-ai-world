@@ -7,9 +7,9 @@ async function main() {
   const instance = await upgrades.deployProxy(contract, [process.env.ADMIN_Wallet_Address])
   await instance.waitForDeployment()
 
-  await (await instance.setContractAddress(['0xA3Ef2A67f40601ca2FE781FFFEb3Cd193a50aaEb', '0x7a798E8eC045f911684dAa28B38a54b883b9523C', '0x8373Bd7e299F6d61490993EDadfF8D61357964E1', '0xcc897DE5965055e90f6c1948bfe41b7519b81EA8'])).wait()
+  await (await instance.setContractAddress(['0xe05599cA89aA8Af73Ef688350800B1444543aF6D', '0x141333a8797db93C217Fb12D9dDd01A255d0fF77', '0xCAf8B831814678116d2f311540b5970C5aA0792B', '0x3b2b46bc3BD0Ac95AA9693a713169dB4dcF90caf'])).wait()
 
-  const IHyperAGI_Roles_Cfg = await ethers.getContractAt('IHyperAGI_Roles_Cfg', '0xF13842B9E794A0970DCbCa245B963d3d0d804317')
+  const IHyperAGI_Roles_Cfg = await ethers.getContractAt('IHyperAGI_Roles_Cfg', '0x250a7629d076581d3713f016727204341865920C')
 
   await (await IHyperAGI_Roles_Cfg.addAdmin(instance.target)).wait()
 

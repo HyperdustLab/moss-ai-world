@@ -4,11 +4,12 @@ import { HardhatUserConfig } from 'hardhat/config'
 import '@nomicfoundation/hardhat-toolbox'
 import 'hardhat-gas-reporter'
 import '@openzeppelin/hardhat-upgrades'
+
 require('./tasks/extract-metadata')
 
-const { ProxyAgent, setGlobalDispatcher } = require('undici')
-const proxyAgent = new ProxyAgent('http://127.0.0.1:7890')
-setGlobalDispatcher(proxyAgent)
+// const { ProxyAgent, setGlobalDispatcher } = require('undici')
+// const proxyAgent = new ProxyAgent('http://127.0.0.1:7890')
+// setGlobalDispatcher(proxyAgent)
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -66,6 +67,11 @@ const config: HardhatUserConfig = {
       accounts: [process.env.PRIVATE_KEY_PROD],
       loggingEnabled: true,
     },
+    hyperAGITest: {
+      url: 'http://rpc.hyperagi.network',
+      accounts: [process.env.PRIVATE_KEY, process.env.PRIVATE_KEY1],
+      loggingEnabled: true,
+    },
   },
   etherscan: {
     solidity: true,
@@ -75,16 +81,9 @@ const config: HardhatUserConfig = {
       arbitrumSepolia: process.env.Arbitrum_Sepolia_KEY,
       arbitrumMainnet: process.env.Arbitrum_Mainnet_KEY,
       bvmTest: '123',
+      hyperAGITest: '123',
     },
     customChains: [
-      {
-        network: 'arbitrumSepolia',
-        chainId: 421614,
-        urls: {
-          apiURL: 'https://api-sepolia.arbiscan.io/api',
-          browserURL: 'https://sepolia.arbiscan.io/',
-        },
-      },
       {
         network: 'arbitrumSepolia',
         chainId: 421614,
@@ -115,6 +114,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: 'https://block-testnet.hyperagi.network/api',
           browserURL: 'https://block-testnet.hyperagi.network/',
+        },
+      },
+      {
+        network: 'hyperAGITest',
+        chainId: 21985375584,
+        urls: {
+          apiURL: 'https://block.hyperagi.network/api',
+          browserURL: 'https://block.hyperagi.network/',
         },
       },
     ],

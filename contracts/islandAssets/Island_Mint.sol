@@ -17,7 +17,6 @@ import "../HyperAGI_Transaction_Cfg.sol";
 
 import "./Island_721.sol";
 import "./Island_1155.sol";
-import "../island/MOSSAI_Island_NFG.sol";
 import "../island/MOSSAI_Island.sol";
 
 import "../utils/StrUtil.sol";
@@ -26,7 +25,6 @@ contract Island_Mint is OwnableUpgradeable {
     address public _islandAddress;
     address public _walletAccountAddress;
     address public _transactionCfgAddress;
-    address public _iandNFGAddress;
     address public _rolesCfgAddress;
 
     using Strings for *;
@@ -48,21 +46,16 @@ contract Island_Mint is OwnableUpgradeable {
         _transactionCfgAddress = transactionCfgAddress;
     }
 
-    function setIandNFGAddress(address iandNFGAddress) public onlyOwner {
-        _iandNFGAddress = iandNFGAddress;
-    }
 
     function setRolesCfgAddress(address rolesCfgAddress) public onlyOwner {
         _rolesCfgAddress = rolesCfgAddress;
     }
 
-    function setContractAddress(address[] memory contractaddressArray) public onlyOwner {
-        require(contractaddressArray.length >= 5, "Insufficient addresses provided");
-        setIslandAddress(contractaddressArray[0]);
-        setWalletAccountAddress(contractaddressArray[1]);
-        setTransactionCfgAddress(contractaddressArray[2]);
-        setIandNFGAddress(contractaddressArray[3]);
-        setRolesCfgAddress(contractaddressArray[4]);
+    function setContractAddress(address[] memory contractAddressArray) public onlyOwner {
+        setIslandAddress(contractAddressArray[0]);
+        setWalletAccountAddress(contractAddressArray[1]);
+        setTransactionCfgAddress(contractAddressArray[2]);
+        setRolesCfgAddress(contractAddressArray[3]);
     }
 
     function mint721(bytes32 sid, string memory tokenURI) public payable {
