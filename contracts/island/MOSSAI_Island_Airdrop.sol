@@ -162,7 +162,7 @@ contract MOSSAI_Island_Airdrop is OwnableUpgradeable {
         uint256Array[2] = storageAddress.getUint(storageAddress.genKey("releaseAmount", id));
 
         uint256Array[3] = storageAddress.getUint(storageAddress.genKey("minRandomAmount", id));
-    
+
         uint256Array[4] = storageAddress.getUint(storageAddress.genKey("maxRandomAmount", id));
 
         uint256Array[5] = storageAddress.getUint(storageAddress.genKey("startTime", id));

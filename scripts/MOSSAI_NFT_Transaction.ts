@@ -13,13 +13,13 @@ async function main() {
 
   console.info('MOSSAI_Storage:', MOSSAI_Storage.target)
 
-  await (await instance.setContractAddress(['0xa7014a2B10782aCF99366152Bf75E725E895c1BA', '0x141333a8797db93C217Fb12D9dDd01A255d0fF77', '0xCAf8B831814678116d2f311540b5970C5aA0792B', MOSSAI_Storage.target])).wait()
+  await (await instance.setContractAddress(['0x62655C96fd517DFA283d617Ea0666c1b5b4467EA', '0x401f50176C74F0aa49FeF7Aea83eeB349bEABF19', '0x9f106E08EfF47a4E1b3340937A14B465E5B74fff', MOSSAI_Storage.target])).wait()
 
-  const IHyperAGI_Roles_Cfg = await ethers.getContractAt('IHyperAGI_Roles_Cfg', '0x250a7629d076581d3713f016727204341865920C')
+  const IHyperAGI_Roles_Cfg = await ethers.getContractAt('IHyperAGI_Roles_Cfg', '0x7B33C8D43C52d0c575eACaEcFdAd68487bfB28Ea')
 
   await (await IHyperAGI_Roles_Cfg.addAdmin(instance.target)).wait()
 
-  const MOSSAI_NFT_Product = await ethers.getContractAt('MOSSAI_NFT_Product', '0xa7014a2B10782aCF99366152Bf75E725E895c1BA')
+  const MOSSAI_NFT_Product = await ethers.getContractAt('MOSSAI_NFT_Product', '0x62655C96fd517DFA283d617Ea0666c1b5b4467EA')
 
   await (await MOSSAI_NFT_Product.setNFTMarketAddress(instance.target)).wait()
 

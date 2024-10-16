@@ -17,24 +17,24 @@ async function main() {
 
   await (
     await instance.setContractAddress([
-      '0x4AEBF64Edd8C5Fd1f99e88b28fC404Ccd4b1dB67',
-      '0x98CeC0Fce2D50c7Bbf05D74afa3078547294587D',
-      '0xce284A1468ad9c072f8Ad71BD37d48E396EFdAC9',
-      '0xE51f97e053cB027EfD9EE05c4B687C43F4499b42',
-      '0x250a7629d076581d3713f016727204341865920C',
+      '0xAa2c95c0E0E46204f9f14D22577aDecb8f80b6e1',
+      '0xbE90b9e27267DE230191351cf0206B483A48386C',
+      '0x62678BB336Ac6B8fAc3320a31c351EcA8a1D30de',
+      '0x95fcC99D26e2FC7d96f233B029AE0b1218E62941',
+      '0x7B33C8D43C52d0c575eACaEcFdAd68487bfB28Ea',
       MOSSAI_Storage.target,
       ethers.ZeroAddress,
-      '0xF3fEe4ba7FE664cE22379B8090152B95805972FE',
+      '0xB713e3c2aCD99244b8599b2a5bca8036Ac321060',
     ])
   ).wait()
 
-  const IHyperAGI_Roles_Cfg = await ethers.getContractAt('IHyperAGI_Roles_Cfg', '0x250a7629d076581d3713f016727204341865920C')
+  const IHyperAGI_Roles_Cfg = await ethers.getContractAt('IHyperAGI_Roles_Cfg', '0x7B33C8D43C52d0c575eACaEcFdAd68487bfB28Ea')
 
   await (await IHyperAGI_Roles_Cfg.addAdmin(instance.target)).wait()
 
   await (await MOSSAI_Storage.setServiceAddress(instance.target)).wait()
 
-  await (await instance.setDefParameter('https://s3.hyperdust.io/upload/2024/3/11/e78b4816-4b81-4241-ac19-cb5758f300df.png', 'https://s3.hyperdust.io/upload/2024/3/4/7d012ce0-9bd0-48f1-ba2c-49228936a250.7z', 'db055fa3753903af2075421cd0b9977fa9390f808c46ac628adcb65bc6bbae51')).wait()
+  await (await instance.setDefParameter('https://ipfs.hyperdust.io/ipfs/QmVtWyYm2v1SQ5zhEMiD9xeXHevy53xU2NETtfSzFPNft4?suffix=png', 'https://ipfs.hyperdust.io/ipfs/QmaV5ZC83bD2jGNaySLwUVZpsCBV8zGnQFsW8EYdr1D4Nt?suffix=7z', 'db055fa3753903af2075421cd0b9977fa9390f808c46ac628adcb65bc6bbae51')).wait()
 
   // const Island_Mint = await ethers.getContractAt('Island_Mint', '0x50D9DC9f388A840b77AA7067D6a2AC7c2635578e')
   //

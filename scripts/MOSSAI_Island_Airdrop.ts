@@ -15,7 +15,7 @@ async function main() {
 
   await (await MOSSAI_Storage.setServiceAddress(instance.target)).wait()
 
-  await (await instance.setContractAddress(['0x250a7629d076581d3713f016727204341865920C', '0xe05599cA89aA8Af73Ef688350800B1444543aF6D', '0x4AEBF64Edd8C5Fd1f99e88b28fC404Ccd4b1dB67', MOSSAI_Storage.target])).wait()
+  await (await instance.setContractAddress(['0x7B33C8D43C52d0c575eACaEcFdAd68487bfB28Ea', '0x464624655495544E62a8504260cf9Fc9128EbA8C', '0xAa2c95c0E0E46204f9f14D22577aDecb8f80b6e1', MOSSAI_Storage.target])).wait()
 
   console.info('contractFactory address:', instance.target)
 }
