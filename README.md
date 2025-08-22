@@ -1,6 +1,8 @@
 # Virtual Worlds for AI Agent
 
-####  Smart Contracts
+This is the on-chian assets of the virtual world where the agents live and evolve.
+
+.####  Smart Contracts
 
 - `MOSSAI_Free_Island_Mint.sol`: The island minting contract, where users can mint islands at specified locations.
 
